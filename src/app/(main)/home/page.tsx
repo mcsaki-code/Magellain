@@ -226,15 +226,23 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Waves — aggregated from any reporting station */}
+                {/* Waves — buoy data or NWS forecast fallback */}
                 <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
                   <Waves className="h-5 w-5 shrink-0 text-ocean" />
                   <div>
                     <p className="text-lg font-bold">
-                      {bestWave?.obs?.wave_height_ft != null ? `${bestWave.obs.wave_height_ft} ft` : "--"}
+                      {bestWave?.obs?.wave_height_ft != null
+                        ? `${bestWave.obs.wave_height_ft} ft`
+                        : sailingConditions?.wave_ft
+                          ? `${sailingConditions.wave_ft} ft`
+                          : "--"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {bestWave ? "Wave height" : "No wave data"}
+                      {bestWave
+                        ? "Wave height"
+                        : sailingConditions?.wave_ft
+                          ? "Waves (forecast)"
+                          : "No wave data"}
                     </p>
                   </div>
                 </div>

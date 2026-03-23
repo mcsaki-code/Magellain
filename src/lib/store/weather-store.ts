@@ -8,6 +8,7 @@ export interface SailingConditions {
   wind_kts: number;
   gust_kts: number;
   wave_ft: number;
+  wave_source: "buoy" | "forecast" | "none";
   has_precipitation: boolean;
 }
 

@@ -182,8 +182,20 @@ function analyzeSailingConditions(
   const wind = windObs?.wind_speed_kts ?? 0;
   const gust = windObs?.wind_gust_kts ?? 0;
   const waveObs = obsValues.find((o) => o?.wave_height_ft != null);
-  const waves = waveObs?.wave_height_ft ?? 0;
   const airTemp = obsValues.find((o) => o?.air_temp_f != null)?.air_temp_f;
+
+  // Use NWS forecast wave data as fallback when no buoy reports waves
+  let waves = waveObs?.wave_height_ft ?? 0;
+  let waveSource: "buoy" | "forecast" | "none" = waveObs ? "buoy" : "none";
+  if (!waveObs) {
+    const waveForecast = forecasts.find((f) => (f.wave_height_max_ft as number | null) != null);
+    if (waveForecast) {
+      const maxWave = waveForecast.wave_height_max_ft as number;
+      const minWave = (waveForecast.wave_height_min_ft as number) ?? maxWave;
+      waves = Math.round(((minWave + maxWave) / 2) * 10) / 10;
+      waveSource = "forecast";
+    }
+  }
 
   // Check forecasts for precipitation
   const hasPrecip = forecasts.some((f) => f.has_precipitation);
@@ -233,15 +245,17 @@ function analyzeSailingConditions(
     tips.push(`Cold conditions at ${airTemp}\u00B0F — dress in layers, wear drysuit or foul weather gear`);
   }
 
-  // Get wave forecast from NWS if no buoy wave data
-  if (!waveObs) {
+  // Note the wave data source
+  if (waveSource === "forecast") {
     const waveForecast = forecasts.find((f) => (f.wave_height_max_ft as number | null) != null);
     if (waveForecast) {
-      tips.push(`NWS forecast: waves ${waveForecast.wave_height_min_ft}-${waveForecast.wave_height_max_ft} ft`);
+      tips.push(`Wave data from NWS marine forecast (${waveForecast.wave_height_min_ft}-${waveForecast.wave_height_max_ft} ft)`);
     }
+  } else if (waveSource === "none") {
+    tips.push("No wave data available — offshore buoys deploy in spring");
   }
 
-  return { rating, summary, tips, wind_kts: wind, gust_kts: gust, wave_ft: waves, has_precipitation: hasPrecip };
+  return { rating, summary, tips, wind_kts: wind, gust_kts: gust, wave_ft: waves, wave_source: waveSource, has_precipitation: hasPrecip };
 }
 
 // ─── API Route Handler ──────────────────────────────────────────────

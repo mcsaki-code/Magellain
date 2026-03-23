@@ -44,11 +44,45 @@ export function MapView() {
       const windDir = stationObs?.wind_direction_deg;
       const color = getWindColor(windSpeed);
 
-      // Create marker DOM
-      const el = document.createElement("div");
-      Object.assign(el.style, {
+      // Always use a wrapper for consistent sizing
+      const wrapper = document.createElement("div");
+      Object.assign(wrapper.style, {
+        position: "relative",
         width: "42px",
-        height: "42px",
+        height: "56px", // extra height for arrow
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        cursor: "pointer",
+      });
+
+      // Wind direction arrow above the circle
+      if (windDir != null) {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", "14");
+        svg.setAttribute("height", "14");
+        svg.setAttribute("viewBox", "0 0 16 16");
+        Object.assign(svg.style, {
+          transform: `rotate(${windDir}deg)`,
+          filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.4))",
+          marginBottom: "1px",
+          flexShrink: "0",
+        });
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", "M8 0L12 10H4Z");
+        path.setAttribute("fill", color);
+        path.setAttribute("stroke", "white");
+        path.setAttribute("stroke-width", "1");
+        svg.appendChild(path);
+        wrapper.appendChild(svg);
+      }
+
+      // The circle with wind speed
+      const circle = document.createElement("div");
+      Object.assign(circle.style, {
+        width: "38px",
+        height: "38px",
         borderRadius: "50%",
         background: color,
         border: "2.5px solid white",
@@ -58,51 +92,20 @@ export function MapView() {
         color: "white",
         fontWeight: "700",
         fontSize: "12px",
-        cursor: "pointer",
         boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
         lineHeight: "1",
+        flexShrink: "0",
       });
-      el.textContent = windSpeed > 0 ? `${Math.round(windSpeed)}` : "--";
+      circle.textContent = windSpeed > 0 ? `${Math.round(windSpeed)}` : "--";
+      wrapper.appendChild(circle);
 
-      // Wind direction arrow
-      if (windDir != null) {
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width", "16");
-        svg.setAttribute("height", "16");
-        svg.setAttribute("viewBox", "0 0 16 16");
-        Object.assign(svg.style, {
-          position: "absolute",
-          top: "-12px",
-          left: "50%",
-          transform: `translateX(-50%) rotate(${windDir}deg)`,
-          filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
-        });
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", "M8 0L12 10H4Z");
-        path.setAttribute("fill", "white");
-        svg.appendChild(path);
-
-        const wrapper = document.createElement("div");
-        Object.assign(wrapper.style, { position: "relative", display: "flex", alignItems: "center", justifyContent: "center" });
-        wrapper.appendChild(svg);
-        wrapper.appendChild(el);
-
-        const popupContent = buildPopupHtml(station, stationObs);
-        const marker = new mapboxgl.Marker({ element: wrapper, anchor: "center" })
-          .setLngLat([station.lng, station.lat])
-          .setPopup(new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(popupContent))
-          .addTo(m);
-        el.addEventListener("click", () => setSelectedBuoy(station.id));
-        markersRef.current.push(marker);
-      } else {
-        const popupContent = buildPopupHtml(station, stationObs);
-        const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
-          .setLngLat([station.lng, station.lat])
-          .setPopup(new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(popupContent))
-          .addTo(m);
-        el.addEventListener("click", () => setSelectedBuoy(station.id));
-        markersRef.current.push(marker);
-      }
+      const popupContent = buildPopupHtml(station, stationObs);
+      const marker = new mapboxgl.Marker({ element: wrapper, anchor: "bottom" })
+        .setLngLat([station.lng, station.lat])
+        .setPopup(new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(popupContent))
+        .addTo(m);
+      wrapper.addEventListener("click", () => setSelectedBuoy(station.id));
+      markersRef.current.push(marker);
     }
 
     // Club markers
@@ -154,17 +157,21 @@ export function MapView() {
     map.current = mapInstance;
 
     mapInstance.addControl(new mapboxgl.NavigationControl(), "top-right");
-    mapInstance.addControl(
-      new mapboxgl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
-      }),
-      "top-right"
-    );
+
+    const geolocate = new mapboxgl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: true,
+      showUserHeading: true,
+    });
+    mapInstance.addControl(geolocate, "top-right");
 
     mapInstance.on("load", () => {
       mapReady.current = true;
       syncMarkers();
+      // Auto-trigger user location after map loads
+      setTimeout(() => {
+        try { geolocate.trigger(); } catch { /* user may deny permission */ }
+      }, 500);
     });
 
     fetchWeather();
