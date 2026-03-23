@@ -208,7 +208,7 @@ export async function POST(req: NextRequest) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
+        model: "claude-sonnet-4-20250514",
         max_tokens: 1024,
         system: systemPrompt,
         messages,
@@ -219,10 +219,13 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       const errText = await response.text();
       console.error("Anthropic API error:", response.status, errText);
-      return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 502,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          error: `AI service error (${response.status})`,
+          detail: response.status === 401 ? "API key invalid or missing" : undefined,
+        }),
+        { status: 502, headers: { "Content-Type": "application/json" } }
+      );
     }
 
     // Stream the response back to the client

@@ -148,11 +148,22 @@ export function MapView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Update markers when observations change
+  // Update markers when observations change or buoy toggle changes
   useEffect(() => {
-    if (map.current?.isStyleLoaded()) {
+    if (!map.current) return;
+
+    // If style is already loaded, add markers immediately
+    if (map.current.isStyleLoaded()) {
       addBuoyMarkers();
+      return;
     }
+
+    // Otherwise wait for style to load
+    const onStyleLoad = () => addBuoyMarkers();
+    map.current.on("style.load", onStyleLoad);
+    return () => {
+      map.current?.off("style.load", onStyleLoad);
+    };
   }, [observations, showBuoyMarkers, addBuoyMarkers]);
 
   if (!token) {

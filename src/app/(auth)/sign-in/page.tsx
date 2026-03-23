@@ -17,7 +17,7 @@ export default function SignInPage() {
 function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/map";
+  const redirect = searchParams.get("redirect") || "/home";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

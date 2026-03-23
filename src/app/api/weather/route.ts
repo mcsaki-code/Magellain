@@ -20,9 +20,12 @@ function parseNdbcObservation(text: string, stationId: string) {
 
   const get = (name: string): number | null => {
     const idx = headers.indexOf(name);
-    if (idx < 0 || !values[idx]) return null;
+    if (idx < 0 || !values[idx] || values[idx] === "MM") return null;
     const v = parseFloat(values[idx]);
-    return isNaN(v) || v === 99 || v === 999 || v === 9999 ? null : v;
+    // NDBC uses 99, 999, 9999, 99.0, 999.0 as "missing data" sentinels
+    if (isNaN(v)) return null;
+    if (v >= 99 && (v === 99 || v === 99.0 || v === 999 || v === 999.0 || v === 9999)) return null;
+    return v;
   };
 
   // Convert m/s to knots (1 m/s = 1.94384 knots)
@@ -62,7 +65,7 @@ async function fetchNdbcStation(stationId: string) {
     const url = `https://www.ndbc.noaa.gov/data/realtime2/${stationId}.txt`;
     const res = await fetch(url, {
       cache: "no-store",
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return null;
     const text = await res.text();
@@ -82,7 +85,7 @@ async function fetchMarineForecasts() {
       const res = await fetch(url, {
         headers: { "User-Agent": "(MagellAIn, mattcsaki@gmail.com)" },
         cache: "no-store",
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(5000),
       });
       if (!res.ok) continue;
       const data = await res.json();
@@ -118,7 +121,7 @@ async function fetchWeatherAlerts() {
     const res = await fetch(url, {
       headers: { "User-Agent": "(MagellAIn, mattcsaki@gmail.com)" },
       cache: "no-store",
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return [];
     const data = await res.json();

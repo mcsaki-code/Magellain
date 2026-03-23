@@ -7,7 +7,7 @@ import { useWeatherStore } from "@/lib/store/weather-store";
 import { createClient } from "@/lib/supabase/client";
 import { BUOY_STATIONS, getWindColor } from "@/lib/constants";
 import {
-  Wind, Waves, Thermometer, Ship, Flag, Map,
+  Wind, Waves, Thermometer, Gauge, Ship, Flag, Map,
   MessageSquare, Cloud, ChevronRight, Settings,
   User, Navigation, Calendar, Sailboat, Anchor,
 } from "lucide-react";
@@ -99,11 +99,13 @@ export default function HomePage() {
     loadNextRace();
   }, []);
 
-  // Get best observation (first station with data)
-  const bestObs = BUOY_STATIONS.map((s) => ({
+  // Get best observation — prefer stations with wind data, fall back to any station with any data
+  const allObs = BUOY_STATIONS.map((s) => ({
     station: s,
     obs: observations[s.id],
-  })).find((o) => o.obs?.wind_speed_kts !== null && o.obs?.wind_speed_kts !== undefined);
+  })).filter((o) => o.obs);
+  const bestObs = allObs.find((o) => o.obs?.wind_speed_kts != null) ?? allObs[0] ?? null;
+  const stationCount = allObs.length;
 
   const greeting = () => {
     const hour = new Date().getHours();
@@ -158,51 +160,91 @@ export default function HomePage() {
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-ocean border-t-transparent" />
             </div>
           ) : bestObs?.obs ? (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                <Wind className="h-5 w-5 shrink-0" style={{ color: getWindColor(bestObs.obs.wind_speed_kts ?? 0) }} />
-                <div>
-                  <p className="text-lg font-bold">{bestObs.obs.wind_speed_kts ?? "--"} kts</p>
-                  <p className="text-xs text-muted-foreground">
-                    {bestObs.obs.wind_direction_deg != null ? `${bestObs.obs.wind_direction_deg}\u00B0` : "--"}
-                    {bestObs.obs.wind_gust_kts ? ` G${bestObs.obs.wind_gust_kts}` : ""}
-                  </p>
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Wind — always show if we have an observation */}
+                <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                  <Wind className="h-5 w-5 shrink-0" style={{ color: getWindColor(bestObs.obs.wind_speed_kts ?? 0) }} />
+                  <div>
+                    <p className="text-lg font-bold">{bestObs.obs.wind_speed_kts ?? "--"} kts</p>
+                    <p className="text-xs text-muted-foreground">
+                      {bestObs.obs.wind_direction_deg != null ? `${bestObs.obs.wind_direction_deg}\u00B0` : "Wind"}
+                      {bestObs.obs.wind_gust_kts ? ` G${bestObs.obs.wind_gust_kts}` : ""}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                <Waves className="h-5 w-5 shrink-0 text-ocean" />
-                <div>
-                  <p className="text-lg font-bold">{bestObs.obs.wave_height_ft ?? "--"} ft</p>
-                  <p className="text-xs text-muted-foreground">
-                    {bestObs.obs.wave_period_sec ? `${bestObs.obs.wave_period_sec}s period` : "Wave height"}
-                  </p>
+
+                {/* Air temp */}
+                <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                  <Thermometer className="h-5 w-5 shrink-0 text-orange-400" />
+                  <div>
+                    <p className="text-lg font-bold">{bestObs.obs.air_temp_f != null ? `${bestObs.obs.air_temp_f}\u00B0F` : "--"}</p>
+                    <p className="text-xs text-muted-foreground">Air temp</p>
+                  </div>
                 </div>
+
+                {/* Waves — only show the card if any station reports wave data */}
+                {(bestObs.obs.wave_height_ft != null || allObs.some((o) => o.obs?.wave_height_ft != null)) ? (
+                  <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                    <Waves className="h-5 w-5 shrink-0 text-ocean" />
+                    <div>
+                      <p className="text-lg font-bold">
+                        {(bestObs.obs.wave_height_ft ?? allObs.find((o) => o.obs?.wave_height_ft != null)?.obs?.wave_height_ft ?? "--")} ft
+                      </p>
+                      <p className="text-xs text-muted-foreground">Wave height</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                    <Waves className="h-5 w-5 shrink-0 text-ocean" />
+                    <div>
+                      <p className="text-lg font-bold">--</p>
+                      <p className="text-xs text-muted-foreground">No wave data</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Water temp or pressure as fallback */}
+                {bestObs.obs.water_temp_f != null ? (
+                  <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                    <Thermometer className="h-5 w-5 shrink-0 text-ocean-300" />
+                    <div>
+                      <p className="text-lg font-bold">{bestObs.obs.water_temp_f}\u00B0F</p>
+                      <p className="text-xs text-muted-foreground">Water temp</p>
+                    </div>
+                  </div>
+                ) : bestObs.obs.barometric_pressure_mb != null ? (
+                  <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                    <Gauge className="h-5 w-5 shrink-0 text-muted-foreground" />
+                    <div>
+                      <p className="text-lg font-bold">{bestObs.obs.barometric_pressure_mb} mb</p>
+                      <p className="text-xs text-muted-foreground">Pressure</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                    <Thermometer className="h-5 w-5 shrink-0 text-ocean-300" />
+                    <div>
+                      <p className="text-lg font-bold">--</p>
+                      <p className="text-xs text-muted-foreground">Water temp</p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                <Thermometer className="h-5 w-5 shrink-0 text-orange-400" />
-                <div>
-                  <p className="text-lg font-bold">{bestObs.obs.air_temp_f ?? "--"}&deg;F</p>
-                  <p className="text-xs text-muted-foreground">Air temp</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                <Thermometer className="h-5 w-5 shrink-0 text-ocean-300" />
-                <div>
-                  <p className="text-lg font-bold">{bestObs.obs.water_temp_f ?? "--"}&deg;F</p>
-                  <p className="text-xs text-muted-foreground">Water temp</p>
-                </div>
-              </div>
-            </div>
+              <p className="mt-2 text-right text-xs text-muted-foreground">
+                {bestObs.station.name} {stationCount > 1 ? `(${stationCount} stations reporting)` : ""}
+              </p>
+            </>
           ) : (
-            <p className="py-4 text-center text-sm text-muted-foreground">
-              No station data available. Offshore buoys may not be deployed yet this season.
-            </p>
-          )}
-          {bestObs?.station && (
-            <p className="mt-2 text-right text-xs text-muted-foreground">
-              {bestObs.station.name}
-            </p>
-          )}
+            <div className="py-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                No station data available yet.
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Offshore buoys may not be deployed this early in the season. Shore stations should update shortly.
+              </p>
+            </div>
+          )
         </section>
 
         {/* My Boat Card */}

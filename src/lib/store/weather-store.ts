@@ -36,7 +36,10 @@ export const useWeatherStore = create<WeatherState>((set, get) => ({
   setError: (error) => set({ error }),
 
   fetchWeather: async () => {
-    if (get().isLoading) return;
+    const state = get();
+    if (state.isLoading) return;
+    // Don't refetch if data is less than 2 minutes old
+    if (state.lastFetched && Date.now() - new Date(state.lastFetched).getTime() < 120_000) return;
     set({ isLoading: true, error: null });
     try {
       const res = await fetch("/api/weather");

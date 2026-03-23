@@ -136,7 +136,7 @@ export default function WeatherPage() {
                   </div>
                 ) : (
                   <p className="py-3 text-center text-sm text-muted-foreground">
-                    {isLoading ? "Loading..." : "No data available"}
+                    {isLoading ? "Loading..." : station.id.match(/^\d/) ? "Seasonal buoy \u2014 not yet deployed" : "No data available"}
                   </p>
                 )}
               </div>
