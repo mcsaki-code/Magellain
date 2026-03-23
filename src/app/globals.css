@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 215 45% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 45% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 45% 20%;
+    --primary: 210 60% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 215 20% 95%;
+    --secondary-foreground: 215 45% 20%;
+    --muted: 215 20% 95%;
+    --muted-foreground: 215 10% 45%;
+    --accent: 215 20% 95%;
+    --accent-foreground: 215 45% 20%;
+    --destructive: 0 84% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 215 20% 88%;
+    --input: 215 20% 88%;
+    --ring: 210 60% 45%;
+    --radius: 0.5rem;
+    --nav-height: 64px;
+  }
+
+  .dark {
+    --background: 220 30% 8%;
+    --foreground: 210 20% 92%;
+    --card: 220 25% 12%;
+    --card-foreground: 210 20% 92%;
+    --popover: 220 25% 12%;
+    --popover-foreground: 210 20% 92%;
+    --primary: 210 60% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 210 20% 92%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 215 10% 55%;
+    --accent: 220 20% 18%;
+    --accent-foreground: 210 20% 92%;
+    --destructive: 0 84% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 20% 22%;
+    --input: 220 20% 22%;
+    --ring: 210 60% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Mapbox overrides */
+.mapboxgl-map {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* Safe area padding for mobile */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Scrollbar styling */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted-foreground) / 0.08) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}

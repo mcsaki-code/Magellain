@@ -1,0 +1,51 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Map, Cloud, MessageSquare, Flag, Menu } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const navItems = [
+  { key: "map", label: "Map", href: "/map", icon: Map },
+  { key: "weather", label: "Weather", href: "/weather", icon: Cloud },
+  { key: "chat", label: "Chat", href: "/chat", icon: MessageSquare },
+  { key: "races", label: "Races", href: "/races", icon: Flag },
+  { key: "menu", label: "Menu", href: "/menu", icon: Menu },
+] as const;
+
+export function BottomNav() {
+  const pathname = usePathname();
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md safe-bottom">
+      <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
+        {navItems.map((item) => {
+          const isActive =
+            pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={cn(
+                "flex min-h-touch min-w-touch flex-col items-center justify-center gap-0.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                isActive
+                  ? "text-ocean"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Icon
+                className={cn(
+                  "h-5 w-5",
+                  isActive ? "stroke-[2.5]" : "stroke-[1.5]"
+                )}
+              />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
