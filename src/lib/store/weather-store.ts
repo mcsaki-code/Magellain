@@ -1,10 +1,21 @@
 import { create } from "zustand";
 import type { WeatherObservation, MarineForecast, WeatherAlert } from "@/lib/types";
 
+export interface SailingConditions {
+  rating: "excellent" | "good" | "fair" | "marginal" | "not_recommended";
+  summary: string;
+  tips: string[];
+  wind_kts: number;
+  gust_kts: number;
+  wave_ft: number;
+  has_precipitation: boolean;
+}
+
 interface WeatherState {
   observations: Record<string, WeatherObservation>;
   forecasts: MarineForecast[];
   alerts: WeatherAlert[];
+  sailingConditions: SailingConditions | null;
   selectedStation: string | null;
   isLoading: boolean;
   lastFetched: string | null;
@@ -23,6 +34,7 @@ export const useWeatherStore = create<WeatherState>((set, get) => ({
   observations: {},
   forecasts: [],
   alerts: [],
+  sailingConditions: null,
   selectedStation: null,
   isLoading: false,
   lastFetched: null,
@@ -49,6 +61,7 @@ export const useWeatherStore = create<WeatherState>((set, get) => ({
         observations: data.observations ?? {},
         forecasts: data.forecasts ?? [],
         alerts: data.alerts ?? [],
+        sailingConditions: data.sailingConditions ?? null,
         lastFetched: new Date().toISOString(),
         isLoading: false,
       });

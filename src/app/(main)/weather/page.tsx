@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import { Header } from "@/components/layout/header";
 import { useWeatherStore } from "@/lib/store/weather-store";
 import { BUOY_STATIONS, getWindColor, WIND_COLORS } from "@/lib/constants";
-import { Wind, Waves, Thermometer, Gauge, AlertTriangle, RefreshCw, CloudRain } from "lucide-react";
+import { Wind, Waves, Thermometer, Gauge, AlertTriangle, RefreshCw, CloudRain, Sailboat } from "lucide-react";
+import type { SailingConditions } from "@/lib/store/weather-store";
 
 function degToCompass(deg: number): string {
   const dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
@@ -30,7 +31,7 @@ function WindLegend() {
 }
 
 export default function WeatherPage() {
-  const { observations, forecasts, alerts, isLoading, lastFetched, fetchWeather } = useWeatherStore();
+  const { observations, forecasts, alerts, sailingConditions, isLoading, lastFetched, fetchWeather } = useWeatherStore();
 
   useEffect(() => {
     if (!lastFetched) fetchWeather();
@@ -63,6 +64,9 @@ export default function WeatherPage() {
             ))}
           </div>
         )}
+
+        {/* Sailing Conditions Analysis */}
+        {sailingConditions && <SailingConditionsCard conditions={sailingConditions} />}
 
         {/* Refresh bar */}
         <div className="flex items-center justify-between">
@@ -172,6 +176,58 @@ export default function WeatherPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+const CONDITION_STYLES: Record<string, { bg: string; border: string; text: string; label: string }> = {
+  excellent: { bg: "bg-green-500/10", border: "border-green-500/30", text: "text-green-700 dark:text-green-400", label: "Excellent" },
+  good: { bg: "bg-blue-500/10", border: "border-blue-500/30", text: "text-blue-700 dark:text-blue-400", label: "Good" },
+  fair: { bg: "bg-yellow-500/10", border: "border-yellow-500/30", text: "text-yellow-700 dark:text-yellow-400", label: "Fair" },
+  marginal: { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-700 dark:text-orange-400", label: "Marginal" },
+  not_recommended: { bg: "bg-red-500/10", border: "border-red-500/30", text: "text-red-700 dark:text-red-400", label: "Not Recommended" },
+};
+
+function SailingConditionsCard({ conditions }: { conditions: SailingConditions }) {
+  const style = CONDITION_STYLES[conditions.rating] ?? CONDITION_STYLES.fair;
+
+  return (
+    <div className={`rounded-xl border ${style.border} ${style.bg} p-4`}>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sailboat className={`h-5 w-5 ${style.text}`} />
+          <h2 className="text-sm font-semibold text-muted-foreground">SAILING CONDITIONS</h2>
+        </div>
+        <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${style.text} ${style.bg}`}>
+          {style.label}
+        </span>
+      </div>
+      <p className="mb-3 text-sm">{conditions.summary}</p>
+      <div className="mb-3 grid grid-cols-4 gap-3 text-center text-xs">
+        <div>
+          <p className="font-bold text-lg">{conditions.wind_kts}</p>
+          <p className="text-muted-foreground">kts wind</p>
+        </div>
+        <div>
+          <p className="font-bold text-lg">{conditions.gust_kts}</p>
+          <p className="text-muted-foreground">kts gust</p>
+        </div>
+        <div>
+          <p className="font-bold text-lg">{conditions.wave_ft}</p>
+          <p className="text-muted-foreground">ft waves</p>
+        </div>
+        <div>
+          <p className="font-bold text-lg">{conditions.has_precipitation ? "Yes" : "No"}</p>
+          <p className="text-muted-foreground">precip</p>
+        </div>
+      </div>
+      {conditions.tips.length > 0 && (
+        <div className="space-y-1 border-t border-border/50 pt-2">
+          {conditions.tips.map((tip, i) => (
+            <p key={i} className="text-xs text-muted-foreground">- {tip}</p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

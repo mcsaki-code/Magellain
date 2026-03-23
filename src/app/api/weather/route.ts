@@ -98,17 +98,34 @@ async function fetchMarineForecasts() {
       const data = await res.json();
       const periods = data.properties?.periods ?? [];
       for (const period of periods.slice(0, 3)) {
+        const forecastText = period.detailedForecast ?? period.text ?? "";
+
+        // Parse wave height from forecast text (e.g. "waves 2 to 4 feet", "seas 1 to 3 ft")
+        const waveMatch = forecastText.match(/(?:waves?|seas?)\s+(\d+)\s+(?:to\s+)?(\d+)?\s*(?:feet|ft)/i);
+        const waveMin = waveMatch ? parseInt(waveMatch[1]) : null;
+        const waveMax = waveMatch ? parseInt(waveMatch[2] ?? waveMatch[1]) : null;
+
+        // Parse wind from forecast text (e.g. "winds 10 to 15 knots", "north winds 5 to 10 kt")
+        const windMatch = forecastText.match(/(?:(\w+)\s+)?winds?\s+(\d+)\s+(?:to\s+)?(\d+)?\s*(?:knots?|kts?|kt)/i);
+        const windDir = windMatch?.[1] ?? null;
+        const windMin = windMatch ? parseInt(windMatch[2]) : null;
+        const windMax = windMatch ? parseInt(windMatch[3] ?? windMatch[2]) : null;
+
+        // Check for precipitation keywords
+        const hasPrecip = /rain|showers?|thunderstorm|snow|sleet|drizzle|precipitation/i.test(forecastText);
+
         forecasts.push({
           zone_id: zone.id,
           zone_name: zone.name,
           period_name: period.name ?? "Unknown",
-          forecast_text: period.detailedForecast ?? period.text ?? "",
+          forecast_text: forecastText,
           hazards: [] as string[],
-          wind_speed_min_kts: null as number | null,
-          wind_speed_max_kts: null as number | null,
-          wind_direction: null as string | null,
-          wave_height_min_ft: null as number | null,
-          wave_height_max_ft: null as number | null,
+          wind_speed_min_kts: windMin,
+          wind_speed_max_kts: windMax,
+          wind_direction: windDir,
+          wave_height_min_ft: waveMin,
+          wave_height_max_ft: waveMax,
+          has_precipitation: hasPrecip,
           issued_at: data.properties?.updated ?? new Date().toISOString(),
           expires_at: null as string | null,
         });
@@ -153,6 +170,80 @@ async function fetchWeatherAlerts() {
   }
 }
 
+// ─── Sailing Conditions Analyzer ────────────────────────────────────
+function analyzeSailingConditions(
+  obsMap: Record<string, ReturnType<typeof parseNdbcObservation>>,
+  forecasts: Array<Record<string, unknown>>,
+  alerts: Array<Record<string, unknown>>
+) {
+  // Find best observation with wind data
+  const obsValues = Object.values(obsMap).filter(Boolean);
+  const windObs = obsValues.find((o) => o?.wind_speed_kts != null);
+  const wind = windObs?.wind_speed_kts ?? 0;
+  const gust = windObs?.wind_gust_kts ?? 0;
+  const waveObs = obsValues.find((o) => o?.wave_height_ft != null);
+  const waves = waveObs?.wave_height_ft ?? 0;
+  const airTemp = obsValues.find((o) => o?.air_temp_f != null)?.air_temp_f;
+
+  // Check forecasts for precipitation
+  const hasPrecip = forecasts.some((f) => f.has_precipitation);
+  const hasAlerts = alerts.length > 0;
+
+  // Determine sailing rating
+  let rating: "excellent" | "good" | "fair" | "marginal" | "not_recommended" = "good";
+  let summary = "";
+  const tips: string[] = [];
+
+  if (hasAlerts || gust > 35 || wind > 30 || waves > 6) {
+    rating = "not_recommended";
+    summary = "Conditions are dangerous for sailing. Stay onshore.";
+    if (hasAlerts) tips.push("Active marine weather alerts in effect");
+    if (gust > 35) tips.push(`Strong gusts to ${gust} kts`);
+    if (waves > 6) tips.push(`Heavy seas at ${waves} ft`);
+  } else if (gust > 25 || wind > 20 || waves > 4) {
+    rating = "marginal";
+    summary = "Experienced sailors only. Reef early and stay alert.";
+    if (wind > 20) tips.push(`Strong winds at ${wind} kts — reef main and consider smaller headsail`);
+    if (waves > 4) tips.push(`Significant wave height ${waves} ft`);
+    if (hasPrecip) tips.push("Precipitation in forecast — reduced visibility");
+  } else if (wind > 15 || waves > 2.5) {
+    rating = "fair";
+    summary = "Solid sailing breeze. Good conditions for racing.";
+    if (wind > 15) tips.push(`Fresh breeze at ${wind} kts — full sail or light reef depending on boat`);
+    tips.push("Good racing conditions for most fleets");
+    if (hasPrecip) tips.push("Watch for rain reducing visibility");
+  } else if (wind >= 8) {
+    rating = "excellent";
+    summary = "Ideal sailing conditions. Perfect for all skill levels.";
+    tips.push(`Moderate ${wind} kt breeze — full sail conditions`);
+    if (waves < 2) tips.push("Flat to light chop — comfortable sailing");
+  } else if (wind >= 4) {
+    rating = "good";
+    summary = "Light air sailing. Good for practice and casual sailing.";
+    tips.push(`Light winds at ${wind} kts — use light-air sails if available`);
+    tips.push("Focus on sail trim and weight placement");
+  } else {
+    rating = "fair";
+    summary = "Very light winds. Drifting conditions possible.";
+    tips.push("Minimal wind — patience required");
+    tips.push("Keep weight low and forward, minimize movement");
+  }
+
+  if (airTemp != null && airTemp < 45) {
+    tips.push(`Cold conditions at ${airTemp}\u00B0F — dress in layers, wear drysuit or foul weather gear`);
+  }
+
+  // Get wave forecast from NWS if no buoy wave data
+  if (!waveObs) {
+    const waveForecast = forecasts.find((f) => (f.wave_height_max_ft as number | null) != null);
+    if (waveForecast) {
+      tips.push(`NWS forecast: waves ${waveForecast.wave_height_min_ft}-${waveForecast.wave_height_max_ft} ft`);
+    }
+  }
+
+  return { rating, summary, tips, wind_kts: wind, gust_kts: gust, wave_ft: waves, has_precipitation: hasPrecip };
+}
+
 // ─── API Route Handler ──────────────────────────────────────────────
 export async function GET() {
   try {
@@ -171,10 +262,18 @@ export async function GET() {
       }
     });
 
+    // Generate sailing conditions analysis
+    const sailingConditions = analyzeSailingConditions(
+      obsMap,
+      forecasts as Array<Record<string, unknown>>,
+      alerts as Array<Record<string, unknown>>
+    );
+
     return NextResponse.json({
       observations: obsMap,
       forecasts,
       alerts,
+      sailingConditions,
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) {

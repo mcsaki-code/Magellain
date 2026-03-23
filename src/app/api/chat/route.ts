@@ -130,9 +130,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "API key not configured" }), {
+      return new Response(JSON.stringify({ error: "API key not configured. Set ANTHROPIC_API_KEY in Netlify environment variables." }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
@@ -201,35 +201,54 @@ export async function POST(req: NextRequest) {
     ];
 
     // Use non-streaming for Netlify serverless reliability
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages,
-      }),
-    });
+    // Try claude-sonnet-4-20250514 first, fall back to claude-3-5-sonnet-20241022
+    const models = ["claude-sonnet-4-20250514", "claude-3-5-sonnet-20241022"];
+    let lastError = "";
+    let text = "";
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Anthropic API error:", response.status, errText);
-      return new Response(
-        JSON.stringify({
-          error: `AI service error (${response.status})`,
-          detail: errText.slice(0, 200),
+    for (const model of models) {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages,
         }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        text = data.content?.[0]?.text ?? "";
+        break;
+      }
+
+      const errText = await response.text();
+      console.error(`Anthropic API error (model=${model}):`, response.status, errText);
+      lastError = `AI service error (${response.status}): ${errText.slice(0, 300)}`;
+
+      // If 401 (auth), don't bother trying another model — the key is the problem
+      if (response.status === 401) {
+        return new Response(
+          JSON.stringify({
+            error: "API authentication failed. Please check your ANTHROPIC_API_KEY in Netlify environment variables.",
+          }),
+          { status: 502, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    if (!text && lastError) {
+      return new Response(
+        JSON.stringify({ error: lastError }),
         { status: 502, headers: { "Content-Type": "application/json" } }
       );
     }
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text ?? "";
 
     return new Response(text, {
       headers: {

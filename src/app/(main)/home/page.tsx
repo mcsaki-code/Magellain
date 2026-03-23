@@ -19,7 +19,7 @@ interface NextRaceInfo {
 }
 
 export default function HomePage() {
-  const { observations, alerts, isLoading: weatherLoading, lastFetched, fetchWeather } = useWeatherStore();
+  const { observations, alerts, sailingConditions, isLoading: weatherLoading, lastFetched, fetchWeather } = useWeatherStore();
   const [boat, setBoat] = useState<Boat | null>(null);
   const [nextRace, setNextRace] = useState<NextRaceInfo | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
@@ -156,6 +156,38 @@ export default function HomePage() {
               <ChevronRight className="ml-auto h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             </div>
             <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">{alerts[0].headline}</p>
+          </Link>
+        )}
+
+        {/* Sailing Conditions Card */}
+        {sailingConditions && !weatherLoading && (
+          <Link href="/weather" className="block">
+            <section className={`rounded-xl border p-4 ${
+              sailingConditions.rating === "excellent" ? "border-green-500/30 bg-green-500/5" :
+              sailingConditions.rating === "good" ? "border-ocean/30 bg-ocean/5" :
+              sailingConditions.rating === "fair" ? "border-yellow-500/30 bg-yellow-500/5" :
+              sailingConditions.rating === "marginal" ? "border-orange-500/30 bg-orange-500/5" :
+              "border-red-500/30 bg-red-500/5"
+            }`}>
+              <div className="mb-2 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-muted-foreground">SAILING CONDITIONS</h2>
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase ${
+                  sailingConditions.rating === "excellent" ? "bg-green-500/20 text-green-700 dark:text-green-400" :
+                  sailingConditions.rating === "good" ? "bg-ocean/20 text-ocean" :
+                  sailingConditions.rating === "fair" ? "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400" :
+                  sailingConditions.rating === "marginal" ? "bg-orange-500/20 text-orange-700 dark:text-orange-400" :
+                  "bg-red-500/20 text-red-700 dark:text-red-400"
+                }`}>
+                  {sailingConditions.rating.replace("_", " ")}
+                </span>
+              </div>
+              <p className="text-sm font-medium">{sailingConditions.summary}</p>
+              {sailingConditions.tips.length > 0 && (
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  {sailingConditions.tips[0]}
+                </p>
+              )}
+            </section>
           </Link>
         )}
 

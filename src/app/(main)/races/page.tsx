@@ -3,12 +3,29 @@
 import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { createClient } from "@/lib/supabase/client";
-import { Trophy, Calendar, MapPin, ChevronRight, Loader2 } from "lucide-react";
-import type { Regatta, Race, Club } from "@/lib/types";
+import { Trophy, Calendar, MapPin, ChevronRight, Loader2, Medal } from "lucide-react";
+import type { Regatta, Race, Club, Boat } from "@/lib/types";
+
+interface RaceResult {
+  id: string;
+  race_id: string;
+  boat_id: string;
+  fleet: string;
+  finish_position: number | null;
+  corrected_position: number | null;
+  elapsed_time_sec: number | null;
+  corrected_time_sec: number | null;
+  status: string;
+  boat?: Boat;
+}
+
+interface RaceWithResults extends Race {
+  results?: RaceResult[];
+}
 
 interface RegattaWithClub extends Regatta {
   club?: Club;
-  races?: Race[];
+  races?: RaceWithResults[];
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -33,6 +50,14 @@ function formatDate(dateStr: string): string {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function formatElapsed(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 export default function RacesPage() {
@@ -65,22 +90,52 @@ export default function RacesPage() {
     loadRegattas();
   }, []);
 
-  // Load races when a regatta is selected
+  // Load races and results when a regatta is selected
   useEffect(() => {
     if (!selectedRegatta) return;
 
     async function loadRaces() {
       const supabase = createClient();
-      const { data } = await supabase
+      const { data: raceData } = await supabase
         .from("races")
         .select("*")
         .eq("regatta_id", selectedRegatta)
         .order("race_number", { ascending: true });
 
-      if (data) {
+      if (raceData) {
+        // Load results for completed races
+        const completedRaceIds = raceData
+          .filter((r: Record<string, unknown>) => r.status === "completed")
+          .map((r: Record<string, unknown>) => r.id as string);
+
+        let resultsMap: Record<string, RaceResult[]> = {};
+        if (completedRaceIds.length > 0) {
+          const { data: results } = await supabase
+            .from("race_results")
+            .select("*, boat:boats(id, name, class_name, sail_number)")
+            .in("race_id", completedRaceIds)
+            .order("corrected_position", { ascending: true });
+
+          if (results) {
+            for (const r of results) {
+              const raceId = r.race_id as string;
+              if (!resultsMap[raceId]) resultsMap[raceId] = [];
+              resultsMap[raceId].push({
+                ...r,
+                boat: (r as Record<string, unknown>).boat as Boat | undefined,
+              } as RaceResult);
+            }
+          }
+        }
+
+        const racesWithResults: RaceWithResults[] = raceData.map((r: Record<string, unknown>) => ({
+          ...r,
+          results: resultsMap[(r.id as string)] ?? [],
+        })) as RaceWithResults[];
+
         setRegattas((prev) =>
-          prev.map((r) =>
-            r.id === selectedRegatta ? { ...r, races: data as Race[] } : r
+          prev.map((reg) =>
+            reg.id === selectedRegatta ? { ...reg, races: racesWithResults } : reg
           )
         );
       }
@@ -217,29 +272,71 @@ function RegattaCard({
 
           {/* Races list */}
           {regatta.races && regatta.races.length > 0 ? (
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground">RACES</p>
-              {regatta.races.map((race) => (
-                <div
-                  key={race.id}
-                  className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2"
-                >
-                  <div>
-                    <span className="text-sm font-medium">Race {race.race_number}</span>
-                    {race.course_type && (
-                      <span className="ml-2 text-xs text-muted-foreground">{race.course_type}</span>
+              {regatta.races.map((race) => {
+                const raceWithResults = race as RaceWithResults;
+                const results = raceWithResults.results ?? [];
+                // Group winners by fleet
+                const fleetWinners: Record<string, RaceResult> = {};
+                for (const r of results) {
+                  if (r.corrected_position === 1 || (r.finish_position === 1 && !r.corrected_position)) {
+                    if (!fleetWinners[r.fleet]) fleetWinners[r.fleet] = r;
+                  }
+                }
+                const winners = Object.entries(fleetWinners);
+
+                return (
+                  <div key={race.id} className="rounded-lg border bg-muted/30 px-3 py-2.5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium">Race {race.race_number}</span>
+                        {race.course_type && (
+                          <span className="ml-2 text-xs text-muted-foreground">{race.course_type}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {race.wind_speed_avg_kts && (
+                          <span className="text-xs text-muted-foreground">
+                            {race.wind_speed_avg_kts} kts
+                          </span>
+                        )}
+                        <StatusBadge status={race.status} />
+                      </div>
+                    </div>
+                    {/* Winners */}
+                    {winners.length > 0 && (
+                      <div className="mt-2 space-y-1 border-t border-border/50 pt-2">
+                        {winners.map(([fleet, result]) => (
+                          <div key={fleet} className="flex items-center gap-2 text-xs">
+                            <Medal className="h-3.5 w-3.5 text-yellow-500" />
+                            <span className="font-medium">{fleet}:</span>
+                            <span className="text-muted-foreground">
+                              {result.boat?.name ?? "Unknown"}{" "}
+                              {result.boat?.sail_number ? `(${result.boat.sail_number})` : ""}
+                              {result.elapsed_time_sec ? ` \u2014 ${formatElapsed(result.elapsed_time_sec)}` : ""}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {/* Show top 3 if we have results but listed separately */}
+                    {results.length > 0 && winners.length === 0 && (
+                      <div className="mt-2 space-y-1 border-t border-border/50 pt-2">
+                        {results.slice(0, 3).map((r, i) => (
+                          <div key={r.id} className="flex items-center gap-2 text-xs">
+                            <span className="w-4 text-center font-bold text-muted-foreground">{i + 1}</span>
+                            <span className="text-muted-foreground">
+                              {r.boat?.name ?? "Unknown"}{" "}
+                              {r.boat?.sail_number ? `(${r.boat.sail_number})` : ""}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {race.wind_speed_avg_kts && (
-                      <span className="text-xs text-muted-foreground">
-                        {race.wind_speed_avg_kts} kts
-                      </span>
-                    )}
-                    <StatusBadge status={race.status} />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">No races posted yet</p>
