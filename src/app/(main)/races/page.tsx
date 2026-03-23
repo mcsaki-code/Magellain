@@ -97,7 +97,7 @@ export default function RacesPage() {
   );
 
   return (
-    <div className="flex flex-col">
+    <div className="mx-auto flex w-full max-w-2xl flex-col">
       <Header title="Races" />
       <div className="space-y-4 p-4">
         {isLoading ? (

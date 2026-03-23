@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
-const SYSTEM_PROMPT = `You are MagellAIn, an expert sailing coach and racing strategist for Great Lakes sailors, especially on Lake Erie and the Detroit River. You have deep knowledge of:
+export const dynamic = "force-dynamic";
+
+const BASE_SYSTEM_PROMPT = `You are MagellAIn, an expert sailing coach and racing strategist for Great Lakes sailors, especially on Lake Erie and the Detroit River. You have deep knowledge of:
 
 - Racing tactics: starts, mark roundings, laylines, current/wind shifts, VMG optimization
 - One-design and PHRF handicap racing rules (Racing Rules of Sailing)
@@ -25,6 +29,97 @@ You can help with:
 5. General sailing knowledge and rules questions
 6. Lake Erie specific navigation and weather patterns`;
 
+function buildBoatContext(boat: Record<string, unknown>): string {
+  const lines: string[] = [];
+  lines.push(`\n\n--- SAILOR'S BOAT PROFILE ---`);
+  lines.push(`Boat: ${boat.name} (${boat.class_name})`);
+
+  if (boat.hull_type) lines.push(`Hull: ${boat.hull_type}`);
+  if (boat.phrf_rating) lines.push(`PHRF Rating: ${boat.phrf_rating}`);
+  if (boat.sail_number) lines.push(`Sail Number: ${boat.sail_number}`);
+
+  // Dimensions
+  const dims: string[] = [];
+  if (boat.loa_ft) dims.push(`LOA ${boat.loa_ft}ft`);
+  if (boat.beam_ft) dims.push(`Beam ${boat.beam_ft}ft`);
+  if (boat.draft_ft) dims.push(`Draft ${boat.draft_ft}ft`);
+  if (boat.displacement_lbs) dims.push(`Displacement ${boat.displacement_lbs}lbs`);
+  if (dims.length) lines.push(`Dimensions: ${dims.join(", ")}`);
+
+  if (boat.year_built) lines.push(`Year Built: ${boat.year_built}`);
+  if (boat.manufacturer) lines.push(`Manufacturer: ${boat.manufacturer}`);
+
+  // Rigging details from raw_data
+  const rawData = boat.raw_data as Record<string, unknown> | null;
+  if (rawData) {
+    const rigging: string[] = [];
+    if (rawData.keel_type) rigging.push(`Keel: ${rawData.keel_type}`);
+    if (rawData.rig_type) rigging.push(`Rig: ${rawData.rig_type}`);
+    if (rawData.propeller_type) rigging.push(`Prop: ${rawData.propeller_type}`);
+    if (rigging.length) lines.push(`Rigging: ${rigging.join(", ")}`);
+  }
+
+  // Sail inventory
+  const sails = rawData?.sail_inventory as Array<Record<string, unknown>> | undefined;
+  if (sails && sails.length > 0) {
+    lines.push(`Sail Inventory:`);
+    for (const s of sails) {
+      const parts: string[] = [String(s.type)];
+      if (s.loft) parts.push(`by ${s.loft}`);
+      if (s.area) parts.push(`${s.area} sqft`);
+      if (s.year) parts.push(`(${s.year})`);
+      if (s.condition) parts.push(`[${s.condition}]`);
+      lines.push(`  - ${parts.join(" ")}`);
+    }
+  }
+
+  // Fall back to the structured sail_inventory field
+  const structuredSails = boat.sail_inventory as Record<string, { area_sqft?: number; type?: string }> | null;
+  if (!sails?.length && structuredSails) {
+    const sailEntries = Object.entries(structuredSails).filter(([, v]) => v);
+    if (sailEntries.length > 0) {
+      lines.push(`Sail Inventory:`);
+      for (const [key, val] of sailEntries) {
+        const info: string[] = [key];
+        if (val.area_sqft) info.push(`${val.area_sqft} sqft`);
+        if (val.type) info.push(`(${val.type})`);
+        lines.push(`  - ${info.join(" ")}`);
+      }
+    }
+  }
+
+  lines.push(`\nTailor all advice to this specific boat. Consider the PHRF rating, sail inventory, keel/rig configuration, and dimensions when recommending sail selection, trim, tactics, and strategy. For example, reference which sails to use at specific wind angles, account for the boat's displacement-to-length ratio for speed predictions, and factor in keel type for pointing ability.`);
+
+  return lines.join("\n");
+}
+
+function buildProfileContext(profile: Record<string, unknown>): string {
+  const lines: string[] = [];
+  lines.push(`\n\n--- SAILOR PROFILE ---`);
+
+  if (profile.display_name || profile.full_name) {
+    lines.push(`Name: ${profile.display_name || profile.full_name}`);
+  }
+
+  if (profile.sailing_experience) {
+    lines.push(`Experience Level: ${profile.sailing_experience}`);
+    if (profile.sailing_experience === "beginner") {
+      lines.push(`Adjust your language: explain sailing terms, be encouraging, focus on fundamentals.`);
+    } else if (profile.sailing_experience === "intermediate") {
+      lines.push(`Use standard sailing terminology. Explain advanced concepts when they come up.`);
+    } else if (profile.sailing_experience === "advanced" || profile.sailing_experience === "expert") {
+      lines.push(`Use advanced sailing terminology freely. Focus on nuanced tactics and optimization.`);
+    }
+  }
+
+  const clubs = profile.club_affiliations as string[] | null;
+  if (clubs && clubs.length > 0) {
+    lines.push(`Club Affiliations: ${clubs.join(", ")}`);
+  }
+
+  return lines.join("\n");
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { message, history } = await req.json();
@@ -42,6 +137,63 @@ export async function POST(req: NextRequest) {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    // Build personalized system prompt with boat + profile data
+    let systemPrompt = BASE_SYSTEM_PROMPT;
+
+    try {
+      const cookieStore = await cookies();
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore.getAll();
+            },
+            setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+              try {
+                cookiesToSet.forEach(({ name, value, options }) =>
+                  cookieStore.set(name, value, options)
+                );
+              } catch {
+                // Server Component context — safe to ignore
+              }
+            },
+          },
+        }
+      );
+
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        // Fetch profile and primary boat in parallel
+        const [profileResult, boatResult] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id)
+            .single(),
+          supabase
+            .from("boats")
+            .select("*")
+            .eq("owner_id", user.id)
+            .eq("is_primary", true)
+            .single(),
+        ]);
+
+        if (profileResult.data) {
+          systemPrompt += buildProfileContext(profileResult.data as Record<string, unknown>);
+        }
+
+        if (boatResult.data) {
+          systemPrompt += buildBoatContext(boatResult.data as Record<string, unknown>);
+        }
+      }
+    } catch (err) {
+      // If auth/DB fails, continue with base prompt — chat should still work for anonymous users
+      console.error("Failed to load user context for chat:", err);
     }
 
     // Build messages array from history
@@ -63,7 +215,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1024,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages,
         stream: true,
       }),

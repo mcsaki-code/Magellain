@@ -37,7 +37,7 @@ export default function WeatherPage() {
   }, [lastFetched, fetchWeather]);
 
   return (
-    <div className="flex flex-col">
+    <div className="mx-auto flex w-full max-w-2xl flex-col">
       <Header title="Weather" />
       <div className="space-y-4 p-4">
         {/* Alerts banner */}

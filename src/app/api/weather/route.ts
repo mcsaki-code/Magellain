@@ -1,14 +1,22 @@
 import { NextResponse } from "next/server";
 import { BUOY_STATIONS, MARINE_ZONES } from "@/lib/constants";
 
+// Force dynamic — never statically render this route
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // ─── NDBC Observation Parser ────────────────────────────────────────
 function parseNdbcObservation(text: string, stationId: string) {
   const lines = text.trim().split("\n");
   if (lines.length < 3) return null;
 
-  // Line 0 = header names, Line 1 = units, Line 2+ = data
-  const headers = lines[0].replace(/^#/, "").trim().split(/\s+/);
-  const values = lines[2].trim().split(/\s+/);
+  // NDBC files have 2 header lines starting with #, then data lines
+  // Line 0 = #header names, Line 1 = #units, Line 2+ = data
+  const headers = lines[0].replace(/^#\s*/, "").trim().split(/\s+/);
+  // Find first non-comment line
+  const dataLineIdx = lines.findIndex((l, i) => i > 0 && !l.startsWith("#"));
+  if (dataLineIdx < 0) return null;
+  const values = lines[dataLineIdx].trim().split(/\s+/);
 
   const get = (name: string): number | null => {
     const idx = headers.indexOf(name);
@@ -53,7 +61,7 @@ async function fetchNdbcStation(stationId: string) {
   try {
     const url = `https://www.ndbc.noaa.gov/data/realtime2/${stationId}.txt`;
     const res = await fetch(url, {
-      next: { revalidate: 300 }, // Cache 5 min
+      cache: "no-store",
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) return null;
@@ -73,7 +81,7 @@ async function fetchMarineForecasts() {
       const url = `https://api.weather.gov/zones/marine/${zone.id}/forecast`;
       const res = await fetch(url, {
         headers: { "User-Agent": "(MagellAIn, mattcsaki@gmail.com)" },
-        next: { revalidate: 1800 }, // Cache 30 min
+        cache: "no-store",
         signal: AbortSignal.timeout(10000),
       });
       if (!res.ok) continue;

@@ -18,7 +18,7 @@ export default async function MenuPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <div className="flex flex-col">
+    <div className="mx-auto flex w-full max-w-2xl flex-col">
       <Header title="Menu" />
       <div className="p-4">
         {user ? (
