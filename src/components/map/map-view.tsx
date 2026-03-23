@@ -12,6 +12,7 @@ export function MapView() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const mapReady = useRef(false);
 
   const { center, zoom, showBuoyMarkers, setSelectedBuoy } = useMapStore();
   const { observations, fetchWeather } = useWeatherStore();
@@ -19,7 +20,7 @@ export function MapView() {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
   const addBuoyMarkers = useCallback(() => {
-    if (!map.current) return;
+    if (!map.current || !mapReady.current) return;
 
     // Clear existing markers
     markersRef.current.forEach((m) => m.remove());
@@ -36,45 +37,55 @@ export function MapView() {
       // Create custom marker element
       const el = document.createElement("div");
       el.className = "buoy-marker";
-      el.style.cssText = `
-        width: 40px; height: 40px; border-radius: 50%;
-        background: ${color}; border: 2px solid white;
-        display: flex; align-items: center; justify-content: center;
-        color: white; font-weight: 700; font-size: 11px;
-        cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        position: relative;
-      `;
+      el.style.width = "40px";
+      el.style.height = "40px";
+      el.style.borderRadius = "50%";
+      el.style.background = color;
+      el.style.border = "2px solid white";
+      el.style.display = "flex";
+      el.style.alignItems = "center";
+      el.style.justifyContent = "center";
+      el.style.color = "white";
+      el.style.fontWeight = "700";
+      el.style.fontSize = "11px";
+      el.style.cursor = "pointer";
+      el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+      el.style.position = "relative";
+      el.style.zIndex = "10";
       el.textContent = windSpeed > 0 ? `${Math.round(windSpeed)}` : "--";
 
       // Wind direction arrow
       if (windDir !== null && windDir !== undefined) {
         const arrow = document.createElement("div");
-        arrow.style.cssText = `
-          position: absolute; top: -10px; left: 50%;
-          transform: translateX(-50%) rotate(${windDir}deg);
-          width: 0; height: 0;
-          border-left: 4px solid transparent;
-          border-right: 4px solid transparent;
-          border-bottom: 10px solid white;
-        `;
+        arrow.style.position = "absolute";
+        arrow.style.top = "-10px";
+        arrow.style.left = "50%";
+        arrow.style.transform = `translateX(-50%) rotate(${windDir}deg)`;
+        arrow.style.width = "0";
+        arrow.style.height = "0";
+        arrow.style.borderLeft = "4px solid transparent";
+        arrow.style.borderRight = "4px solid transparent";
+        arrow.style.borderBottom = "10px solid white";
         el.appendChild(arrow);
       }
+
+      const popupHtml = `
+        <div style="font-family: system-ui; padding: 4px;">
+          <strong>${station.name}</strong><br/>
+          <span style="font-size: 12px; color: #666;">${station.id}</span><br/>
+          ${obs ? `
+            Wind: ${obs.wind_speed_kts ?? "--"} kts @ ${obs.wind_direction_deg ?? "--"}&deg;
+            ${obs.wind_gust_kts ? ` (G ${obs.wind_gust_kts})` : ""}<br/>
+            Waves: ${obs.wave_height_ft ?? "--"} ft / ${obs.wave_period_sec ?? "--"}s<br/>
+            Air: ${obs.air_temp_f ?? "--"}&deg;F | Water: ${obs.water_temp_f ?? "--"}&deg;F
+          ` : "No data available"}
+        </div>
+      `;
 
       const marker = new mapboxgl.Marker({ element: el })
         .setLngLat([station.lng, station.lat])
         .setPopup(
-          new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(`
-            <div style="font-family: system-ui; padding: 4px;">
-              <strong>${station.name}</strong><br/>
-              <span style="font-size: 12px; color: #666;">${station.id}</span><br/>
-              ${obs ? `
-                Wind: ${obs.wind_speed_kts ?? "--"} kts @ ${obs.wind_direction_deg ?? "--"}°
-                ${obs.wind_gust_kts ? ` (G ${obs.wind_gust_kts})` : ""}<br/>
-                Waves: ${obs.wave_height_ft ?? "--"} ft / ${obs.wave_period_sec ?? "--"}s<br/>
-                Air: ${obs.air_temp_f ?? "--"}°F | Water: ${obs.water_temp_f ?? "--"}°F
-              ` : "No data available"}
-            </div>
-          `)
+          new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(popupHtml)
         )
         .addTo(map.current!);
 
@@ -85,13 +96,20 @@ export function MapView() {
     // Add club markers
     CLUBS.forEach((club) => {
       const el = document.createElement("div");
-      el.style.cssText = `
-        width: 28px; height: 28px; border-radius: 4px;
-        background: #1B2A4A; border: 2px solid white;
-        display: flex; align-items: center; justify-content: center;
-        color: white; font-weight: 700; font-size: 9px;
-        cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-      `;
+      el.style.width = "28px";
+      el.style.height = "28px";
+      el.style.borderRadius = "4px";
+      el.style.background = "#1B2A4A";
+      el.style.border = "2px solid white";
+      el.style.display = "flex";
+      el.style.alignItems = "center";
+      el.style.justifyContent = "center";
+      el.style.color = "white";
+      el.style.fontWeight = "700";
+      el.style.fontSize = "9px";
+      el.style.cursor = "pointer";
+      el.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
+      el.style.zIndex = "10";
       el.textContent = club.shortName;
 
       const marker = new mapboxgl.Marker({ element: el })
@@ -116,7 +134,7 @@ export function MapView() {
 
     mapboxgl.accessToken = token;
 
-    map.current = new mapboxgl.Map({
+    const mapInstance = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/outdoors-v12",
       center,
@@ -124,8 +142,10 @@ export function MapView() {
       attributionControl: false,
     });
 
-    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
-    map.current.addControl(
+    map.current = mapInstance;
+
+    mapInstance.addControl(new mapboxgl.NavigationControl(), "top-right");
+    mapInstance.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
         trackUserLocation: true,
@@ -133,7 +153,8 @@ export function MapView() {
       "top-right"
     );
 
-    map.current.on("load", () => {
+    mapInstance.on("load", () => {
+      mapReady.current = true;
       addBuoyMarkers();
     });
 
@@ -142,7 +163,9 @@ export function MapView() {
 
     return () => {
       markersRef.current.forEach((m) => m.remove());
-      map.current?.remove();
+      markersRef.current = [];
+      mapReady.current = false;
+      mapInstance.remove();
       map.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -150,20 +173,8 @@ export function MapView() {
 
   // Update markers when observations change or buoy toggle changes
   useEffect(() => {
-    if (!map.current) return;
-
-    // If style is already loaded, add markers immediately
-    if (map.current.isStyleLoaded()) {
-      addBuoyMarkers();
-      return;
-    }
-
-    // Otherwise wait for style to load
-    const onStyleLoad = () => addBuoyMarkers();
-    map.current.on("style.load", onStyleLoad);
-    return () => {
-      map.current?.off("style.load", onStyleLoad);
-    };
+    if (!map.current || !mapReady.current) return;
+    addBuoyMarkers();
   }, [observations, showBuoyMarkers, addBuoyMarkers]);
 
   if (!token) {

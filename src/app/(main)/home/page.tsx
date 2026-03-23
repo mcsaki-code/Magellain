@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Wordmark } from "@/components/layout/header";
 import { useWeatherStore } from "@/lib/store/weather-store";
 import { createClient } from "@/lib/supabase/client";
-import { BUOY_STATIONS, getWindColor } from "@/lib/constants";
+import { BUOY_STATIONS, FORD_YC, getWindColor } from "@/lib/constants";
 import {
   Wind, Waves, Thermometer, Gauge, Ship, Flag, Map,
   MessageSquare, Cloud, ChevronRight, Settings,
@@ -99,13 +99,24 @@ export default function HomePage() {
     loadNextRace();
   }, []);
 
-  // Get best observation — prefer stations with wind data, fall back to any station with any data
-  const allObs = BUOY_STATIONS.map((s) => ({
-    station: s,
-    obs: observations[s.id],
-  })).filter((o) => o.obs);
-  const bestObs = allObs.find((o) => o.obs?.wind_speed_kts != null) ?? allObs[0] ?? null;
+  // Aggregate best data across all stations, prefer closest to FYC
+  const allObs = BUOY_STATIONS.map((s) => {
+    const dist = Math.sqrt(
+      Math.pow(s.lat - FORD_YC.lat, 2) + Math.pow(s.lng - FORD_YC.lng, 2)
+    );
+    return { station: s, obs: observations[s.id], dist };
+  })
+    .filter((o) => o.obs)
+    .sort((a, b) => a.dist - b.dist);
+
+  // Build a composite observation from all stations, preferring closest
+  const bestWind = allObs.find((o) => o.obs?.wind_speed_kts != null);
+  const bestAirTemp = allObs.find((o) => o.obs?.air_temp_f != null);
+  const bestWave = allObs.find((o) => o.obs?.wave_height_ft != null);
+  const bestWaterTemp = allObs.find((o) => o.obs?.water_temp_f != null);
+  const bestPressure = allObs.find((o) => o.obs?.barometric_pressure_mb != null);
   const stationCount = allObs.length;
+  const hasAnyData = stationCount > 0;
 
   const greeting = () => {
     const hour = new Date().getHours();
@@ -159,65 +170,57 @@ export default function HomePage() {
             <div className="flex items-center justify-center py-6">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-ocean border-t-transparent" />
             </div>
-          ) : bestObs?.obs ? (
+          ) : hasAnyData ? (
             <>
               <div className="grid grid-cols-2 gap-3">
-                {/* Wind — always show if we have an observation */}
+                {/* Wind */}
                 <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                  <Wind className="h-5 w-5 shrink-0" style={{ color: getWindColor(bestObs.obs.wind_speed_kts ?? 0) }} />
+                  <Wind className="h-5 w-5 shrink-0" style={{ color: getWindColor(bestWind?.obs?.wind_speed_kts ?? 0) }} />
                   <div>
-                    <p className="text-lg font-bold">{bestObs.obs.wind_speed_kts ?? "--"} kts</p>
+                    <p className="text-lg font-bold">{bestWind?.obs?.wind_speed_kts ?? "--"} kts</p>
                     <p className="text-xs text-muted-foreground">
-                      {bestObs.obs.wind_direction_deg != null ? `${bestObs.obs.wind_direction_deg}\u00B0` : "Wind"}
-                      {bestObs.obs.wind_gust_kts ? ` G${bestObs.obs.wind_gust_kts}` : ""}
+                      {bestWind?.obs?.wind_direction_deg != null ? `${bestWind.obs.wind_direction_deg}\u00B0` : "Wind"}
+                      {bestWind?.obs?.wind_gust_kts ? ` G${bestWind.obs.wind_gust_kts}` : ""}
                     </p>
                   </div>
                 </div>
 
-                {/* Air temp */}
+                {/* Air temp — aggregated from any reporting station */}
                 <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
                   <Thermometer className="h-5 w-5 shrink-0 text-orange-400" />
                   <div>
-                    <p className="text-lg font-bold">{bestObs.obs.air_temp_f != null ? `${bestObs.obs.air_temp_f}\u00B0F` : "--"}</p>
+                    <p className="text-lg font-bold">{bestAirTemp?.obs?.air_temp_f != null ? `${bestAirTemp.obs.air_temp_f}\u00B0F` : "--"}</p>
                     <p className="text-xs text-muted-foreground">Air temp</p>
                   </div>
                 </div>
 
-                {/* Waves — only show the card if any station reports wave data */}
-                {(bestObs.obs.wave_height_ft != null || allObs.some((o) => o.obs?.wave_height_ft != null)) ? (
-                  <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                    <Waves className="h-5 w-5 shrink-0 text-ocean" />
-                    <div>
-                      <p className="text-lg font-bold">
-                        {(bestObs.obs.wave_height_ft ?? allObs.find((o) => o.obs?.wave_height_ft != null)?.obs?.wave_height_ft ?? "--")} ft
-                      </p>
-                      <p className="text-xs text-muted-foreground">Wave height</p>
-                    </div>
+                {/* Waves — aggregated from any reporting station */}
+                <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                  <Waves className="h-5 w-5 shrink-0 text-ocean" />
+                  <div>
+                    <p className="text-lg font-bold">
+                      {bestWave?.obs?.wave_height_ft != null ? `${bestWave.obs.wave_height_ft} ft` : "--"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {bestWave ? "Wave height" : "No wave data"}
+                    </p>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                    <Waves className="h-5 w-5 shrink-0 text-ocean" />
-                    <div>
-                      <p className="text-lg font-bold">--</p>
-                      <p className="text-xs text-muted-foreground">No wave data</p>
-                    </div>
-                  </div>
-                )}
+                </div>
 
-                {/* Water temp or pressure as fallback */}
-                {bestObs.obs.water_temp_f != null ? (
+                {/* Water temp / pressure — aggregated */}
+                {bestWaterTemp?.obs?.water_temp_f != null ? (
                   <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
                     <Thermometer className="h-5 w-5 shrink-0 text-ocean-300" />
                     <div>
-                      <p className="text-lg font-bold">{bestObs.obs.water_temp_f}\u00B0F</p>
+                      <p className="text-lg font-bold">{bestWaterTemp.obs.water_temp_f}\u00B0F</p>
                       <p className="text-xs text-muted-foreground">Water temp</p>
                     </div>
                   </div>
-                ) : bestObs.obs.barometric_pressure_mb != null ? (
+                ) : bestPressure?.obs?.barometric_pressure_mb != null ? (
                   <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
                     <Gauge className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <div>
-                      <p className="text-lg font-bold">{bestObs.obs.barometric_pressure_mb} mb</p>
+                      <p className="text-lg font-bold">{bestPressure.obs.barometric_pressure_mb} mb</p>
                       <p className="text-xs text-muted-foreground">Pressure</p>
                     </div>
                   </div>
@@ -232,7 +235,7 @@ export default function HomePage() {
                 )}
               </div>
               <p className="mt-2 text-right text-xs text-muted-foreground">
-                {bestObs.station.name} {stationCount > 1 ? `(${stationCount} stations reporting)` : ""}
+                Detroit River area ({stationCount} station{stationCount !== 1 ? "s" : ""} reporting)
               </p>
             </>
           ) : (

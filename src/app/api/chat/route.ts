@@ -200,6 +200,7 @@ export async function POST(req: NextRequest) {
       { role: "user", content: message },
     ];
 
+    // Use non-streaming for Netlify serverless reliability
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -208,11 +209,10 @@ export async function POST(req: NextRequest) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 1024,
         system: systemPrompt,
         messages,
-        stream: true,
       }),
     });
 
@@ -222,64 +222,19 @@ export async function POST(req: NextRequest) {
       return new Response(
         JSON.stringify({
           error: `AI service error (${response.status})`,
-          detail: response.status === 401 ? "API key invalid or missing" : undefined,
+          detail: errText.slice(0, 200),
         }),
         { status: 502, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // Stream the response back to the client
-    const encoder = new TextEncoder();
-    const reader = response.body?.getReader();
-    if (!reader) {
-      return new Response(JSON.stringify({ error: "No response body" }), {
-        status: 502,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    const data = await response.json();
+    const text = data.content?.[0]?.text ?? "";
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() ?? "";
-
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                const data = line.slice(6);
-                if (data === "[DONE]") continue;
-                try {
-                  const parsed = JSON.parse(data);
-                  if (parsed.type === "content_block_delta" && parsed.delta?.text) {
-                    controller.enqueue(encoder.encode(parsed.delta.text));
-                  }
-                } catch {
-                  // Skip non-JSON lines
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.error("Stream error:", err);
-        } finally {
-          controller.close();
-        }
-      },
-    });
-
-    return new Response(stream, {
+    return new Response(text, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-cache",
-        "Transfer-Encoding": "chunked",
       },
     });
   } catch (err) {

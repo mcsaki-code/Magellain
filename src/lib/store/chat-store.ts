@@ -76,21 +76,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }),
       });
 
-      if (!res.ok) throw new Error(`Chat failed: ${res.status}`);
-
-      const reader = res.body?.getReader();
-      if (!reader) throw new Error("No response body");
-
-      const decoder = new TextDecoder();
-      let fullContent = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        fullContent += chunk;
-        get().updateLastAssistant(fullContent);
+      if (!res.ok) {
+        // Try to read the error detail from the JSON response
+        let errMsg = `Chat failed: ${res.status}`;
+        try {
+          const errData = await res.json();
+          errMsg = errData.error || errMsg;
+        } catch {
+          // Not JSON, use default message
+        }
+        throw new Error(errMsg);
       }
+
+      const text = await res.text();
+      get().updateLastAssistant(text);
 
       set({ isStreaming: false });
     } catch (err) {

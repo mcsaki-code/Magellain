@@ -21,10 +21,17 @@ function parseNdbcObservation(text: string, stationId: string) {
   const get = (name: string): number | null => {
     const idx = headers.indexOf(name);
     if (idx < 0 || !values[idx] || values[idx] === "MM") return null;
-    const v = parseFloat(values[idx]);
-    // NDBC uses 99, 999, 9999, 99.0, 999.0 as "missing data" sentinels
+    const raw = values[idx];
+    const v = parseFloat(raw);
     if (isNaN(v)) return null;
-    if (v >= 99 && (v === 99 || v === 99.0 || v === 999 || v === 999.0 || v === 9999)) return null;
+    // NDBC sentinel values depend on the field:
+    // Temp fields (ATMP, WTMP, DEWP): 999 or 99.0 means missing
+    // Wind/direction: 99 or 999 means missing
+    // Pressure: 9999 means missing (valid range ~900-1100 mb)
+    // Wave: 99.0 or 99.00 means missing
+    // Visibility: 99.0 means missing
+    // General: any field that is exactly "99.0", "99.00", "999", "999.0", or "9999" is missing
+    if (raw === "99.0" || raw === "99.00" || raw === "999" || raw === "999.0" || raw === "9999" || raw === "9999.0") return null;
     return v;
   };
 
