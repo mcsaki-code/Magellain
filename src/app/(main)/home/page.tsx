@@ -247,7 +247,7 @@ export default function HomePage() {
                 Offshore buoys may not be deployed this early in the season. Shore stations should update shortly.
               </p>
             </div>
-          )
+          )}
         </section>
 
         {/* My Boat Card */}
