@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useMapStore } from "@/lib/store/map-store";
@@ -12,9 +12,10 @@ export function MapView() {
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const mapReady = useRef(false);
+  const [debugInfo, setDebugInfo] = useState("");
 
   const { center, zoom, showBuoyMarkers, setSelectedBuoy } = useMapStore();
-  const { observations, fetchWeather } = useWeatherStore();
+  const { observations, fetchWeather, isLoading: weatherLoading } = useWeatherStore();
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -25,17 +26,29 @@ export function MapView() {
   const showMarkersRef = useRef(showBuoyMarkers);
   showMarkersRef.current = showBuoyMarkers;
 
-  function syncMarkers() {
+  const syncMarkers = useCallback(() => {
     const m = map.current;
-    if (!m || !mapReady.current) return;
+    if (!m) {
+      console.log("[MagellAIn] syncMarkers: no map instance");
+      return;
+    }
+    if (!mapReady.current) {
+      console.log("[MagellAIn] syncMarkers: map not ready yet");
+      return;
+    }
 
     // Remove old markers
     markersRef.current.forEach((mk) => mk.remove());
     markersRef.current = [];
 
-    if (!showMarkersRef.current) return;
+    if (!showMarkersRef.current) {
+      console.log("[MagellAIn] syncMarkers: markers toggled off");
+      return;
+    }
 
     const obs = observationsRef.current;
+    const stationCount = Object.keys(obs).length;
+    console.log("[MagellAIn] syncMarkers: building markers, stations with data:", stationCount);
 
     // Buoy station markers
     for (const station of BUOY_STATIONS) {
@@ -109,6 +122,7 @@ export function MapView() {
         .addTo(m);
       wrapper.addEventListener("click", () => setSelectedBuoy(station.id));
       markersRef.current.push(marker);
+      console.log(`[MagellAIn] Added marker: ${station.name} at [${station.lng}, ${station.lat}] wind=${windSpeed}kts`);
     }
 
     // Club markers
@@ -141,12 +155,19 @@ export function MapView() {
         .addTo(m);
       markersRef.current.push(marker);
     }
-  }
+
+    const total = markersRef.current.length;
+    console.log(`[MagellAIn] Total markers placed: ${total}`);
+    setDebugInfo(`${stationCount} stations | ${total} markers`);
+  }, [setSelectedBuoy]);
 
   // Initialize map once
   useEffect(() => {
-    if (!mapContainer.current || map.current || !token) return;
+    if (!mapContainer.current || !token) return;
+    // If map already exists, skip re-init
+    if (map.current) return;
 
+    console.log("[MagellAIn] Initializing Mapbox map...");
     mapboxgl.accessToken = token;
 
     const mapInstance = new mapboxgl.Map({
@@ -170,23 +191,29 @@ export function MapView() {
 
     mapInstance.on("load", () => {
       mapReady.current = true;
-      console.log("[MagellAIn] Map loaded, syncing markers...");
+      console.log("[MagellAIn] Map style loaded, syncing markers...");
       syncMarkers();
-      console.log("[MagellAIn] Markers created:", markersRef.current.length);
+      console.log("[MagellAIn] After initial sync, markers:", markersRef.current.length);
       // Auto-trigger user location after map loads
       setTimeout(() => {
         try { geolocate.trigger(); } catch { /* user may deny permission */ }
       }, 500);
     });
 
-    // Also listen for idle (all tiles loaded) as a fallback sync
+    // Fallback: if style.load already fired (can happen with caching), force sync
     mapInstance.once("idle", () => {
-      if (mapReady.current && markersRef.current.length === 0) {
-        console.log("[MagellAIn] Idle fallback: re-syncing markers");
+      console.log("[MagellAIn] Map idle event, mapReady:", mapReady.current, "markers:", markersRef.current.length);
+      if (!mapReady.current) {
+        // Style may have loaded before our listener was attached
+        mapReady.current = true;
+      }
+      if (markersRef.current.length === 0) {
+        console.log("[MagellAIn] Idle fallback: syncing markers");
         syncMarkers();
       }
     });
 
+    // Kick off weather data fetch
     fetchWeather();
 
     return () => {
@@ -199,12 +226,21 @@ export function MapView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  // Fly to new center/zoom when store changes (e.g. from controls)
+  useEffect(() => {
+    if (!map.current || !mapReady.current) return;
+    map.current.flyTo({ center, zoom, duration: 1000 });
+  }, [center, zoom]);
+
   // Re-sync markers whenever observations or toggle changes
   useEffect(() => {
-    console.log("[MagellAIn] Observations changed, stations:", Object.keys(observations).length, "mapReady:", mapReady.current);
-    syncMarkers();
+    const stationCount = Object.keys(observations).length;
+    console.log("[MagellAIn] Observations changed, stations:", stationCount, "mapReady:", mapReady.current);
+    if (mapReady.current) {
+      syncMarkers();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [observations, showBuoyMarkers]);
+  }, [observations, showBuoyMarkers, syncMarkers]);
 
   if (!token) {
     return (
@@ -219,7 +255,17 @@ export function MapView() {
     );
   }
 
-  return <div ref={mapContainer} className="h-full w-full" />;
+  return (
+    <div className="relative h-full w-full">
+      <div ref={mapContainer} className="h-full w-full" />
+      {/* Weather loading/debug indicator */}
+      {(weatherLoading || debugInfo) && (
+        <div className="absolute bottom-2 left-2 z-10 rounded-lg bg-card/90 px-2 py-1 text-[10px] text-muted-foreground backdrop-blur-sm">
+          {weatherLoading ? "Loading weather..." : debugInfo}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function buildPopupHtml(

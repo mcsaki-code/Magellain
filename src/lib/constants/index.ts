@@ -6,8 +6,9 @@ export const FORD_YC = {
   shortName: "FYC",
 } as const;
 
-export const DEFAULT_MAP_CENTER: [number, number] = [FORD_YC.lng, FORD_YC.lat];
-export const DEFAULT_MAP_ZOOM = 11;
+// Center slightly south of FYC to show W. Lake Erie buoys + Detroit River area
+export const DEFAULT_MAP_CENTER: [number, number] = [-83.0, 41.9];
+export const DEFAULT_MAP_ZOOM = 9;
 
 // ─── NDBC Buoy Stations ─────────────────────────────────────────────
 // Mix of C-MAN shore stations (year-round) and offshore buoys (seasonal)

@@ -13,14 +13,14 @@ const RIG_TYPES = ["masthead-sloop", "fractional-sloop", "cutter", "yawl", "ketc
 const PROP_TYPES = ["fixed", "folding", "feathering", "none"] as const;
 
 const POPULAR_CLASSES = [
-  { name: "S2 7.9", loa: 25.92, beam: 9.5, draft: 5.0, displacement: 4250, phrf: 168 },
-  { name: "J/24", loa: 24.0, beam: 8.92, draft: 4.0, displacement: 3100, phrf: 171 },
-  { name: "Cal 25", loa: 25.0, beam: 8.0, draft: 4.0, displacement: 4000, phrf: 168 },
-  { name: "J/70", loa: 22.75, beam: 7.33, draft: 4.75, displacement: 1750, phrf: 108 },
-  { name: "Melges 24", loa: 24.0, beam: 8.25, draft: 4.75, displacement: 1880, phrf: 87 },
-  { name: "J/105", loa: 34.5, beam: 11.0, draft: 6.5, displacement: 7750, phrf: 84 },
-  { name: "J/120", loa: 40.0, beam: 12.17, draft: 7.0, displacement: 14500, phrf: 48 },
-  { name: "Tartan 10", loa: 33.25, beam: 10.33, draft: 5.67, displacement: 8500, phrf: 132 },
+  { name: "S2 7.9", loa: 25.92, beam: 9.5, draft: 5.0, displacement: 4250, phrf: 168, desc: "26' one-design racer/cruiser. FYC Fleet 15 — the largest active fleet on the Detroit River.", category: "One-Design" },
+  { name: "J/24", loa: 24.0, beam: 8.92, draft: 4.0, displacement: 3100, phrf: 171, desc: "24' classic one-design keelboat. One of the most popular racing sailboats worldwide.", category: "One-Design" },
+  { name: "Cal 25", loa: 25.0, beam: 8.0, draft: 4.0, displacement: 4000, phrf: 168, desc: "25' racer/cruiser. Reliable all-rounder common in PHRF fleets on the Great Lakes.", category: "PHRF Racer/Cruiser" },
+  { name: "J/70", loa: 22.75, beam: 7.33, draft: 4.75, displacement: 1750, phrf: 108, desc: "23' high-performance sportboat. Fast planing hull, active one-design class.", category: "Sportboat" },
+  { name: "Melges 24", loa: 24.0, beam: 8.25, draft: 4.75, displacement: 1880, phrf: 87, desc: "24' grand prix sportboat. Ultra-competitive, one of the fastest boats per foot.", category: "Sportboat" },
+  { name: "J/105", loa: 34.5, beam: 11.0, draft: 6.5, displacement: 7750, phrf: 84, desc: "34' performance one-design. Popular offshore racer, excellent in heavy air.", category: "Performance" },
+  { name: "J/120", loa: 40.0, beam: 12.17, draft: 7.0, displacement: 14500, phrf: 48, desc: "40' performance cruiser. Fast PHRF A boat, built for distance and buoy racing.", category: "Performance" },
+  { name: "Tartan 10", loa: 33.25, beam: 10.33, draft: 5.67, displacement: 8500, phrf: 132, desc: "33' Tim Farris design. Iconic Great Lakes racer popular in DRYA and PHRF fleets.", category: "PHRF Racer" },
 ];
 
 interface SailEntry {
@@ -155,16 +155,26 @@ export default function NewBoatPage() {
         {/* Quick Select */}
         <section className="space-y-3">
           <h2 className="text-sm font-semibold text-muted-foreground">QUICK SELECT CLASS</h2>
-          <div className="flex flex-wrap gap-2">
+          <p className="text-xs text-muted-foreground">
+            Tap a boat class to auto-fill specs. These are the most common classes racing on the Detroit River and Lake Erie.
+          </p>
+          <div className="space-y-2">
             {POPULAR_CLASSES.map((c) => (
               <button
                 key={c.name}
                 onClick={() => populateFromClass(c.name)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                  boat.class_name === c.name ? "border-ocean bg-ocean/10 text-ocean" : "bg-card hover:bg-muted"
+                className={`w-full rounded-xl border p-3 text-left transition-colors ${
+                  boat.class_name === c.name ? "border-ocean bg-ocean/10" : "bg-card hover:bg-muted"
                 }`}
               >
-                {c.name}
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm font-semibold ${boat.class_name === c.name ? "text-ocean" : ""}`}>{c.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">{c.category}</span>
+                    <span className="text-[10px] text-muted-foreground">PHRF {c.phrf}</span>
+                  </div>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{c.desc}</p>
               </button>
             ))}
           </div>

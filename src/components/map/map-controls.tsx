@@ -2,12 +2,13 @@
 
 import { useMapStore } from "@/lib/store/map-store";
 import { useWeatherStore } from "@/lib/store/weather-store";
-import { Layers, RotateCcw, RefreshCw } from "lucide-react";
+import { Layers, RotateCcw, RefreshCw, Anchor, Navigation } from "lucide-react";
 import { useState } from "react";
+import { FORD_YC } from "@/lib/constants";
 
 export function MapControls() {
   const [showLayers, setShowLayers] = useState(false);
-  const { showBuoyMarkers, showWindArrows, toggleBuoyMarkers, toggleWindArrows, resetView } = useMapStore();
+  const { showBuoyMarkers, showWindArrows, toggleBuoyMarkers, toggleWindArrows, resetView, setCenter, setZoom } = useMapStore();
   const { fetchWeather, isLoading, lastFetched } = useWeatherStore();
 
   return (
@@ -41,21 +42,35 @@ export function MapControls() {
             />
             Wind Arrows
           </label>
+          <div className="mt-2 flex flex-col gap-1 border-t border-border pt-2">
+            <button
+              onClick={() => { setCenter([FORD_YC.lng, FORD_YC.lat]); setZoom(13); }}
+              className="flex items-center gap-2 rounded-md px-2 py-1 text-xs text-foreground hover:bg-muted"
+            >
+              <Anchor className="h-3 w-3" /> Zoom to FYC
+            </button>
+            <button
+              onClick={() => resetView()}
+              className="flex items-center gap-2 rounded-md px-2 py-1 text-xs text-foreground hover:bg-muted"
+            >
+              <Navigation className="h-3 w-3" /> Show All Stations
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Reset view */}
+      {/* Reset view (show all stations) */}
       <button
         onClick={resetView}
         className="rounded-lg bg-card/90 p-2 shadow-md backdrop-blur-sm hover:bg-card"
-        title="Reset view"
+        title="Show all stations"
       >
         <RotateCcw className="h-5 w-5 text-foreground" />
       </button>
 
       {/* Refresh data */}
       <button
-        onClick={fetchWeather}
+        onClick={() => { fetchWeather(); }}
         disabled={isLoading}
         className="rounded-lg bg-card/90 p-2 shadow-md backdrop-blur-sm hover:bg-card disabled:opacity-50"
         title={lastFetched ? `Last updated: ${new Date(lastFetched).toLocaleTimeString()}` : "Refresh weather"}
