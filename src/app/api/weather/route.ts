@@ -117,7 +117,7 @@ async function fetchWeatherAlerts() {
     const url = "https://api.weather.gov/alerts/active?area=OH,MI,NY,PA&event=Marine";
     const res = await fetch(url, {
       headers: { "User-Agent": "(MagellAIn, mattcsaki@gmail.com)" },
-      next: { revalidate: 300 },
+      cache: "no-store",
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) return [];

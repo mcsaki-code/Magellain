@@ -1,21 +1,25 @@
 // ─── Geography ───────────────────────────────────────────────────────
 export const FORD_YC = {
-  lat: 42.3408,
-  lng: -82.9122,
+  lat: 42.1244,
+  lng: -83.1333,
   name: "Ford Yacht Club",
   shortName: "FYC",
 } as const;
 
 export const DEFAULT_MAP_CENTER: [number, number] = [FORD_YC.lng, FORD_YC.lat];
-export const DEFAULT_MAP_ZOOM = 10;
+export const DEFAULT_MAP_ZOOM = 11;
 
 // ─── NDBC Buoy Stations ─────────────────────────────────────────────
+// Mix of C-MAN shore stations (year-round) and offshore buoys (seasonal)
+// Shore stations listed first — they're more reliable in early season
 export const BUOY_STATIONS = [
-  { id: "45005", name: "W Lake Erie", lat: 41.677, lng: -82.398 },
-  { id: "45132", name: "Toledo Channel LS", lat: 41.694, lng: -83.194 },
-  { id: "45142", name: "Cleveland Offshore", lat: 41.589, lng: -81.575 },
+  { id: "MRHO1", name: "Marblehead, OH", lat: 41.544, lng: -82.731 },
+  { id: "SBIO1", name: "South Bass Island, OH", lat: 41.629, lng: -82.841 },
+  { id: "THRO1", name: "Toledo Harbor, OH", lat: 41.694, lng: -83.473 },
   { id: "DBLN6", name: "Dunkirk, NY", lat: 42.494, lng: -79.354 },
-  { id: "THRO1", name: "Toledo Harbor", lat: 41.694, lng: -83.473 },
+  { id: "45005", name: "W Lake Erie (buoy)", lat: 41.677, lng: -82.398 },
+  { id: "45132", name: "Toledo Channel LS", lat: 41.694, lng: -83.194 },
+  { id: "45142", name: "Cleveland (buoy)", lat: 41.589, lng: -81.575 },
 ] as const;
 
 // ─── NWS Marine Forecast Zones ──────────────────────────────────────
@@ -33,17 +37,17 @@ export const CLUBS = [
     id: "ford-yc",
     name: "Ford Yacht Club",
     shortName: "FYC",
-    lat: 42.3408,
-    lng: -82.9122,
+    lat: 42.1244,
+    lng: -83.1333,
     website: "https://www.fordyachtclub.com",
   },
   {
     id: "wssc",
-    name: "West Shore Sailing Club",
+    name: "West Shore Sail Club",
     shortName: "WSSC",
-    lat: 42.2986,
-    lng: -83.1514,
-    website: "https://westshoresc.com",
+    lat: 42.0965,
+    lng: -83.1862,
+    website: "https://westshoresailclub.org",
   },
 ] as const;
 

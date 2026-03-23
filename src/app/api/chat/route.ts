@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
 
 export const dynamic = "force-dynamic";
 
@@ -143,23 +142,19 @@ export async function POST(req: NextRequest) {
     let systemPrompt = BASE_SYSTEM_PROMPT;
 
     try {
-      const cookieStore = await cookies();
       const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
           cookies: {
             getAll() {
-              return cookieStore.getAll();
+              return req.cookies.getAll().map((c) => ({
+                name: c.name,
+                value: c.value,
+              }));
             },
-            setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-              try {
-                cookiesToSet.forEach(({ name, value, options }) =>
-                  cookieStore.set(name, value, options)
-                );
-              } catch {
-                // Server Component context — safe to ignore
-              }
+            setAll() {
+              // Route Handlers can't set cookies on a streaming response — safe to no-op
             },
           },
         }
@@ -213,7 +208,7 @@ export async function POST(req: NextRequest) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 1024,
         system: systemPrompt,
         messages,

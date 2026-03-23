@@ -1,0 +1,345 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Wordmark } from "@/components/layout/header";
+import { useWeatherStore } from "@/lib/store/weather-store";
+import { createClient } from "@/lib/supabase/client";
+import { BUOY_STATIONS, getWindColor } from "@/lib/constants";
+import {
+  Wind, Waves, Thermometer, Ship, Flag, Map,
+  MessageSquare, Cloud, ChevronRight, Settings,
+  User, Navigation, Calendar, Sailboat, Anchor,
+} from "lucide-react";
+import type { Boat, Regatta, Race } from "@/lib/types";
+
+interface NextRaceInfo {
+  regatta: Regatta & { club?: { name: string; short_name: string } };
+  race: Race;
+}
+
+export default function HomePage() {
+  const { observations, alerts, isLoading: weatherLoading, lastFetched, fetchWeather } = useWeatherStore();
+  const [boat, setBoat] = useState<Boat | null>(null);
+  const [nextRace, setNextRace] = useState<NextRaceInfo | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  // Fetch weather on mount
+  useEffect(() => {
+    if (!lastFetched) fetchWeather();
+  }, [lastFetched, fetchWeather]);
+
+  // Fetch user data
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        setIsLoggedIn(true);
+
+        // Get profile
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("display_name, full_name")
+          .eq("id", user.id)
+          .single();
+        if (profile) {
+          setUserName(profile.display_name || profile.full_name || user.email?.split("@")[0] || null);
+        }
+
+        // Get primary boat
+        const { data: boatData } = await supabase
+          .from("boats")
+          .select("*")
+          .eq("owner_id", user.id)
+          .eq("is_primary", true)
+          .single();
+        if (boatData) setBoat(boatData as Boat);
+      }
+      setLoadingUser(false);
+    }
+    load();
+  }, []);
+
+  // Fetch next upcoming race
+  useEffect(() => {
+    async function loadNextRace() {
+      const supabase = createClient();
+      const now = new Date().toISOString();
+
+      const { data: regattas } = await supabase
+        .from("regattas")
+        .select("*, club:clubs(name, short_name)")
+        .eq("is_active", true)
+        .gte("end_date", now.split("T")[0])
+        .order("start_date", { ascending: true })
+        .limit(5);
+
+      if (!regattas?.length) return;
+
+      for (const regatta of regattas) {
+        const { data: races } = await supabase
+          .from("races")
+          .select("*")
+          .eq("regatta_id", regatta.id)
+          .eq("status", "scheduled")
+          .gte("scheduled_start", now)
+          .order("scheduled_start", { ascending: true })
+          .limit(1);
+
+        if (races?.length) {
+          setNextRace({ regatta: regatta as NextRaceInfo["regatta"], race: races[0] as Race });
+          return;
+        }
+      }
+    }
+    loadNextRace();
+  }, []);
+
+  // Get best observation (first station with data)
+  const bestObs = BUOY_STATIONS.map((s) => ({
+    station: s,
+    obs: observations[s.id],
+  })).find((o) => o.obs?.wind_speed_kts !== null && o.obs?.wind_speed_kts !== undefined);
+
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
+  return (
+    <div className="mx-auto flex w-full max-w-2xl flex-col">
+      {/* Header */}
+      <header className="flex items-center justify-between px-4 pb-2 pt-4 safe-top">
+        <div>
+          <Wordmark className="text-2xl" />
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {loadingUser ? "" : userName ? `${greeting()}, ${userName}` : greeting()}
+          </p>
+        </div>
+        <Link href="/menu" className="rounded-xl bg-muted p-2.5">
+          {isLoggedIn ? (
+            <User className="h-5 w-5 text-muted-foreground" />
+          ) : (
+            <Settings className="h-5 w-5 text-muted-foreground" />
+          )}
+        </Link>
+      </header>
+
+      <div className="space-y-4 p-4">
+        {/* Alerts banner */}
+        {alerts.length > 0 && (
+          <Link href="/weather" className="block rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Wind className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+              <span className="text-sm font-semibold text-yellow-600 dark:text-yellow-400">
+                {alerts.length} Active Marine Alert{alerts.length > 1 ? "s" : ""}
+              </span>
+              <ChevronRight className="ml-auto h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+            </div>
+            <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">{alerts[0].headline}</p>
+          </Link>
+        )}
+
+        {/* Current Conditions Card */}
+        <section className="rounded-xl border bg-card p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-muted-foreground">CURRENT CONDITIONS</h2>
+            <Link href="/weather" className="text-xs font-medium text-ocean">View All</Link>
+          </div>
+
+          {weatherLoading && !lastFetched ? (
+            <div className="flex items-center justify-center py-6">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-ocean border-t-transparent" />
+            </div>
+          ) : bestObs?.obs ? (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                <Wind className="h-5 w-5 shrink-0" style={{ color: getWindColor(bestObs.obs.wind_speed_kts ?? 0) }} />
+                <div>
+                  <p className="text-lg font-bold">{bestObs.obs.wind_speed_kts ?? "--"} kts</p>
+                  <p className="text-xs text-muted-foreground">
+                    {bestObs.obs.wind_direction_deg != null ? `${bestObs.obs.wind_direction_deg}\u00B0` : "--"}
+                    {bestObs.obs.wind_gust_kts ? ` G${bestObs.obs.wind_gust_kts}` : ""}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                <Waves className="h-5 w-5 shrink-0 text-ocean" />
+                <div>
+                  <p className="text-lg font-bold">{bestObs.obs.wave_height_ft ?? "--"} ft</p>
+                  <p className="text-xs text-muted-foreground">
+                    {bestObs.obs.wave_period_sec ? `${bestObs.obs.wave_period_sec}s period` : "Wave height"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                <Thermometer className="h-5 w-5 shrink-0 text-orange-400" />
+                <div>
+                  <p className="text-lg font-bold">{bestObs.obs.air_temp_f ?? "--"}&deg;F</p>
+                  <p className="text-xs text-muted-foreground">Air temp</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                <Thermometer className="h-5 w-5 shrink-0 text-ocean-300" />
+                <div>
+                  <p className="text-lg font-bold">{bestObs.obs.water_temp_f ?? "--"}&deg;F</p>
+                  <p className="text-xs text-muted-foreground">Water temp</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              No station data available. Offshore buoys may not be deployed yet this season.
+            </p>
+          )}
+          {bestObs?.station && (
+            <p className="mt-2 text-right text-xs text-muted-foreground">
+              {bestObs.station.name}
+            </p>
+          )}
+        </section>
+
+        {/* My Boat Card */}
+        {isLoggedIn && (
+          <section className="rounded-xl border bg-card p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-muted-foreground">MY BOAT</h2>
+              <Link href="/menu/boats" className="text-xs font-medium text-ocean">
+                {boat ? "Edit" : "Add Boat"}
+              </Link>
+            </div>
+            {boat ? (
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-ocean/10">
+                  <Sailboat className="h-7 w-7 text-ocean" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold">{boat.name}</p>
+                  <p className="text-sm text-muted-foreground">{boat.class_name}</p>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {boat.sail_number && (
+                      <span className="rounded-md bg-muted px-2 py-0.5 text-xs">Sail #{boat.sail_number}</span>
+                    )}
+                    {boat.phrf_rating && (
+                      <span className="rounded-md bg-muted px-2 py-0.5 text-xs">PHRF {boat.phrf_rating}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link
+                href="/menu/boats/new"
+                className="flex items-center gap-3 rounded-lg bg-muted/50 p-4"
+              >
+                <Ship className="h-6 w-6 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Add your boat</p>
+                  <p className="text-xs text-muted-foreground">
+                    Set up your boat for personalized coaching
+                  </p>
+                </div>
+              </Link>
+            )}
+          </section>
+        )}
+
+        {/* Next Race Card */}
+        <section className="rounded-xl border bg-card p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-muted-foreground">NEXT RACE</h2>
+            <Link href="/races" className="text-xs font-medium text-ocean">All Races</Link>
+          </div>
+          {nextRace ? (
+            <Link href="/races" className="flex items-center gap-4">
+              <div className="flex h-14 w-14 flex-col items-center justify-center rounded-xl bg-ocean/10">
+                <Calendar className="h-5 w-5 text-ocean" />
+                <span className="mt-0.5 text-[10px] font-bold text-ocean">
+                  {new Date(nextRace.race.scheduled_start).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                </span>
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold">{nextRace.regatta.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  Race {nextRace.race.race_number}
+                  {nextRace.regatta.club ? ` \u00B7 ${nextRace.regatta.club.short_name}` : ""}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {new Date(nextRace.race.scheduled_start).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                  {" at "}
+                  {new Date(nextRace.race.scheduled_start).toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </Link>
+          ) : (
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              No upcoming races scheduled
+            </p>
+          )}
+        </section>
+
+        {/* Quick Actions */}
+        <section className="grid grid-cols-2 gap-3">
+          <Link href="/map" className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted">
+            <Map className="h-6 w-6 text-ocean" />
+            <div>
+              <p className="text-sm font-semibold">Chart</p>
+              <p className="text-[11px] text-muted-foreground">Map & buoys</p>
+            </div>
+          </Link>
+          <Link href="/weather" className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted">
+            <Cloud className="h-6 w-6 text-ocean" />
+            <div>
+              <p className="text-sm font-semibold">Weather</p>
+              <p className="text-[11px] text-muted-foreground">Forecasts</p>
+            </div>
+          </Link>
+          <Link href="/chat" className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted">
+            <MessageSquare className="h-6 w-6 text-ocean" />
+            <div>
+              <p className="text-sm font-semibold">AI Coach</p>
+              <p className="text-[11px] text-muted-foreground">Tactics & strategy</p>
+            </div>
+          </Link>
+          <Link href="/map" className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted">
+            <Navigation className="h-6 w-6 text-ocean" />
+            <div>
+              <p className="text-sm font-semibold">GPS Speed</p>
+              <p className="text-[11px] text-muted-foreground">Speedometer</p>
+            </div>
+          </Link>
+        </section>
+
+        {/* Sign in prompt for anonymous users */}
+        {!isLoggedIn && !loadingUser && (
+          <section className="rounded-xl border border-ocean/30 bg-ocean/5 p-4 text-center">
+            <Anchor className="mx-auto h-8 w-8 text-ocean" />
+            <p className="mt-2 text-sm font-medium">Sign in for the full experience</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Set up your boat profile for personalized AI coaching, track races, and more.
+            </p>
+            <Link
+              href="/sign-in"
+              className="mt-3 inline-block rounded-xl bg-ocean px-6 py-2.5 text-sm font-semibold text-white"
+            >
+              Sign In
+            </Link>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+}
