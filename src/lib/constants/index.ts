@@ -59,7 +59,8 @@ export const FORECAST_REFRESH_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 export const NAV_ITEMS = [
   { key: "map", label: "Map", href: "/map" },
   { key: "weather", label: "Weather", href: "/weather" },
-  { key: "chat", label: "Chat", href: "/chat" },
+  { key: "chat", label: "Coach", href: "/chat" },
+  { key: "messages", label: "Crew", href: "/messages" },
   { key: "races", label: "Races", href: "/races" },
   { key: "menu", label: "Menu", href: "/menu" },
 ] as const;

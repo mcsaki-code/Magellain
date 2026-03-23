@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Map, Cloud, MessageSquare, Flag, Menu } from "lucide-react";
+import { Compass, Map, MessageSquare, Users, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { key: "home", label: "Home", href: "/home", icon: Compass },
   { key: "map", label: "Map", href: "/map", icon: Map },
   { key: "chat", label: "Coach", href: "/chat", icon: MessageSquare },
-  { key: "races", label: "Races", href: "/races", icon: Flag },
+  { key: "messages", label: "Crew", href: "/messages", icon: Users },
   { key: "menu", label: "Menu", href: "/menu", icon: Menu },
 ] as const;
 

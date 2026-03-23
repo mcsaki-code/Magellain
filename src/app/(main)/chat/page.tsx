@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/layout/header";
 import { useChatStore } from "@/lib/store/chat-store";
 import { Send, Trash2, Loader2, Sailboat } from "lucide-react";
@@ -21,8 +22,12 @@ function MessageBubble({ role, content }: { role: "user" | "assistant"; content:
       <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy-100 dark:bg-navy-800">
         <Sailboat className="h-3.5 w-3.5 text-navy-600 dark:text-navy-300" />
       </div>
-      <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-muted px-4 py-2.5 text-sm">
-        {content || <span className="inline-block h-4 w-4 animate-pulse rounded-full bg-muted-foreground/30" />}
+      <div className="prose prose-sm dark:prose-invert max-w-[85%] rounded-2xl rounded-bl-md bg-muted px-4 py-2.5 text-sm [&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:text-sm [&_h2]:font-bold [&_h3]:mt-2 [&_h3]:mb-1 [&_h3]:text-sm [&_h3]:font-semibold [&_p]:my-1.5 [&_ul]:my-1 [&_ul]:pl-4 [&_li]:my-0.5 [&_strong]:text-foreground">
+        {content ? (
+          <ReactMarkdown>{content}</ReactMarkdown>
+        ) : (
+          <span className="inline-block h-4 w-4 animate-pulse rounded-full bg-muted-foreground/30" />
+        )}
       </div>
     </div>
   );

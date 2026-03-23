@@ -46,15 +46,18 @@ export function MapView() {
 
       // Always use a wrapper for consistent sizing
       const wrapper = document.createElement("div");
+      wrapper.className = "magellain-marker";
       Object.assign(wrapper.style, {
         position: "relative",
         width: "42px",
-        height: "56px", // extra height for arrow
+        height: "56px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "flex-end",
         cursor: "pointer",
+        zIndex: "10",
+        pointerEvents: "auto",
       });
 
       // Wind direction arrow above the circle
@@ -167,11 +170,21 @@ export function MapView() {
 
     mapInstance.on("load", () => {
       mapReady.current = true;
+      console.log("[MagellAIn] Map loaded, syncing markers...");
       syncMarkers();
+      console.log("[MagellAIn] Markers created:", markersRef.current.length);
       // Auto-trigger user location after map loads
       setTimeout(() => {
         try { geolocate.trigger(); } catch { /* user may deny permission */ }
       }, 500);
+    });
+
+    // Also listen for idle (all tiles loaded) as a fallback sync
+    mapInstance.once("idle", () => {
+      if (mapReady.current && markersRef.current.length === 0) {
+        console.log("[MagellAIn] Idle fallback: re-syncing markers");
+        syncMarkers();
+      }
     });
 
     fetchWeather();
@@ -188,6 +201,7 @@ export function MapView() {
 
   // Re-sync markers whenever observations or toggle changes
   useEffect(() => {
+    console.log("[MagellAIn] Observations changed, stations:", Object.keys(observations).length, "mapReady:", mapReady.current);
     syncMarkers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [observations, showBuoyMarkers]);
