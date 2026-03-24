@@ -32,6 +32,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className="bg-background">
+      <head>
+        {/* Blocking script: apply dark class before first paint so iOS safe area
+            inherits the correct background color and avoids the white bar flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('magellain-theme');var dark=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.add(dark?'dark':'light');}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="font-sans antialiased bg-background">
         <ThemeProvider
           attribute="class"

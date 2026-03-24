@@ -59,6 +59,12 @@
     @apply bg-background;
     /* Ensure background extends behind mobile browser chrome */
     min-height: 100%;
+    /* Tell iOS which color-scheme is active so native UI elements
+       (home indicator, keyboard, scroll bars) match the theme. */
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
   }
   body {
     @apply bg-background text-foreground;

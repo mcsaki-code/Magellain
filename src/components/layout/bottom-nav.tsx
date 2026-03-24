@@ -17,7 +17,15 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card backdrop-blur-md" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 bg-card"
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom)",
+        // Single physical-pixel top border that respects DPR instead of
+        // the default 1px CSS border which renders as 2px on Retina/3x screens
+        boxShadow: "0 -0.5px 0 0 hsl(var(--border))",
+      }}
+    >
       <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-2">
         {navItems.map((item) => {
           const isActive =
