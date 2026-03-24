@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Map, MessageSquare, Users, Menu } from "lucide-react";
+import { Compass, Map, MessageSquare, BarChart3, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { key: "home", label: "Home", href: "/home", icon: Compass },
   { key: "map", label: "Map", href: "/map", icon: Map },
   { key: "chat", label: "Coach", href: "/chat", icon: MessageSquare },
-  { key: "messages", label: "Crew", href: "/messages", icon: Users },
+  { key: "performance", label: "Performance", href: "/performance", icon: BarChart3 },
   { key: "menu", label: "Menu", href: "/menu", icon: Menu },
 ] as const;
 
@@ -17,7 +17,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card backdrop-blur-md" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
       <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-2">
         {navItems.map((item) => {
           const isActive =

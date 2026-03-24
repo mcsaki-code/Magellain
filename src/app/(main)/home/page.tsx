@@ -10,12 +10,24 @@ import {
   Wind, Waves, Thermometer, Gauge, Ship, Flag, Map,
   MessageSquare, Cloud, ChevronRight, Settings,
   User, Navigation, Calendar, Sailboat, Anchor,
+  Newspaper, ExternalLink, Loader2,
 } from "lucide-react";
 import type { Boat, Regatta, Race } from "@/lib/types";
 
 interface NextRaceInfo {
   regatta: Regatta & { club?: { name: string; short_name: string } };
   race: Race;
+}
+
+interface NewsItem {
+  id: string;
+  title: string;
+  link: string;
+  source: string;
+  sourceIcon: string;
+  pubDate: string;
+  snippet: string;
+  imageUrl: string | null;
 }
 
 export default function HomePage() {
@@ -25,6 +37,25 @@ export default function HomePage() {
   const [userName, setUserName] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [newsLoading, setNewsLoading] = useState(true);
+
+  // Fetch sailing news
+  useEffect(() => {
+    async function loadNews() {
+      try {
+        const res = await fetch("/api/news");
+        if (res.ok) {
+          const data = await res.json();
+          setNews(data.news || []);
+        }
+      } catch (err) {
+        console.warn("Failed to load news:", err);
+      }
+      setNewsLoading(false);
+    }
+    loadNews();
+  }, []);
 
   // Fetch weather on mount
   useEffect(() => {
@@ -50,14 +81,25 @@ export default function HomePage() {
           setUserName(profile.display_name || profile.full_name || user.email?.split("@")[0] || null);
         }
 
-        // Get primary boat
-        const { data: boatData } = await supabase
+        // Get primary boat — fall back to Impetuous for admin/demo
+        const DEMO_BOAT_ID = "d3099269-e402-4c95-b47a-74cd1bb4164c";
+        const { data: ownBoat } = await supabase
           .from("boats")
           .select("*")
           .eq("owner_id", user.id)
           .eq("is_primary", true)
           .single();
-        if (boatData) setBoat(boatData as Boat);
+        if (ownBoat) {
+          setBoat(ownBoat as Boat);
+        } else {
+          // Admin mirror / demo: show Impetuous
+          const { data: fallback } = await supabase
+            .from("boats")
+            .select("*")
+            .eq("id", DEMO_BOAT_ID)
+            .single();
+          if (fallback) setBoat(fallback as Boat);
+        }
       }
       setLoadingUser(false);
     }
@@ -117,6 +159,17 @@ export default function HomePage() {
   const bestPressure = allObs.find((o) => o.obs?.barometric_pressure_mb != null);
   const stationCount = allObs.length;
   const hasAnyData = stationCount > 0;
+
+  function formatTimeAgo(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
 
   const greeting = () => {
     const hour = new Date().getHours();
@@ -406,6 +459,73 @@ export default function HomePage() {
               <p className="text-[11px] text-muted-foreground">Speedometer</p>
             </div>
           </Link>
+        </section>
+
+        {/* Sailing News Feed */}
+        <section className="rounded-xl border bg-card">
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+              <Newspaper className="h-4 w-4" />
+              SAILING NEWS
+            </h2>
+          </div>
+
+          {newsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : news.length > 0 ? (
+            <div className="divide-y">
+              {news.slice(0, 8).map((item) => (
+                <a
+                  key={item.id}
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex gap-3 px-4 py-3 transition-colors hover:bg-muted/30"
+                >
+                  {item.imageUrl && (
+                    <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.imageUrl}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-medium leading-snug text-foreground line-clamp-2">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                      {item.snippet}
+                    </p>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                        {item.sourceIcon}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {item.source}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/60">
+                        {formatTimeAgo(item.pubDate)}
+                      </span>
+                      <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground/40" />
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+              No sailing news available right now
+            </p>
+          )}
         </section>
 
         {/* Sign in prompt for anonymous users */}

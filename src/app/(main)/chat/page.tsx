@@ -66,7 +66,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="mx-auto flex h-[calc(100dvh-4rem)] w-full max-w-2xl flex-col">
+    <div className="mx-auto flex h-[calc(100dvh-var(--nav-total-height))] w-full max-w-2xl flex-col">
       <Header title="Sailing Coach">
         {messages.length > 0 && (
           <button

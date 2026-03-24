@@ -5,16 +5,19 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useMapStore } from "@/lib/store/map-store";
 import { useWeatherStore } from "@/lib/store/weather-store";
+import { createClient } from "@/lib/supabase/client";
 import { BUOY_STATIONS, CLUBS, getWindColor } from "@/lib/constants";
 
 export function MapView() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const courseMarkersRef = useRef<mapboxgl.Marker[]>([]);
   const mapReady = useRef(false);
   const [debugInfo, setDebugInfo] = useState("");
+  const [raceMarks, setRaceMarks] = useState<Array<{ id: string; name: string; short_name: string; latitude: number; longitude: number; mark_type: string; color: string | null }>>([]);
 
-  const { center, zoom, showBuoyMarkers, setSelectedBuoy } = useMapStore();
+  const { center, zoom, showBuoyMarkers, setSelectedBuoy, showCourseOverlay, courseLegs, selectedCourse } = useMapStore();
   const { observations, fetchWeather, isLoading: weatherLoading } = useWeatherStore();
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -161,6 +164,128 @@ export function MapView() {
     setDebugInfo(`${stationCount} stations | ${total} markers`);
   }, [setSelectedBuoy]);
 
+  // Fetch race marks from Supabase
+  useEffect(() => {
+    const fetchRaceMarks = async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("race_marks")
+        .select("id, name, short_name, latitude, longitude, mark_type, color")
+        .eq("is_active", true);
+      if (data) setRaceMarks(data);
+    };
+    fetchRaceMarks();
+  }, []);
+
+  // Sync course overlay (race mark dots + course line)
+  const syncCourseOverlay = useCallback(() => {
+    const m = map.current;
+    if (!m || !mapReady.current) return;
+
+    // Remove old course markers
+    courseMarkersRef.current.forEach((mk) => mk.remove());
+    courseMarkersRef.current = [];
+
+    // Remove old course line layer and source
+    if (m.getLayer("course-line-layer")) m.removeLayer("course-line-layer");
+    if (m.getLayer("course-line-arrows")) m.removeLayer("course-line-arrows");
+    if (m.getSource("course-line")) m.removeSource("course-line");
+
+    if (!showCourseOverlay) return;
+
+    // Add race mark markers (small diamonds)
+    for (const mark of raceMarks) {
+      // Skip the virtual S/F mark
+      if (mark.mark_type === "virtual") continue;
+
+      const el = document.createElement("div");
+      const isOnCourse = courseLegs.some((leg) => leg.mark.id === mark.id);
+      const bgColor = isOnCourse ? "#0ea5e9" : "#6b7280"; // ocean blue if on course, gray otherwise
+      const size = isOnCourse ? "24px" : "18px";
+
+      Object.assign(el.style, {
+        width: size,
+        height: size,
+        borderRadius: mark.mark_type === "light" ? "2px" : "50%",
+        background: bgColor,
+        border: "2px solid white",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "white",
+        fontWeight: "800",
+        fontSize: isOnCourse ? "9px" : "7px",
+        cursor: "pointer",
+        boxShadow: isOnCourse
+          ? "0 0 8px rgba(14,165,233,0.5), 0 2px 6px rgba(0,0,0,0.3)"
+          : "0 2px 4px rgba(0,0,0,0.3)",
+        transform: mark.mark_type === "light" ? "rotate(45deg)" : "none",
+        zIndex: isOnCourse ? "5" : "3",
+      });
+
+      const label = document.createElement("span");
+      label.textContent = mark.short_name;
+      if (mark.mark_type === "light") {
+        label.style.transform = "rotate(-45deg)";
+      }
+      el.appendChild(label);
+
+      const popup = new mapboxgl.Popup({
+        offset: 15,
+        closeButton: false,
+      }).setHTML(
+        `<div style="font-family:system-ui;padding:4px">
+          <strong>${mark.name}</strong><br/>
+          <span style="font-size:11px;color:#666">${mark.short_name} — ${mark.mark_type}</span><br/>
+          <span style="font-size:11px;color:#888">${mark.latitude.toFixed(4)}°N, ${Math.abs(mark.longitude).toFixed(4)}°W</span>
+        </div>`
+      );
+
+      const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
+        .setLngLat([mark.longitude, mark.latitude])
+        .setPopup(popup)
+        .addTo(m);
+
+      courseMarkersRef.current.push(marker);
+    }
+
+    // Draw course line if a course is selected
+    if (selectedCourse && courseLegs.length >= 2) {
+      const coordinates = courseLegs.map((leg) => [
+        leg.mark.longitude,
+        leg.mark.latitude,
+      ]);
+
+      m.addSource("course-line", {
+        type: "geojson",
+        data: {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "LineString",
+            coordinates,
+          },
+        },
+      });
+
+      m.addLayer({
+        id: "course-line-layer",
+        type: "line",
+        source: "course-line",
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: {
+          "line-color": "#0ea5e9",
+          "line-width": 3,
+          "line-opacity": 0.8,
+          "line-dasharray": [2, 1],
+        },
+      });
+    }
+  }, [showCourseOverlay, raceMarks, courseLegs, selectedCourse]);
+
   // Initialize map once
   useEffect(() => {
     if (!mapContainer.current || !token) return;
@@ -193,6 +318,7 @@ export function MapView() {
       mapReady.current = true;
       console.log("[MagellAIn] Map style loaded, syncing markers...");
       syncMarkers();
+      syncCourseOverlay();
       console.log("[MagellAIn] After initial sync, markers:", markersRef.current.length);
       // Auto-trigger user location after map loads
       setTimeout(() => {
@@ -219,6 +345,8 @@ export function MapView() {
     return () => {
       markersRef.current.forEach((mk) => mk.remove());
       markersRef.current = [];
+      courseMarkersRef.current.forEach((mk) => mk.remove());
+      courseMarkersRef.current = [];
       mapReady.current = false;
       mapInstance.remove();
       map.current = null;
@@ -241,6 +369,13 @@ export function MapView() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [observations, showBuoyMarkers, syncMarkers]);
+
+  // Sync course overlay whenever course data or toggle changes
+  useEffect(() => {
+    if (mapReady.current) {
+      syncCourseOverlay();
+    }
+  }, [showCourseOverlay, raceMarks, courseLegs, selectedCourse, syncCourseOverlay]);
 
   if (!token) {
     return (

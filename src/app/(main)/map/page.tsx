@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import { BuoyPanel } from "@/components/map/buoy-panel";
 import { MapControls } from "@/components/map/map-controls";
 import { Speedometer } from "@/components/map/speedometer";
+import { CoursePanel } from "@/components/map/course-panel";
+import { TacticalAnalysis } from "@/components/map/tactical-analysis";
 
 // mapbox-gl accesses `window` at import time → must skip SSR
 const MapView = dynamic(
@@ -20,11 +22,13 @@ const MapView = dynamic(
 
 export default function MapPage() {
   return (
-    <div className="relative h-[calc(100dvh-4rem)]">
+    <div className="relative" style={{ height: "calc(100dvh - var(--nav-total-height))" }}>
       <MapView />
       <MapControls />
       <BuoyPanel />
       <Speedometer />
+      <CoursePanel />
+      <TacticalAnalysis />
     </div>
   );
 }

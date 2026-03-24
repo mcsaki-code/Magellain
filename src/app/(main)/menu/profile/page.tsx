@@ -76,7 +76,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100dvh-4rem)] items-center justify-center">
+      <div className="flex h-[calc(100dvh-var(--nav-total-height))] items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );

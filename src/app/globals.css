@@ -25,6 +25,7 @@
     --ring: 210 60% 45%;
     --radius: 0.5rem;
     --nav-height: 64px;
+    --nav-total-height: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 
   .dark {
@@ -54,11 +55,17 @@
   * {
     @apply border-border;
   }
+  html {
+    @apply bg-background;
+    /* Ensure background extends behind mobile browser chrome */
+    min-height: 100%;
+  }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100dvh;
   }
 }
 
