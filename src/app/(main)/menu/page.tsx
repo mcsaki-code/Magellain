@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
-import { User, Ship, Settings, LogOut, Shield, FileText, Users, Trophy } from "lucide-react";
+import { User, Ship, Settings, LogOut, Shield, FileText, Users, Trophy, HelpCircle, Info } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +13,8 @@ const menuItems = [
   { label: "Settings", href: "/menu/settings", icon: Settings, description: "App preferences" },
   { label: "Float Plan", href: "/menu/float-plan", icon: FileText, description: "Safety float plans" },
   { label: "Emergency", href: "/menu/emergency", icon: Shield, description: "Safety contacts" },
+  { label: "Help", href: "/menu/help", icon: HelpCircle, description: "How to use MagellAIn" },
+  { label: "About", href: "/menu/about", icon: Info, description: "App info, data sources & legal" },
 ];
 
 export default async function MenuPage() {

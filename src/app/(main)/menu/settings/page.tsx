@@ -186,6 +186,20 @@ export default function SettingsPage() {
               Sailing intelligence platform for Great Lakes racing sailors.
               Built for Ford Yacht Club and West Shore Sailing Club.
             </p>
+            <div className="mt-3 flex gap-2">
+              <Link
+                href="/menu/help"
+                className="flex-1 rounded-lg border border-border bg-muted px-3 py-2 text-center text-xs font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                Help
+              </Link>
+              <Link
+                href="/menu/about"
+                className="flex-1 rounded-lg border border-border bg-muted px-3 py-2 text-center text-xs font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                About
+              </Link>
+            </div>
           </div>
         </section>
       </div>
