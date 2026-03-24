@@ -148,20 +148,42 @@ export default function PerformancePage() {
       try {
         const supabase = createClient();
 
-        // Get the user's primary boat
+        // Get the user's primary boat, falling back to Impetuous for demo/admin
+        const DEMO_BOAT_ID = "d3099269-e402-4c95-b47a-74cd1bb4164c";
         const { data: { user } } = await supabase.auth.getUser();
-        let boatQuery = supabase.from("boats").select("*");
+        let boatData = null;
 
         if (user) {
-          boatQuery = boatQuery.eq("owner_id", user.id).eq("is_primary", true);
+          // Try user's own primary boat first
+          const { data: ownBoat } = await supabase
+            .from("boats")
+            .select("*")
+            .eq("owner_id", user.id)
+            .eq("is_primary", true)
+            .single();
+
+          if (ownBoat) {
+            boatData = ownBoat;
+          } else {
+            // Fall back to Impetuous (admin mirror / demo mode)
+            const { data: fallback } = await supabase
+              .from("boats")
+              .select("*")
+              .eq("id", DEMO_BOAT_ID)
+              .single();
+            boatData = fallback;
+          }
         } else {
-          // Fallback to Impetuous for demo/unauthenticated
-          boatQuery = boatQuery.eq("id", "d3099269-e402-4c95-b47a-74cd1bb4164c");
+          // Unauthenticated: demo with Impetuous
+          const { data: fallback } = await supabase
+            .from("boats")
+            .select("*")
+            .eq("id", DEMO_BOAT_ID)
+            .single();
+          boatData = fallback;
         }
 
-        const { data: boatData, error: boatError } = await boatQuery.single();
-
-        if (boatError || !boatData) {
+        if (!boatData) {
           setError("No boat found. Add a boat in Menu > My Boats to see performance data.");
           setIsLoading(false);
           return;

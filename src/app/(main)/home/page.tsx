@@ -81,14 +81,25 @@ export default function HomePage() {
           setUserName(profile.display_name || profile.full_name || user.email?.split("@")[0] || null);
         }
 
-        // Get primary boat
-        const { data: boatData } = await supabase
+        // Get primary boat — fall back to Impetuous for admin/demo
+        const DEMO_BOAT_ID = "d3099269-e402-4c95-b47a-74cd1bb4164c";
+        const { data: ownBoat } = await supabase
           .from("boats")
           .select("*")
           .eq("owner_id", user.id)
           .eq("is_primary", true)
           .single();
-        if (boatData) setBoat(boatData as Boat);
+        if (ownBoat) {
+          setBoat(ownBoat as Boat);
+        } else {
+          // Admin mirror / demo: show Impetuous
+          const { data: fallback } = await supabase
+            .from("boats")
+            .select("*")
+            .eq("id", DEMO_BOAT_ID)
+            .single();
+          if (fallback) setBoat(fallback as Boat);
+        }
       }
       setLoadingUser(false);
     }
