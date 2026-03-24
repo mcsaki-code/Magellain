@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Map, MessageSquare, BarChart3, Menu } from "lucide-react";
+import { Compass, Map, Cloud, MessageSquare, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { key: "home", label: "Home", href: "/home", icon: Compass },
-  { key: "map", label: "Map", href: "/map", icon: Map },
-  { key: "chat", label: "Coach", href: "/chat", icon: MessageSquare },
-  { key: "performance", label: "Performance", href: "/performance", icon: BarChart3 },
-  { key: "menu", label: "Menu", href: "/menu", icon: Menu },
+  { key: "home",    label: "Home",    href: "/home",    icon: Compass },
+  { key: "map",     label: "Map",     href: "/map",     icon: Map },
+  { key: "weather", label: "Weather", href: "/weather", icon: Cloud },
+  { key: "chat",    label: "Coach",   href: "/chat",    icon: MessageSquare },
+  { key: "menu",    label: "Menu",    href: "/menu",    icon: Menu },
 ] as const;
 
 export function BottomNav() {

@@ -6,6 +6,7 @@ import { MapControls } from "@/components/map/map-controls";
 import { Speedometer } from "@/components/map/speedometer";
 import { CoursePanel } from "@/components/map/course-panel";
 import { TacticalAnalysis } from "@/components/map/tactical-analysis";
+import { GpsTracker } from "@/components/map/gps-tracker";
 
 // mapbox-gl accesses `window` at import time → must skip SSR
 const MapView = dynamic(
@@ -29,6 +30,7 @@ export default function MapPage() {
       <Speedometer />
       <CoursePanel />
       <TacticalAnalysis />
+      <GpsTracker />
     </div>
   );
 }

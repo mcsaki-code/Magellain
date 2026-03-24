@@ -1,20 +1,21 @@
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
-import { User, Ship, Settings, LogOut, Shield, FileText, Users, Trophy, HelpCircle, Info } from "lucide-react";
+import { User, Ship, Settings, LogOut, Shield, FileText, Users, Trophy, HelpCircle, Info, BarChart3 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 const menuItems = [
-  { label: "Profile", href: "/menu/profile", icon: User, description: "Your sailing profile" },
-  { label: "My Boats", href: "/menu/boats", icon: Ship, description: "Manage your fleet" },
-  { label: "Race Results", href: "/races", icon: Trophy, description: "Regatta results & standings" },
-  { label: "Crew Messages", href: "/messages", icon: Users, description: "Chat with your crew" },
-  { label: "Settings", href: "/menu/settings", icon: Settings, description: "App preferences" },
-  { label: "Float Plan", href: "/menu/float-plan", icon: FileText, description: "Safety float plans" },
-  { label: "Emergency", href: "/menu/emergency", icon: Shield, description: "Safety contacts" },
-  { label: "Help", href: "/menu/help", icon: HelpCircle, description: "How to use MagellAIn" },
-  { label: "About", href: "/menu/about", icon: Info, description: "App info, data sources & legal" },
+  { label: "Profile",      href: "/menu/profile",    icon: User,       description: "Your sailing profile" },
+  { label: "My Boats",     href: "/menu/boats",       icon: Ship,       description: "Manage your fleet" },
+  { label: "Races",        href: "/races",            icon: Trophy,     description: "Schedules & results" },
+  { label: "Performance",  href: "/performance",      icon: BarChart3,  description: "Analytics & standings" },
+  { label: "Crew Messages",href: "/messages",         icon: Users,      description: "Chat with your crew" },
+  { label: "Float Plan",   href: "/menu/float-plan",  icon: FileText,   description: "Safety float plans" },
+  { label: "Emergency",    href: "/menu/emergency",   icon: Shield,     description: "USCG & safety contacts" },
+  { label: "Settings",     href: "/menu/settings",    icon: Settings,   description: "App preferences" },
+  { label: "Help",         href: "/menu/help",        icon: HelpCircle, description: "How to use MagellAIn" },
+  { label: "About",        href: "/menu/about",       icon: Info,       description: "App info, data sources & legal" },
 ];
 
 export default async function MenuPage() {

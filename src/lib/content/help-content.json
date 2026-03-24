@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lastUpdated": "2026-03-24",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
@@ -29,14 +29,14 @@
         {
           "id": "navigation",
           "title": "Navigating the App",
-          "content": "MagellAIn uses a bottom navigation bar designed for one-handed use on the water. The five main tabs are: Home (dashboard overview), Map (nautical charts and live buoy data), Coach (AI sailing coach), Performance (race analytics and results), and Menu (profile, boats, safety, settings, and help). Weather is accessible from the Home and Map screens via the 'View All' or weather card links."
+          "content": "MagellAIn uses a bottom navigation bar designed for one-handed use on the water. The five main tabs are: Home (dashboard overview), Map (nautical charts, GPS tracking, and live buoy data), Weather (marine forecasts and wind data), Coach (AI sailing coach with voice input), and Menu (profile, boats, races, safety, settings, and help)."
         }
       ]
     },
     "mapAndCharts": {
       "id": "map-charts",
       "title": "Map and Charts",
-      "description": "Interactive nautical charts with live data overlays for navigation and racing.",
+      "description": "Interactive nautical charts with live data overlays and GPS track recording.",
       "items": [
         {
           "id": "map-overview",
@@ -49,14 +49,19 @@
           "content": "Tap any NDBC buoy marker on the map to see real-time observations: wind speed and direction, wave height and period, water temperature, and air pressure. Key buoys for our area include Station 45005 (W Lake Erie) and Station DTLM4 (Detroit River). Data refreshes automatically every few minutes."
         },
         {
-          "id": "course-view",
-          "title": "Race Course View",
-          "content": "When a race course is active, the map displays mark positions, leg distances and bearings, and the current wind overlay. Use this to plan your approach to each mark and visualize wind shifts relative to the course. The tactical analysis panel shows laylines and optimal approach angles."
+          "id": "gps-track",
+          "title": "GPS Track Recording",
+          "content": "The GPS Tracker panel appears in the lower-right corner of the map. Tap 'Start' to begin recording your track — your device GPS will log position, speed, and heading continuously. Live stats show elapsed time, current speed in knots, total distance in nautical miles, and max speed. When finished, tap 'Stop' then 'Save' to store the track. Saved tracks sync to your account when signed in, or save locally if you are offline or not signed in."
         },
         {
           "id": "speedometer",
           "title": "Speedometer and GPS Speed",
           "content": "The on-screen speedometer displays your current GPS boat speed and heading when location tracking is active. This live data feeds into the AI coach context so you can get condition-specific advice while on the water."
+        },
+        {
+          "id": "course-view",
+          "title": "Race Course View",
+          "content": "When a race course is active, the map displays mark positions, leg distances and bearings, and the current wind overlay. Use this to plan your approach to each mark and visualize wind shifts relative to the course. The tactical analysis panel shows laylines and optimal approach angles."
         }
       ]
     },
@@ -68,7 +73,7 @@
         {
           "id": "weather-overview",
           "title": "Weather Dashboard",
-          "content": "The weather screen is accessible from the Home screen weather card or the 'View All' link. It shows current conditions and forecasts from NOAA/NWS specifically for Lake Erie marine zones (LEZ162 Detroit River, LEZ163 Western Lake Erie open waters). Wind data is displayed in knots with direction, gusts, and a color-coded severity scale matched to Beaufort categories."
+          "content": "The Weather tab is in the bottom navigation bar (third from left). It shows current conditions and forecasts from NOAA/NWS specifically for Lake Erie marine zones (LEZ162 Detroit River, LEZ163 Western Lake Erie open waters). Wind data is displayed in knots with direction, gusts, and a color-coded severity scale matched to Beaufort categories."
         },
         {
           "id": "wind-data",
@@ -90,12 +95,17 @@
     "aiCoach": {
       "id": "ai-coach",
       "title": "AI Sailing Coach",
-      "description": "Your personal Claude-powered sailing intelligence assistant.",
+      "description": "Your personal Claude-powered sailing intelligence assistant with voice input.",
       "items": [
         {
           "id": "chat-overview",
           "title": "Talking to Your Coach",
           "content": "The Coach tab connects you to MagellAIn's AI sailing coach, powered by Claude. Ask questions in plain English about racing tactics, sail trim, weather interpretation, rules, or boat handling. The coach knows your boat type, your waters, and current conditions, so answers are specific and actionable rather than generic."
+        },
+        {
+          "id": "voice-input",
+          "title": "Voice Input",
+          "content": "Tap the microphone button to the left of the text input to speak your question hands-free. A pulsing indicator shows when the coach is listening. Speak naturally — your words appear in the input field as you talk. When you stop speaking, the text is ready to review and send. Voice input requires microphone permission in your browser settings. Available on most modern mobile browsers."
         },
         {
           "id": "what-to-ask",
@@ -110,7 +120,7 @@
         {
           "id": "coach-history",
           "title": "Chat History",
-          "content": "Your conversations with the AI coach are saved when you are signed in, so you can refer back to previous advice across sessions. Start a fresh conversation at any time using the new chat button. Sign in to preserve your history across devices."
+          "content": "Your conversations with the AI coach are saved within your session. Start a fresh conversation at any time using the trash icon in the top-right corner of the Coach screen. Sign in to preserve your history across devices and sessions."
         }
       ]
     },
@@ -122,7 +132,7 @@
         {
           "id": "schedules",
           "title": "Race Schedules",
-          "content": "The Races section (accessible from the Home screen race card or the Performance tab) shows upcoming and past events from Ford Yacht Club, West Shore Sail Club, and DRYA series. Events include Wednesday Night at the Races (WNATR), weekend regattas, and championship series. Tap any event to expand and see race-by-race results."
+          "content": "The Races section is accessible from Menu > Races or from the Home screen race card. It shows upcoming and past events from Ford Yacht Club, West Shore Sail Club, and DRYA series. Events include Wednesday Night at the Races (WNATR), weekend regattas, and championship series. Tap any event to expand and see race-by-race results."
         },
         {
           "id": "results",
@@ -132,7 +142,7 @@
         {
           "id": "analytics",
           "title": "Performance Analytics",
-          "content": "The Performance tab shows your race history, season trend, series standings, and head-to-head competitor records for your primary boat. Key metrics include total races, wins, podiums, average finishing position, and average VMG when GPS data is available. Use the PDF export button to share your season summary."
+          "content": "The Performance section (accessible from Menu > Performance) shows your race history, season trend, series standings, and head-to-head competitor records for your primary boat. Key metrics include total races, wins, podiums, and average finishing position. GPS track data from the Map screen feeds into speed and distance analytics."
         },
         {
           "id": "series-standings",
@@ -154,7 +164,7 @@
         {
           "id": "float-plan",
           "title": "Float Plans",
-          "content": "File a float plan before heading out through Menu > Float Plan. Enter your departure location, destination, expected return time, number of persons aboard, and a shore contact who should alert USCG if you do not return on time. Your vessel details are pre-filled from your boat profile. Active plans are saved and viewable until you close them after returning to dock."
+          "content": "File a float plan before heading out through Menu > Float Plan. Enter your departure location, destination, expected return time, and number of persons aboard. Your vessel details are pre-filled from your boat profile. Shore contact information can be added for someone who should alert authorities if you do not return on time. Active plans are saved and viewable in the Active Plans tab until you close them after returning to dock."
         },
         {
           "id": "weather-safety",
