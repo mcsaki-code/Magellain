@@ -224,14 +224,14 @@ export default function CrewChatPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100dvh-4rem)] items-center justify-center">
+      <div className="flex h-[calc(100dvh-var(--nav-total-height))] items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-[calc(100dvh-4rem)] flex-col">
+    <div className="flex h-[calc(100dvh-var(--nav-total-height))] flex-col">
       {/* Header */}
       <header className="flex items-center gap-3 border-b px-3 py-3">
         <button onClick={() => router.push("/messages")} className="rounded-lg p-1.5 hover:bg-muted">
