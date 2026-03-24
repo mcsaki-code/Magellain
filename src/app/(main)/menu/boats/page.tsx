@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowLeft, Plus, Ship, Star, Loader2, ChevronRight } from "lucide-react";
+import { ArrowLeft, Plus, Ship, Star, Loader2, ChevronRight, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import type { Boat } from "@/lib/types";
 
@@ -52,27 +52,40 @@ export default function BoatsPage() {
         ) : (
           <div className="space-y-2">
             {boats.map((boat) => (
-              <Link
+              <div
                 key={boat.id}
-                href={`/menu/boats/${boat.id}`}
-                className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted"
+                className="flex items-center gap-2 rounded-xl border bg-card p-4 transition-colors"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ocean/10">
-                  <Ship className="h-5 w-5 text-ocean" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate font-semibold">{boat.name}</p>
-                    {boat.is_primary && <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />}
+                <Link
+                  href={`/menu/boats/${boat.id}`}
+                  className="flex flex-1 items-center gap-3 min-w-0"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ocean/10">
+                    <Ship className="h-5 w-5 text-ocean" />
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {boat.class_name}
-                    {boat.sail_number ? ` | #${boat.sail_number}` : ""}
-                    {boat.phrf_rating ? ` | PHRF ${boat.phrf_rating}` : ""}
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate font-semibold">{boat.name}</p>
+                      {boat.is_primary && <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {boat.class_name}
+                      {boat.sail_number ? ` | #${boat.sail_number}` : ""}
+                      {boat.phrf_rating ? ` | PHRF ${boat.phrf_rating}` : ""}
+                    </p>
+                  </div>
+                </Link>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    href={`/menu/boats/${boat.id}/performance`}
+                    className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    title="View performance"
+                  >
+                    <TrendingUp className="h-4 w-4" />
+                  </Link>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
+              </div>
             ))}
           </div>
         )}

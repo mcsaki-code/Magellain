@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "lastUpdated": "2026-03-24",
+    "appName": "MagellAIn",
+    "tagline": "Navigate Smarter. Race Harder."
+  },
+  "about": {
+    "title": "About MagellAIn",
+    "subtitle": "Sailing Intelligence for Great Lakes Racers",
+    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management, analytics, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
+    "version": "1.0 (MVP)",
+    "builtFor": "Ford Yacht Club, West Shore Sail Club, and the DRYA racing community"
+  },
+  "features": [
+    {
+      "id": "live-data",
+      "title": "Live Marine Data",
+      "summary": "Real-time NOAA weather, NDBC buoy observations, and GLERL lake data, all displayed on interactive nautical charts.",
+      "details": "Wind speed and direction, wave height, water temperature, and marine forecasts updated continuously from official government sources. NOAA electronic nautical chart overlays show depths, markers, and hazards."
+    },
+    {
+      "id": "ai-coach",
+      "title": "AI Sailing Coach",
+      "summary": "A Claude-powered assistant that knows your boat, your waters, and racing strategy.",
+      "details": "Ask about tactics, sail trim, weather interpretation, racing rules, or post-race analysis. The coach factors in current conditions, your boat specs, and local knowledge about Lake Erie and Detroit River sailing patterns."
+    },
+    {
+      "id": "race-management",
+      "title": "Race Management and Analytics",
+      "summary": "Club schedules, results, and performance metrics all in one place.",
+      "details": "View upcoming races from Ford YC, West Shore SC, and DRYA series. Import results and GPS data to compute VMG, start analysis, speed polars, and leg-by-leg breakdowns. Track your improvement across a full series."
+    },
+    {
+      "id": "safety",
+      "title": "Safety First",
+      "summary": "Emergency USCG contact, float plans, and weather alert notifications.",
+      "details": "One-tap emergency button displays your GPS coordinates and connects to USCG Sector Detroit. File digital float plans with automatic overdue alerts. Push notifications for Small Craft Advisories and severe weather."
+    },
+    {
+      "id": "mobile-first",
+      "title": "Built for the Water",
+      "summary": "Clean, one-handed mobile interface that works when conditions are tough.",
+      "details": "Designed for use on a wet, moving boat with one hand. Large touch targets, high-contrast display, offline caching for spotty cell coverage, and voice input when your hands are full. No clutter, no distractions."
+    }
+  ],
+  "dataSources": [
+    {
+      "name": "NOAA / NWS",
+      "description": "Marine weather forecasts, alerts, and zone data for Lake Erie"
+    },
+    {
+      "name": "NDBC Buoys",
+      "description": "Real-time wind, wave, and water observations from Great Lakes buoys"
+    },
+    {
+      "name": "GLERL",
+      "description": "Great Lakes Environmental Research Laboratory data for lake conditions"
+    },
+    {
+      "name": "NOAA CO-OPS",
+      "description": "Water levels and currents for the Detroit River"
+    },
+    {
+      "name": "YachtScoring",
+      "description": "Race results and regatta data from local clubs"
+    }
+  ],
+  "contact": {
+    "email": "mattcsaki@gmail.com",
+    "clubs": ["Ford Yacht Club", "West Shore Sail Club", "DRYA"]
+  },
+  "legal": {
+    "disclaimer": "MagellAIn is a decision-support tool, not a substitute for seamanship, proper safety equipment, or sound judgment. Weather data is sourced from NOAA and may be delayed. Always monitor VHF Channel 16 and carry required safety gear. The emergency feature connects to USCG but does not replace a VHF radio or EPIRB.",
+    "dataAttribution": "Weather and marine data provided by the National Oceanic and Atmospheric Administration (NOAA), National Weather Service (NWS), National Data Buoy Center (NDBC), and the Great Lakes Environmental Research Laboratory (GLERL)."
+  }
+}

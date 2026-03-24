@@ -172,7 +172,7 @@ export interface RaceResult {
   corrected_position: number | null;
   elapsed_time_sec: number | null;
   corrected_time_sec: number | null;
-  status: "finished" | "dns" | "dnf" | "dsq" | "ocs" | "raf";
+  status: "finished" | "dns" | "dnf" | "dnc" | "dsq" | "ocs" | "raf" | "ufd" | "rdg" | "rc" | "tle";
   raw_data: Record<string, unknown> | null;
   created_at: string;
 }
