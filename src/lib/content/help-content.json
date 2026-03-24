@@ -14,29 +14,29 @@
         {
           "id": "create-account",
           "title": "Creating Your Account",
-          "content": "Sign up with your email or use Google/Apple sign-in. During setup, you'll be asked for your home club (Ford YC, West Shore SC, or other) and your primary fleet or boat class. This helps MagellAIn personalize weather zones, race schedules, and AI coaching to your specific sailing context."
+          "content": "Sign up with your email, or use Google or Apple sign-in on the sign-in screen. Once in, go to Menu > My Boats to add your primary boat. MagellAIn uses your boat details to personalize AI coaching, performance analytics, and race data to your specific setup."
         },
         {
           "id": "add-boat",
           "title": "Adding Your Boat",
-          "content": "Go to Menu > Boats > Add Boat. Enter your boat's name, class (e.g., J/70, S2 7.9, Cal 25), sail number, and PHRF rating if applicable. MagellAIn uses this information to tailor performance analytics, polar predictions, and AI coaching advice to your specific boat. You can add multiple boats if you race on different vessels."
+          "content": "Go to Menu > My Boats > Add Boat. Enter your boat's name, class (e.g. J/70, S2 7.9, Cal 25), sail number, and PHRF rating if applicable. MagellAIn uses this to tailor performance analytics and AI coaching to your specific boat. You can add multiple boats if you race on different vessels."
         },
         {
           "id": "home-screen",
           "title": "Your Home Dashboard",
-          "content": "The home screen is your at-a-glance command center. It shows current wind conditions for your area, upcoming races from your club's schedule, recent AI coaching insights, and any active weather alerts. Tap any card to dive deeper into that section."
+          "content": "The home screen is your at-a-glance command center. It shows current wind conditions from NOAA and NDBC buoys, your next scheduled race, an AI sailing conditions summary, and a live sailing news feed. Tap any card to dive deeper. Sign in to also see your primary boat and personalized data."
         },
         {
           "id": "navigation",
           "title": "Navigating the App",
-          "content": "MagellAIn uses a bottom navigation bar designed for one-handed use on the water. The five main tabs are: Home (dashboard overview), Map (charts and live data), Weather (detailed forecasts), Chat (AI sailing coach), and Races (schedule and results). The Menu button in the top corner gives you access to your profile, boats, settings, emergency features, and this help section."
+          "content": "MagellAIn uses a bottom navigation bar designed for one-handed use on the water. The five main tabs are: Home (dashboard overview), Map (nautical charts and live buoy data), Coach (AI sailing coach), Performance (race analytics and results), and Menu (profile, boats, safety, settings, and help). Weather is accessible from the Home and Map screens via the 'View All' or weather card links."
         }
       ]
     },
     "mapAndCharts": {
       "id": "map-charts",
       "title": "Map and Charts",
-      "description": "Interactive charts with live data overlays for navigation and racing.",
+      "description": "Interactive nautical charts with live data overlays for navigation and racing.",
       "items": [
         {
           "id": "map-overview",
@@ -55,8 +55,8 @@
         },
         {
           "id": "speedometer",
-          "title": "Speedometer and Instruments",
-          "content": "The on-screen speedometer displays your current boat speed, VMG (velocity made good), and heading when GPS tracking is active. This data feeds directly into your race analytics and AI coaching context."
+          "title": "Speedometer and GPS Speed",
+          "content": "The on-screen speedometer displays your current GPS boat speed and heading when location tracking is active. This live data feeds into the AI coach context so you can get condition-specific advice while on the water."
         }
       ]
     },
@@ -68,22 +68,22 @@
         {
           "id": "weather-overview",
           "title": "Weather Dashboard",
-          "content": "The weather tab shows current conditions and forecasts from NOAA/NWS specifically for Lake Erie marine zones (LEZ162 Detroit River, LEZ163 Western Lake Erie open waters). Unlike generic weather apps, MagellAIn displays wind data in the format sailors need: true wind speed and direction, gusts, trend arrows, and shift predictions."
+          "content": "The weather screen is accessible from the Home screen weather card or the 'View All' link. It shows current conditions and forecasts from NOAA/NWS specifically for Lake Erie marine zones (LEZ162 Detroit River, LEZ163 Western Lake Erie open waters). Wind data is displayed in knots with direction, gusts, and a color-coded severity scale matched to Beaufort categories."
         },
         {
           "id": "wind-data",
           "title": "Understanding Wind Data",
-          "content": "Wind is displayed in knots with direction shown as both compass bearing and an animated arrow. The wind trend indicator shows whether conditions are building, steady, or dying. Shift predictions, when available, show the expected direction and timing of wind shifts based on NOAA forecast models and GLERL lake-effect data."
+          "content": "Wind is displayed in knots with direction shown as both compass bearing and an animated arrow. The wind trend indicator shows whether conditions are building, steady, or dying. Data is sourced from NDBC buoy observations and NOAA NWS forecast models for the Great Lakes region."
         },
         {
           "id": "alerts",
           "title": "Weather Alerts",
-          "content": "MagellAIn monitors active NOAA weather alerts for your sailing area. Small Craft Advisories, Gale Warnings, and Thunderstorm Warnings appear as prominent notifications. These alerts also feed into the AI coach, which can help you interpret conditions and decide whether to sail."
+          "content": "MagellAIn monitors active NOAA weather alerts for your sailing area. Small Craft Advisories, Gale Warnings, and Thunderstorm Warnings appear as prominent banners on the Home and Weather screens. These alerts also feed into the AI coach, which can help you interpret conditions and decide whether to sail."
         },
         {
           "id": "forecast",
-          "title": "Extended Forecast",
-          "content": "View hourly wind forecasts for up to 48 hours and a 7-day marine outlook. Use this to plan your race strategy days ahead or decide which sails to rig. The forecast is sourced from NOAA's National Weather Service gridpoint data for your specific location."
+          "title": "Marine Forecast",
+          "content": "View current buoy observations from NDBC stations across Western Lake Erie and the Detroit River, with wave height, water temperature, and barometric pressure. Extended forecasts are sourced from NOAA NWS gridpoint data. Tap 'Refresh' on the weather screen to pull the latest data."
         }
       ]
     },
@@ -95,22 +95,22 @@
         {
           "id": "chat-overview",
           "title": "Talking to Your Coach",
-          "content": "The Chat tab connects you to MagellAIn's AI sailing coach, powered by Claude. Ask questions in plain English about racing tactics, sail trim, weather interpretation, rules, or boat handling. The coach knows your boat type, your waters, and current conditions, so answers are specific and actionable rather than generic."
+          "content": "The Coach tab connects you to MagellAIn's AI sailing coach, powered by Claude. Ask questions in plain English about racing tactics, sail trim, weather interpretation, rules, or boat handling. The coach knows your boat type, your waters, and current conditions, so answers are specific and actionable rather than generic."
         },
         {
           "id": "what-to-ask",
           "title": "What You Can Ask",
-          "content": "The AI coach handles a wide range of sailing topics: pre-race strategy ('Wind is 8 knots out of the SW, which end of the line should I start?'), rules questions ('Boat on port tack crossed me at the windward mark, do I have rights?'), trim advice ('My J/70 is slow upwind in 12-15 knots, what should I check?'), weather interpretation ('Is this frontal passage going to shift the wind?'), and post-race analysis ('My VMG was 3.2 knots, is that good for my boat in these conditions?')."
+          "content": "The AI coach handles a wide range of sailing topics: pre-race strategy ('Wind is 8 knots out of the SW, which end of the line should I start?'), rules questions ('Boat on port tack crossed me at the windward mark, do I have rights?'), trim advice ('My J/70 is slow upwind in 12-15 knots, what should I check?'), weather interpretation ('Is this frontal passage going to shift the wind?'), and post-race analysis ('I finished 4th — what should I work on?')."
         },
         {
           "id": "context-aware",
           "title": "Context-Aware Coaching",
-          "content": "The AI coach automatically factors in current weather conditions from your area, your boat's specifications and PHRF rating, local knowledge about Lake Erie and Detroit River patterns, and your racing history when available. You don't need to re-explain your setup each time."
+          "content": "The AI coach automatically factors in current weather conditions from your area, your boat's specifications and PHRF rating, and local knowledge about Lake Erie and Detroit River sailing patterns. The more boat and conditions information you share in the conversation, the more specific and useful the advice becomes."
         },
         {
-          "id": "voice-support",
-          "title": "Voice Queries",
-          "content": "When your hands are busy on the water, use the voice input button to speak your question. MagellAIn will transcribe and send it to the coach. Responses can also be read aloud using text-to-speech."
+          "id": "coach-history",
+          "title": "Chat History",
+          "content": "Your conversations with the AI coach are saved when you are signed in, so you can refer back to previous advice across sessions. Start a fresh conversation at any time using the new chat button. Sign in to preserve your history across devices."
         }
       ]
     },
@@ -122,22 +122,22 @@
         {
           "id": "schedules",
           "title": "Race Schedules",
-          "content": "The Races tab shows upcoming events from Ford Yacht Club, West Shore Sail Club, and DRYA series. Events include Wednesday Night at the Races (WNATR), weekend regattas, and championship series. Tap any event to see details, sailing instructions, and course information."
+          "content": "The Races section (accessible from the Home screen race card or the Performance tab) shows upcoming and past events from Ford Yacht Club, West Shore Sail Club, and DRYA series. Events include Wednesday Night at the Races (WNATR), weekend regattas, and championship series. Tap any event to expand and see race-by-race results."
         },
         {
           "id": "results",
           "title": "Race Results",
-          "content": "View results from completed races, imported from YachtScoring and club sources. Results show finish positions, corrected times (for PHRF handicap races), and series standings. Your finishes are highlighted so you can quickly find your performance."
+          "content": "View results from completed races, imported from YachtScoring and club sources. Results show finish positions, corrected times for PHRF handicap races, and series standings by fleet. Tap any race row on the Performance screen to expand the full fleet result for that race."
         },
         {
           "id": "analytics",
           "title": "Performance Analytics",
-          "content": "MagellAIn computes racing metrics from your GPS data and race results: start-line speed and position, VMG (velocity made good) on each leg, speed relative to your boat's polar predictions, leg-by-leg breakdown compared to fleet average, and trend analysis across a series. Access these from the Performance tab or from any individual race result."
+          "content": "The Performance tab shows your race history, season trend, series standings, and head-to-head competitor records for your primary boat. Key metrics include total races, wins, podiums, average finishing position, and average VMG when GPS data is available. Use the PDF export button to share your season summary."
         },
         {
-          "id": "import-data",
-          "title": "Importing Race Data",
-          "content": "You can import race data from GPS tracks (GPX files), YachtScoring exports, or manual entry. Go to Races > Import to upload your data. MagellAIn will parse the file and compute analytics automatically."
+          "id": "series-standings",
+          "title": "Series Standings",
+          "content": "Series standings are computed automatically from your race results within each regatta. Points accumulate race by race using corrected position scoring. Your place within the fleet is shown alongside fleet size so you can track your progress through the series. Export a full PDF standings report from the Races screen."
         }
       ]
     },
@@ -149,17 +149,22 @@
         {
           "id": "emergency-button",
           "title": "Emergency Assist",
-          "content": "The emergency button is accessible from Menu > Emergency. In a real emergency, it connects you to the nearest USCG station (Sector Detroit covers Western Lake Erie). The screen displays your current GPS coordinates in a large, readable format so you can relay your position immediately. Only use this for genuine emergencies."
+          "content": "The Emergency page is accessible from Menu > Emergency. It provides one-tap calling to 911 and direct numbers for USCG Sector Detroit (313-568-9564) and USCG Station Toledo (419-691-4048). Tap 'Get My Location' to display your GPS coordinates in large text for relaying to rescue services. You can also send an SOS text to any saved emergency contact that includes your GPS position."
         },
         {
           "id": "float-plan",
           "title": "Float Plans",
-          "content": "Before heading out, file a float plan through MagellAIn. Enter your departure time, expected return, number of persons aboard, and planned sailing area. A designated contact receives your plan and is notified if you don't check back in by your expected return time."
+          "content": "File a float plan before heading out through Menu > Float Plan. Enter your departure location, destination, expected return time, number of persons aboard, and a shore contact who should alert USCG if you do not return on time. Your vessel details are pre-filled from your boat profile. Active plans are saved and viewable until you close them after returning to dock."
         },
         {
           "id": "weather-safety",
           "title": "Weather Safety Alerts",
-          "content": "MagellAIn pushes notifications for NOAA Small Craft Advisories, Gale Warnings, and severe thunderstorm warnings affecting your sailing area. These appear even when the app is in the background, helping you stay informed of changing conditions."
+          "content": "Active NOAA weather alerts for your sailing area appear as prominent banners on the Home and Weather screens whenever a Small Craft Advisory, Gale Warning, or Thunderstorm Warning is in effect. The AI coach also references active alerts in its responses so you can make informed go/no-go decisions."
+        },
+        {
+          "id": "sos-contacts",
+          "title": "Emergency Contacts",
+          "content": "Go to Menu > Emergency to save personal emergency contacts. Each contact can be called directly or sent an SOS text message that includes your current GPS coordinates. Contacts are synced to your account when signed in. You can also set a primary emergency contact in your profile (Menu > Profile) for quick access."
         }
       ]
     },
@@ -170,23 +175,23 @@
       "items": [
         {
           "id": "units",
-          "title": "Units and Display",
-          "content": "Choose your preferred units: wind speed (knots, mph, m/s), temperature (F or C), distance (nautical miles, statute miles). Set your default map zoom level and home location. All settings sync across devices when you're signed in."
+          "title": "Speed Units",
+          "content": "Choose your preferred wind and boat speed units under Menu > Settings > Speed Units. Options include knots (standard nautical), miles per hour, and kilometers per hour. Knots is the default and recommended setting for racing sailors."
         },
         {
-          "id": "notifications",
-          "title": "Notifications",
-          "content": "Configure which alerts you receive: weather warnings, race reminders, result postings, and float plan check-ins. You can set quiet hours so you're not disturbed off-season or overnight."
-        },
-        {
-          "id": "offline",
-          "title": "Offline Mode",
-          "content": "MagellAIn caches map tiles, recent weather data, and your boat information for use when cell service is spotty on the water. Charts and the most recent forecast remain accessible offline. Data syncs automatically when you regain connectivity."
+          "id": "theme",
+          "title": "Display Theme",
+          "content": "Switch between Light, Dark, and System themes under Menu > Settings > Appearance. Dark mode is recommended for use on the water as it reduces glare and improves readability in bright sunlight. The System setting automatically matches your device's current display mode."
         },
         {
           "id": "profile",
           "title": "Your Profile",
-          "content": "Your profile stores your name, home club, fleet, and sailing experience level. This information helps the AI coach calibrate its responses. You can also add crew members to enable crew messaging and shared race analytics."
+          "content": "Go to Menu > Profile to update your display name, home club, and emergency contact information. Your profile details help the AI coach calibrate responses to your experience level and local sailing area. Keeping your emergency contact current is important for safety planning."
+        },
+        {
+          "id": "password",
+          "title": "Changing Your Password",
+          "content": "If you signed up with email and password, you can change your password under Menu > Settings > Change Password. Enter your new password twice to confirm. If you signed in with Google or Apple, your password is managed by those accounts and cannot be changed here."
         }
       ]
     }
