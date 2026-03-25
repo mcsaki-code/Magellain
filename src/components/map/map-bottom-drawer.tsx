@@ -328,16 +328,31 @@ export function MapBottomDrawer() {
   // ─── Render ───────────────────────────────────────────────────────
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20">
+    <div className="absolute inset-0 bottom-auto z-20 flex flex-col justify-end pointer-events-none">
+
+      {/* Backdrop — tap to dismiss */}
+      {activeTab && (
+        <div
+          className="absolute inset-0 pointer-events-auto"
+          onClick={() => { setActiveTab(null); setDrawerActiveTab(null); }}
+        />
+      )}
 
       {/* ── Panel content (appears above tab bar) ────────────────── */}
       {activeTab && (
-        <div className="overflow-y-auto rounded-t-2xl bg-card shadow-[0_-4px_24px_rgba(0,0,0,0.18)] border-t border-border"
+        <div className="relative z-10 pointer-events-auto overflow-y-auto rounded-t-2xl bg-card shadow-[0_-4px_24px_rgba(0,0,0,0.18)] border-t border-border"
           style={{ maxHeight: "55dvh" }}>
 
-          {/* Drag handle */}
-          <div className="flex justify-center pt-2.5 pb-1 sticky top-0 bg-card z-10">
+          {/* Drag handle with chevron-down close indicator */}
+          <div className="flex justify-center items-center pt-2.5 pb-1 sticky top-0 bg-card z-10">
             <div className="h-1 w-10 rounded-full bg-border" />
+            <button
+              onClick={() => { setActiveTab(null); setDrawerActiveTab(null); }}
+              className="ml-auto mr-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+              title="Close panel"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </button>
           </div>
 
           {/* ─ Courses panel ─────────────────────────────────────── */}
@@ -567,13 +582,13 @@ export function MapBottomDrawer() {
         </div>
       )}
 
-      {/* ── Tab bar ───────────────────────────────────────────────── */}
-      <div className="grid grid-cols-3 border-t border-border bg-card/97 backdrop-blur-md">
+      {/* ── Tab bar (always interactive) ───────────────────────────── */}
+      <div className="relative z-10 pointer-events-auto grid grid-cols-3 border-t border-border bg-card backdrop-blur-md">
 
         {/* Courses tab */}
         <button onClick={() => toggle("courses")}
           className={cn(
-            "flex flex-col items-center gap-0.5 py-3 text-xs font-medium transition-colors",
+            "flex flex-col items-center gap-0.5 py-3 min-h-[52px] text-xs font-medium transition-colors",
             activeTab === "courses" ? "text-ocean" : "text-muted-foreground hover:text-foreground"
           )}>
           <Route className="h-5 w-5" />
@@ -588,7 +603,7 @@ export function MapBottomDrawer() {
         {/* GPS tab */}
         <button onClick={() => toggle("gps")}
           className={cn(
-            "flex flex-col items-center gap-0.5 py-3 text-xs font-medium transition-colors",
+            "flex flex-col items-center gap-0.5 py-3 min-h-[52px] text-xs font-medium transition-colors",
             activeTab === "gps" ? "text-ocean" : "text-muted-foreground hover:text-foreground"
           )}>
           <div className="relative">
@@ -606,7 +621,7 @@ export function MapBottomDrawer() {
         {/* Timer tab */}
         <button onClick={() => toggle("timer")}
           className={cn(
-            "flex flex-col items-center gap-0.5 py-3 text-xs font-medium transition-colors",
+            "flex flex-col items-center gap-0.5 py-3 min-h-[52px] text-xs font-medium transition-colors",
             activeTab === "timer" ? "text-ocean" :
               timerIsActive ? timerPhaseColor : "text-muted-foreground hover:text-foreground"
           )}>

@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
-import { User, Ship, Settings, LogOut, Shield, FileText, Users, Trophy, HelpCircle, Info, BarChart3 } from "lucide-react";
+import { User, Ship, Settings, LogOut, Shield, FileText, Users, Trophy, HelpCircle, Info, BarChart3, Sailboat } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 const menuItems = [
   { label: "Profile",      href: "/menu/profile",    icon: User,       description: "Your sailing profile" },
+  { label: "Race Tools",   href: "/map",             icon: Sailboat,   description: "Wind shifts, start line & courses" },
   { label: "My Boats",     href: "/menu/boats",       icon: Ship,       description: "Manage your fleet" },
   { label: "Races",        href: "/races",            icon: Trophy,     description: "Schedules & results" },
   { label: "Performance",  href: "/performance",      icon: BarChart3,  description: "Analytics & standings" },
