@@ -151,9 +151,9 @@ export function GpsTracker() {
       if (!user) {
         // Save to localStorage for anonymous users
         const track = { points, stats, savedAt: new Date().toISOString() };
-        const existing = JSON.parse(localStorage.getItem("magellain-tracks") || "[]");
+        const existing = JSON.parse(localStorage.getItem("magellain-gps-tracks") || "[]");
         existing.unshift(track);
-        localStorage.setItem("magellain-tracks", JSON.stringify(existing.slice(0, 10)));
+        localStorage.setItem("magellain-gps-tracks", JSON.stringify(existing.slice(0, 10)));
         setSaved(true);
       } else {
         // Get primary boat

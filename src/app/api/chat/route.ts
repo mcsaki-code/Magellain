@@ -231,6 +231,44 @@ export async function POST(req: NextRequest) {
       console.error("Failed to load user context for chat:", err);
     }
 
+    // Inject live weather from the app's own /api/weather endpoint (best-effort, non-blocking)
+    try {
+      const weatherRes = await fetch(
+        `${req.nextUrl.origin}/api/weather`,
+        { signal: AbortSignal.timeout(4000) }
+      );
+      if (weatherRes.ok) {
+        const wd = await weatherRes.json();
+        const lines: string[] = ["\n\n--- LIVE CONDITIONS (fetched moments ago) ---"];
+        // Primary buoy observation
+        const stations = Object.values(wd.observations ?? {}) as Record<string, unknown>[];
+        if (stations.length > 0) {
+          const primary = stations[0] as Record<string, unknown>;
+          if (primary.wind_speed_kts != null) lines.push(`Wind: ${primary.wind_speed_kts} kts from ${primary.wind_direction_deg}°${primary.wind_gust_kts ? ` (gusting ${primary.wind_gust_kts} kts)` : ""}`);
+          if (primary.wave_height_ft != null) lines.push(`Waves: ${primary.wave_height_ft} ft`);
+          if (primary.water_temp_f != null) lines.push(`Water temp: ${primary.water_temp_f}°F`);
+          if (primary.air_temp_f != null) lines.push(`Air temp: ${primary.air_temp_f}°F`);
+        }
+        // Sailing conditions summary
+        const sc = wd.sailingConditions as Record<string, unknown> | null;
+        if (sc) {
+          lines.push(`Conditions rating: ${sc.rating}`);
+          if (sc.summary) lines.push(`Summary: ${sc.summary}`);
+        }
+        // Active alerts
+        const alerts = (wd.alerts ?? []) as Record<string, unknown>[];
+        if (alerts.length > 0) {
+          lines.push(`Active NOAA Alerts: ${alerts.map((a) => a.headline).join("; ")}`);
+        }
+        if (lines.length > 1) {
+          systemPrompt += lines.join("\n");
+          systemPrompt += "\n\nUse this live data when answering questions about current conditions. If the sailor asks what the wind is doing right now, reference these numbers specifically.";
+        }
+      }
+    } catch {
+      // Weather fetch failed — continue without it, coach still works
+    }
+
     // Build messages array from history
     const messages = [
       ...(history ?? []).slice(-20).map((m: { role: string; content: string }) => ({

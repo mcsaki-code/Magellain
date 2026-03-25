@@ -8,8 +8,6 @@ import { Trophy, Calendar, MapPin, ChevronRight, Loader2, Medal, Download, Uploa
 import type { Regatta, Race, Club, Boat } from "@/lib/types";
 import { exportSeriesStandingsPDF } from "@/lib/utils/pdf-export";
 
-const USER_BOAT_ID = "d3099269-e402-4c95-b47a-74cd1bb4164c"; // Impetuous
-
 interface RaceResult {
   id: string;
   race_id: string;
@@ -114,10 +112,23 @@ export default function RacesPage() {
   const [regattas, setRegattas] = useState<RegattaWithClub[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRegatta, setSelectedRegatta] = useState<string | null>(null);
+  const [userBoatId, setUserBoatId] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadRegattas() {
       const supabase = createClient();
+
+      // Fetch the signed-in user's primary boat ID dynamically
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: boat } = await supabase
+          .from("boats")
+          .select("id")
+          .eq("owner_id", user.id)
+          .eq("is_primary", true)
+          .single();
+        if (boat) setUserBoatId(boat.id);
+      }
 
       // Fetch regattas with their clubs
       const { data: regattaData } = await supabase
@@ -318,7 +329,7 @@ function StandingsSection({ races, regattaName }: { races: RaceWithResults[]; re
                 </thead>
                 <tbody>
                   {standings[fleet].map((boat, idx) => {
-                    const isUserBoat = boat.boat_id === USER_BOAT_ID;
+                    const isUserBoat = userBoatId !== null && boat.boat_id === userBoatId;
                     return (
                       <tr
                         key={boat.boat_id}
