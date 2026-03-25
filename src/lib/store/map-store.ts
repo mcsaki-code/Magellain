@@ -89,6 +89,9 @@ interface MapState {
   // Race checklist state
   showChecklist: boolean;
 
+  // Drawer coordination
+  drawerActiveTab: "courses" | "gps" | "timer" | null;
+
   setCenter: (center: [number, number]) => void;
   setZoom: (zoom: number) => void;
   setPitch: (pitch: number) => void;
@@ -126,6 +129,9 @@ interface MapState {
 
   // Race checklist actions
   toggleChecklist: () => void;
+
+  // Drawer coordination actions
+  setDrawerActiveTab: (tab: "courses" | "gps" | "timer" | null) => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -165,6 +171,9 @@ export const useMapStore = create<MapState>((set) => ({
 
   // Race checklist defaults
   showChecklist: false,
+
+  // Drawer coordination defaults
+  drawerActiveTab: null,
 
   setCenter: (center) => set({ center }),
   setZoom: (zoom) => set({ zoom }),
@@ -248,4 +257,7 @@ export const useMapStore = create<MapState>((set) => ({
       showWindShift: false,
       showStartLineTool: s.showChecklist ? s.showStartLineTool : false,
     })),
+
+  // Drawer coordination actions
+  setDrawerActiveTab: (tab) => set({ drawerActiveTab: tab }),
 }));

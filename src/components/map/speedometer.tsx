@@ -98,14 +98,14 @@ export function Speedometer() {
   const currentSpeed = convertSpeed(gps.speed);
 
   return (
-    <div className="absolute bottom-20 right-2 z-10 w-44 rounded-xl bg-card/95 p-3 shadow-xl backdrop-blur-sm sm:right-4">
+    <div className="absolute top-24 right-3 z-10 w-36 rounded-xl bg-card/95 p-3 shadow-xl backdrop-blur-sm">
       {!isTracking ? (
         <button
           onClick={startTracking}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-ocean py-2 text-xs font-semibold text-white hover:bg-ocean-600"
+          className="flex items-center justify-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-[11px] font-medium text-muted-foreground hover:bg-muted/80 transition-colors"
         >
-          <Gauge className="h-4 w-4" />
-          Start GPS
+          <Gauge className="h-3 w-3" />
+          Speed
         </button>
       ) : (
         <div className="text-center">

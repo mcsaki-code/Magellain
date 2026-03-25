@@ -97,9 +97,13 @@ function computePhase(target: number | null): { phase: TimerPhase; remainingMs: 
 
 export function MapBottomDrawer() {
   const [activeTab, setActiveTab] = useState<DrawerTab | null>(null);
+  const { setDrawerActiveTab } = useMapStore();
 
-  const toggle = (tab: DrawerTab) =>
-    setActiveTab((prev) => (prev === tab ? null : tab));
+  const toggle = (tab: DrawerTab) => {
+    const newTab = activeTab === tab ? null : tab;
+    setActiveTab(newTab);
+    setDrawerActiveTab(newTab);
+  };
 
   // ── GPS state ──────────────────────────────────────────────────────
   const [isRecording, setIsRecording] = useState(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMapStore } from "@/lib/store/map-store";
 import { Flag, TrendingUp, X, Sailboat } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,12 +9,18 @@ export function RaceToolsFab() {
   const [expanded, setExpanded] = useState(false);
 
   const {
+    drawerActiveTab,
     showStartLineTool,
     setShowStartLineTool,
     clearStartLine,
     showWindShift,
     toggleWindShift,
   } = useMapStore();
+
+  // Force collapse FAB when drawer opens
+  useEffect(() => {
+    if (drawerActiveTab !== null) setExpanded(false);
+  }, [drawerActiveTab]);
 
   const anyToolActive = showStartLineTool || showWindShift;
 
@@ -40,6 +46,9 @@ export function RaceToolsFab() {
   ];
 
   const handleMain = () => {
+    // Prevent expansion if drawer is open
+    if (drawerActiveTab !== null) return;
+
     if (anyToolActive) {
       if (showStartLineTool) { setShowStartLineTool(false); clearStartLine(); }
       if (showWindShift) toggleWindShift();
