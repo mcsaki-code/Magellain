@@ -230,11 +230,10 @@ export const useMapStore = create<MapState>((set) => ({
       showChecklist: show ? false : s.showChecklist,
     })),
 
-  // Wind shift actions — mutually exclusive with other tool panels
+  // Wind shift actions — mutually exclusive with start line tool
   toggleWindShift: () =>
     set((s) => ({
       showWindShift: !s.showWindShift,
-      showChecklist: false,
       showStartLineTool: s.showWindShift ? s.showStartLineTool : false,
     })),
 

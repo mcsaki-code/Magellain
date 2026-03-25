@@ -1,18 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { BuoyPanel } from "@/components/map/buoy-panel";
 import { MapControls } from "@/components/map/map-controls";
+import { BuoyPanel } from "@/components/map/buoy-panel";
 import { Speedometer } from "@/components/map/speedometer";
-import { CoursePanel } from "@/components/map/course-panel";
 import { TacticalAnalysis } from "@/components/map/tactical-analysis";
-import { GpsTracker } from "@/components/map/gps-tracker";
-import { TrackReplay } from "@/components/map/track-replay";
-import { RaceTimer } from "@/components/map/race-timer";
-import { StartLineTool } from "@/components/map/start-line-tool";
-import { WindShiftPanel } from "@/components/map/wind-shift-panel";
-import { RaceChecklist } from "@/components/map/race-checklist";
+import { MapBottomDrawer } from "@/components/map/map-bottom-drawer";
 import { RaceToolsFab } from "@/components/map/race-tools-fab";
+import { WindShiftPanel } from "@/components/map/wind-shift-panel";
+import { StartLineTool } from "@/components/map/start-line-tool";
 
 // mapbox-gl accesses `window` at import time → must skip SSR
 const MapView = dynamic(
@@ -30,28 +26,30 @@ const MapView = dynamic(
 export default function MapPage() {
   return (
     <div className="relative" style={{ height: "calc(100dvh - var(--nav-total-height))" }}>
-      {/* Base map layer */}
+      {/* Base map */}
       <MapView />
 
-      {/* Utility controls — top-left (3 buttons: Layers, Reset, Refresh) */}
+      {/* Top-left utility controls: Layers / Reset / Refresh (3 buttons) */}
       <MapControls />
 
-      {/* Persistent info panels */}
+      {/* Buoy data popup when a station marker is tapped */}
       <BuoyPanel />
-      <Speedometer />
-      <CoursePanel />
-      <TacticalAnalysis />
-      <GpsTracker />
-      <TrackReplay />
-      <RaceTimer />
 
-      {/* Race Tools FAB — bottom-right floating action button */}
+      {/* Always-on GPS speedometer (top-right or corner, no map interaction) */}
+      <Speedometer />
+
+      {/* AI tactical analysis panel (appears when course selected + button pressed) */}
+      <TacticalAnalysis />
+
+      {/* Unified bottom drawer — Courses | GPS Track | Race Timer tabs */}
+      <MapBottomDrawer />
+
+      {/* Race Tools FAB (bottom-right) — Wind Shift + Start Line Bias */}
       <RaceToolsFab />
 
-      {/* Mutually exclusive tool bottom sheets (z-30, rendered above everything) */}
+      {/* Race tool bottom sheets — mutually exclusive, z-30, above drawer */}
       <WindShiftPanel />
       <StartLineTool />
-      <RaceChecklist />
     </div>
   );
 }

@@ -4,9 +4,174 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { createClient } from "@/lib/supabase/client";
-import { Trophy, Calendar, MapPin, ChevronRight, Loader2, Medal, Download, Upload } from "lucide-react";
+import { Trophy, Calendar, MapPin, ChevronRight, Loader2, Medal, Download, Upload, LayoutList, ChevronDown, RotateCcw, CheckSquare } from "lucide-react";
 import type { Regatta, Race, Club, Boat } from "@/lib/types";
 import { exportSeriesStandingsPDF } from "@/lib/utils/pdf-export";
+import { cn } from "@/lib/utils";
+
+// ─── Pre-Race Checklist (inline card for Races page) ────────────────
+
+const CHECKLIST_CATEGORIES = [
+  { id: "rig", title: "Rig", items: [
+    "Mast step / partners secure",
+    "Shrouds, forestay, backstay tight",
+    "All halyards run clean, no twists",
+    "Boom vang functional",
+    "Backstay adjuster / runner ready",
+    "Cunningham / downhaul ready",
+    "Spreader tips taped",
+  ]},
+  { id: "sails", title: "Sails", items: [
+    "Main halyard up and locked",
+    "Jib / headsail hanked on or furled",
+    "Batten tension set",
+    "Telltales in good condition",
+    "Sail numbers visible both sides",
+    "Spinnaker packed and ready (if used)",
+    "Sheets led correctly, no twists",
+  ]},
+  { id: "safety", title: "Safety", items: [
+    "PFDs / life jackets for all crew",
+    "Horn or whistle aboard",
+    "Throwable flotation device",
+    "Visual distress signals (flares)",
+    "VHF radio charged, channel 16 set",
+    "First aid kit accessible",
+  ]},
+  { id: "boat", title: "Boat", items: [
+    "Drain plug / bung installed",
+    "Hatches closed and latched",
+    "Bilge dry (pump if needed)",
+    "Fire extinguisher accessible",
+    "Crew weight distributed for conditions",
+  ]},
+  { id: "race", title: "Race Day", items: [
+    "Protest flag aboard",
+    "Class / division flag displayed",
+    "Watch / timer synchronized with RC",
+    "Course number confirmed",
+    "Crew briefed: signals, rules, plan",
+    "Start plan agreed (end, time, tack)",
+  ]},
+];
+
+const ALL_ITEMS = CHECKLIST_CATEGORIES.flatMap((c) =>
+  c.items.map((label, i) => `${c.id}-${i}`)
+);
+
+function PreRaceChecklist() {
+  const [open, setOpen] = useState(false);
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [expandedCat, setExpandedCat] = useState<string>("rig");
+
+  const toggle = (id: string) =>
+    setChecked((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+
+  const done = ALL_ITEMS.filter((id) => checked.has(id)).length;
+  const pct = Math.round((done / ALL_ITEMS.length) * 100);
+
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className="flex w-full items-center justify-between px-4 py-3"
+      >
+        <div className="flex items-center gap-2">
+          <LayoutList className="h-4 w-4 text-ocean" />
+          <span className="text-sm font-semibold text-foreground">Pre-Race Checklist</span>
+          {done > 0 && (
+            <span className={cn(
+              "rounded-full px-2 py-0.5 text-[10px] font-bold",
+              pct === 100 ? "bg-green-500/15 text-green-600 dark:text-green-400" : "bg-ocean/15 text-ocean"
+            )}>
+              {pct === 100 ? "All clear!" : `${done}/${ALL_ITEMS.length}`}
+            </span>
+          )}
+        </div>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
+
+      {open && (
+        <div className="border-t border-border">
+          {/* Progress bar */}
+          <div className="px-4 py-2.5">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className={cn("h-full rounded-full transition-all duration-300", pct === 100 ? "bg-green-500" : "bg-ocean")}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <p className="mt-1 text-[10px] text-muted-foreground">{done} of {ALL_ITEMS.length} items checked</p>
+          </div>
+
+          {/* Categories */}
+          <div className="divide-y divide-border">
+            {CHECKLIST_CATEGORIES.map((cat) => {
+              const catItems = cat.items.map((_, i) => `${cat.id}-${i}`);
+              const catDone = catItems.filter((id) => checked.has(id)).length;
+              const isExpanded = expandedCat === cat.id;
+              const allDone = catDone === cat.items.length;
+              return (
+                <div key={cat.id}>
+                  <button
+                    onClick={() => setExpandedCat(isExpanded ? "" : cat.id)}
+                    className="flex w-full items-center justify-between px-4 py-2.5 hover:bg-muted/40"
+                  >
+                    <span className={cn("text-sm font-medium", allDone && "text-green-600 dark:text-green-400")}>
+                      {cat.title}
+                    </span>
+                    <span className={cn("text-xs tabular-nums", allDone ? "text-green-600 dark:text-green-400 font-semibold" : "text-muted-foreground")}>
+                      {catDone}/{cat.items.length}
+                    </span>
+                  </button>
+                  {isExpanded && (
+                    <div className="px-4 pb-2">
+                      {cat.items.map((label, i) => {
+                        const id = `${cat.id}-${i}`;
+                        const isChecked = checked.has(id);
+                        return (
+                          <button key={id} onClick={() => toggle(id)}
+                            className="mb-1 flex w-full items-start gap-3 rounded-lg px-2 py-2 text-left hover:bg-muted/50">
+                            <div className={cn(
+                              "mt-0.5 h-4 w-4 shrink-0 rounded border-2 transition-colors",
+                              isChecked ? "border-green-500 bg-green-500" : "border-muted-foreground/50"
+                            )}>
+                              {isChecked && (
+                                <svg viewBox="0 0 10 10" className="h-full w-full p-0.5">
+                                  <path d="M1.5 5L4 7.5L8.5 2.5" stroke="white" strokeWidth="1.5"
+                                    fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              )}
+                            </div>
+                            <span className={cn("text-sm leading-snug", isChecked && "text-muted-foreground line-through")}>
+                              {label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
+            <button onClick={() => setChecked(new Set())}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
+              <RotateCcw className="h-3.5 w-3.5" /> Reset
+            </button>
+            <button onClick={() => setChecked(new Set(ALL_ITEMS))}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
+              <CheckSquare className="h-3.5 w-3.5" /> Check All
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface RaceResult {
   id: string;
@@ -225,6 +390,9 @@ export default function RacesPage() {
         </Link>
       </Header>
       <div className="space-y-4 p-4">
+        {/* Pre-Race Checklist — always visible, collapsed by default */}
+        <PreRaceChecklist />
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
