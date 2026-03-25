@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const BASE_SYSTEM_PROMPT = `You are MagellAIn, an expert sailing coach and racing strategist for Great Lakes sailors, especially on Lake Erie and the Detroit River. You have deep knowledge of:
@@ -278,14 +279,13 @@ export async function POST(req: NextRequest) {
       { role: "user", content: message },
     ];
 
-    // Use non-streaming for Netlify serverless reliability
+    // Stream responses using Anthropic's SSE streaming API
     // Try claude-sonnet-4-20250514 first, fall back to claude-3-5-sonnet-20241022
     const models = ["claude-sonnet-4-20250514", "claude-3-5-sonnet-20241022"];
     let lastError = "";
-    let text = "";
 
     for (const model of models) {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const anthropicResponse = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -297,21 +297,12 @@ export async function POST(req: NextRequest) {
           max_tokens: 1024,
           system: systemPrompt,
           messages,
+          stream: true,
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        text = data.content?.[0]?.text ?? "";
-        break;
-      }
-
-      const errText = await response.text();
-      console.error(`Anthropic API error (model=${model}):`, response.status, errText);
-      lastError = `AI service error (${response.status}): ${errText.slice(0, 300)}`;
-
       // If 401 (auth), don't bother trying another model — the key is the problem
-      if (response.status === 401) {
+      if (anthropicResponse.status === 401) {
         return new Response(
           JSON.stringify({
             error: "API authentication failed. Please check your ANTHROPIC_API_KEY in Netlify environment variables.",
@@ -319,21 +310,72 @@ export async function POST(req: NextRequest) {
           { status: 502, headers: { "Content-Type": "application/json" } }
         );
       }
+
+      if (anthropicResponse.ok && anthropicResponse.body) {
+        // Create a transform stream that extracts text from SSE events
+        const stream = new ReadableStream({
+          async start(controller) {
+            const reader = anthropicResponse.body!.getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
+
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                buffer = lines.pop() ?? ""; // keep incomplete line
+
+                for (const line of lines) {
+                  if (!line.startsWith("data: ")) continue;
+                  const data = line.slice(6).trim();
+                  if (data === "[DONE]") {
+                    controller.close();
+                    return;
+                  }
+                  try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.type === "content_block_delta" && parsed.delta?.type === "text_delta") {
+                      controller.enqueue(new TextEncoder().encode(parsed.delta.text));
+                    }
+                    if (parsed.type === "message_delta" && parsed.delta?.stop_reason) {
+                      controller.close();
+                      return;
+                    }
+                  } catch {
+                    // skip malformed JSON
+                  }
+                }
+              }
+            } catch (err) {
+              controller.error(err);
+            } finally {
+              reader.releaseLock();
+            }
+          },
+        });
+
+        return new Response(stream, {
+          headers: {
+            "Content-Type": "text/plain; charset=utf-8",
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no", // disable Netlify response buffering
+          },
+        });
+      }
+
+      const errText = await anthropicResponse.text();
+      console.error(`Anthropic API error (model=${model}):`, anthropicResponse.status, errText);
+      lastError = `AI service error (${anthropicResponse.status}): ${errText.slice(0, 300)}`;
     }
 
-    if (!text && lastError) {
-      return new Response(
-        JSON.stringify({ error: lastError }),
-        { status: 502, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    return new Response(text, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-cache",
-      },
-    });
+    // Both models failed
+    return new Response(
+      JSON.stringify({ error: lastError || "AI service unavailable" }),
+      { status: 502, headers: { "Content-Type": "application/json" } }
+    );
   } catch (err) {
     console.error("Chat API error:", err);
     return new Response(JSON.stringify({ error: "Internal server error" }), {

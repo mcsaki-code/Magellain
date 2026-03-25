@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.2.0",
+    "version": "1.3.0",
     "lastUpdated": "2026-03-25",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
@@ -38,6 +38,16 @@
       "title": "Map and Charts",
       "description": "Interactive nautical charts with live data overlays, GPS track recording, and track replay.",
       "items": [
+        {
+          "id": "race-timer",
+          "title": "Pre-Race Start Timer",
+          "content": "Tap the Flag icon in the lower-right of the map (above the GPS Tracker) to open the Start Timer panel. Tap '5 MIN' to begin the standard 5-minute US Sailing starting sequence — the timer counts down through Warning (yellow), Prep (orange), and One Minute (red) phases, then switches to a racing elapsed clock when the gun fires. Tap 'SYNC' instead when you hear the actual race committee gun — the timer immediately starts your racing clock from that moment. Audio signals play at each phase transition: three beeps at Warning and Prep, six rapid beeps at One Minute, and a long horn tone at the start. Tap Pause to freeze the countdown and resume with Play. Tap Reset to return to idle."
+        },
+        {
+          "id": "wind-arrows",
+          "title": "Wind Arrow Overlay",
+          "content": "Toggle the wind arrow overlay from the map controls panel (upper-left of the map). When on, colored directional arrows appear at each NDBC buoy station across Western Lake Erie and the Detroit River, showing the current observed wind direction and speed. Arrow color indicates intensity: green for light air, yellow for moderate breeze, orange for fresh, and red for strong or gale-force winds. Arrow size grows with wind speed. Tap any arrow to see a popup with the station name, exact wind speed in knots, compass direction, and gust speed if available. Arrows update whenever the weather data refreshes."
+        },
         {
           "id": "map-overview",
           "title": "Using the Map",
@@ -106,6 +116,11 @@
           "id": "chat-overview",
           "title": "Talking to Your Coach",
           "content": "The Coach tab connects you to MagellAIn's AI sailing coach, powered by Claude. Ask questions in plain English about racing tactics, sail trim, weather interpretation, rules, or boat handling. The coach knows your boat type, your waters, and current conditions, so answers are specific and actionable rather than generic."
+        },
+        {
+          "id": "streaming-responses",
+          "title": "Streaming Responses",
+          "content": "The AI coach streams responses in real time — words appear as they are generated rather than arriving all at once after a delay. This means you start reading useful information within a second or two of sending a question. The coach also has access to live current conditions from the NDBC buoys when formulating a response, so if you ask what the wind is doing right now, it will reference actual observed readings from the nearest buoy."
         },
         {
           "id": "voice-input",

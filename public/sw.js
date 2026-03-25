@@ -1,4 +1,7 @@
-const CACHE_NAME = "magellain-v1";
+// NEXT_PUBLIC_COMMIT_SHA is injected at build time via next.config.mjs env
+// Falls back to "dev" for local development
+const COMMIT_SHA = self.__COMMIT_SHA__ || "dev";
+const CACHE_NAME = `magellain-${COMMIT_SHA}`;
 
 // Static paths to cache on install
 const STATIC_PATHS = [

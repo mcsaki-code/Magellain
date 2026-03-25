@@ -17,7 +17,7 @@ export function MapView() {
   const [debugInfo, setDebugInfo] = useState("");
   const [raceMarks, setRaceMarks] = useState<Array<{ id: string; name: string; short_name: string; latitude: number; longitude: number; mark_type: string; color: string | null }>>([]);
 
-  const { center, zoom, showBuoyMarkers, setSelectedBuoy, showCourseOverlay, courseLegs, selectedCourse, activeTrackPoints, playbackIndex } = useMapStore();
+  const { center, zoom, showBuoyMarkers, showWindArrows, setSelectedBuoy, showCourseOverlay, courseLegs, selectedCourse, activeTrackPoints, playbackIndex } = useMapStore();
   const { observations, fetchWeather, isLoading: weatherLoading } = useWeatherStore();
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -317,6 +317,23 @@ export function MapView() {
     mapInstance.on("load", () => {
       mapReady.current = true;
       console.log("[MagellAIn] Map style loaded, syncing markers...");
+
+      // Register wind arrow SVG as Mapbox image
+      const arrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <line x1="20" y1="32" x2="20" y2="8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <polyline points="12,16 20,6 28,16" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>`;
+      const blob = new Blob([arrowSvg], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const img = new Image(40, 40);
+      img.onload = () => {
+        if (!mapInstance.hasImage("wind-arrow")) {
+          mapInstance.addImage("wind-arrow", img, { sdf: true });
+        }
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+
       syncMarkers();
       syncCourseOverlay();
       console.log("[MagellAIn] After initial sync, markers:", markersRef.current.length);
@@ -475,6 +492,149 @@ export function MapView() {
     }
   }, [activeTrackPoints, playbackIndex]);
 
+  // Handle wind arrow layer
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady.current) return;
+
+    // Remove existing wind arrow layer and source if they exist
+    if (m.getLayer("wind-arrow-layer")) {
+      m.removeLayer("wind-arrow-layer");
+    }
+    if (m.getSource("wind-arrows")) {
+      m.removeSource("wind-arrows");
+    }
+
+    // If wind arrows are disabled, stop here (cleanup done)
+    if (!showWindArrows) {
+      console.log("[MagellAIn] Wind arrows disabled, layer removed");
+      return;
+    }
+
+    // Build GeoJSON FeatureCollection from BUOY_STATIONS
+    const features: GeoJSON.Feature<GeoJSON.Point>[] = BUOY_STATIONS.flatMap((station) => {
+      const obs = observations[station.id];
+      if (!obs || obs.wind_speed_kts == null || obs.wind_direction_deg == null) {
+        return [];
+      }
+
+      return [
+        {
+          type: "Feature" as const,
+          geometry: {
+            type: "Point" as const,
+            coordinates: [station.lng, station.lat],
+          },
+          properties: {
+            stationId: station.id,
+            stationName: station.name,
+            windSpeed: obs.wind_speed_kts,
+            windDir: obs.wind_direction_deg,
+            windGust: obs.wind_gust_kts,
+            // Mapbox rotation: icon-rotate rotates clockwise from north
+            // Meteorological wind direction is where wind comes FROM
+            // Arrow should point in the direction wind is GOING TO (add 180°)
+            rotation: (obs.wind_direction_deg + 180) % 360,
+          },
+        },
+      ];
+    });
+
+    // Add source
+    m.addSource("wind-arrows", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features,
+      },
+    });
+
+    // Add symbol layer
+    m.addLayer({
+      id: "wind-arrow-layer",
+      type: "symbol",
+      source: "wind-arrows",
+      layout: {
+        "icon-image": "wind-arrow",
+        "icon-rotate": ["get", "rotation"],
+        "icon-rotation-alignment": "map",
+        "icon-allow-overlap": true,
+        "icon-ignore-placement": true,
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["get", "windSpeed"],
+          0,
+          0.4,
+          10,
+          0.7,
+          20,
+          1.0,
+          30,
+          1.3,
+        ],
+      },
+      paint: {
+        "icon-color": [
+          "interpolate",
+          ["linear"],
+          ["get", "windSpeed"],
+          0,
+          "#22c55e", // green — light
+          8,
+          "#eab308", // yellow — moderate
+          15,
+          "#f97316", // orange — fresh
+          20,
+          "#ef4444", // red — strong
+          25,
+          "#dc2626", // dark red — gale
+        ],
+        "icon-opacity": 0.9,
+      },
+    });
+
+    // Add click handler for wind arrow layer
+    m.on("click", "wind-arrow-layer", (e) => {
+      if (!e.features || e.features.length === 0) return;
+
+      const feature = e.features[0];
+      const props = feature.properties;
+      const stationName = props?.stationName || "Unknown";
+      const stationId = props?.stationId || "N/A";
+      const windSpeed = props?.windSpeed ?? "--";
+      const windDir = props?.windDir ?? "--";
+      const windGust = props?.windGust ?? "--";
+
+      // Convert meteorological wind direction to compass direction
+      const compassDir = getCompassDirection(windDir);
+
+      const popupContent = `<div style="font-family:system-ui;padding:6px;width:200px">
+        <strong>${stationName}</strong><br/>
+        <span style="font-size:11px;color:#666">${stationId}</span><br/>
+        <span style="font-size:12px;margin-top:4px;display:block">
+          <strong>Wind:</strong> ${windSpeed} kts from ${compassDir} (${windDir}°)
+        </span>
+        ${windGust !== "--" ? `<span style="font-size:12px;display:block">Gusts to: ${windGust} kts</span>` : ""}
+      </div>`;
+
+      const popup = new mapboxgl.Popup({ offset: 25, closeButton: false })
+        .setLngLat(e.lngLat)
+        .setHTML(popupContent)
+        .addTo(m);
+    });
+
+    // Change cursor on hover
+    m.on("mouseenter", "wind-arrow-layer", () => {
+      m.getCanvas().style.cursor = "pointer";
+    });
+    m.on("mouseleave", "wind-arrow-layer", () => {
+      m.getCanvas().style.cursor = "";
+    });
+
+    console.log("[MagellAIn] Wind arrow layer added, stations with arrows:", features.length);
+  }, [showWindArrows, observations]);
+
   if (!token) {
     return (
       <div className="flex h-full items-center justify-center bg-navy-900 p-8 text-center">
@@ -499,6 +659,13 @@ export function MapView() {
       )}
     </div>
   );
+}
+
+function getCompassDirection(degrees: number | null): string {
+  if (degrees === null) return "N/A";
+  const dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+  const index = Math.round(degrees / 22.5) % 16;
+  return dirs[index];
 }
 
 function buildPopupHtml(

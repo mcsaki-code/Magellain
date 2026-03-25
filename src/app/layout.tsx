@@ -40,6 +40,12 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('magellain-theme');var dark=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.add(dark?'dark':'light');}catch(e){}})();`,
           }}
         />
+        {/* Inject build-time commit SHA into service worker scope for cache busting */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `self.__COMMIT_SHA__ = ${JSON.stringify(process.env.NEXT_PUBLIC_COMMIT_SHA ?? "dev")};`,
+          }}
+        />
         {/* Service worker registration */}
         <script
           dangerouslySetInnerHTML={{

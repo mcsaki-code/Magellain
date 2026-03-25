@@ -52,21 +52,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
       createdAt: new Date().toISOString(),
     };
 
-    const assistantMsg: ChatMsg = {
-      id: crypto.randomUUID(),
-      role: "assistant",
-      content: "",
-      createdAt: new Date().toISOString(),
-    };
-
     set((s) => ({
-      messages: [...s.messages, userMsg, assistantMsg],
+      messages: [...s.messages, userMsg],
       isStreaming: true,
       error: null,
     }));
 
     try {
-      const res = await fetch("/api/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -76,22 +69,40 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }),
       });
 
-      if (!res.ok) {
-        // Try to read the error detail from the JSON response
-        let errMsg = `Chat failed: ${res.status}`;
-        try {
-          const errData = await res.json();
-          errMsg = errData.error || errMsg;
-        } catch {
-          // Not JSON, use default message
-        }
-        throw new Error(errMsg);
+      if (!response.ok || !response.body) {
+        const errData = await response.json().catch(() => ({ error: "Chat failed" }));
+        set({ error: errData.error || "Chat request failed", isStreaming: false });
+        return;
       }
 
-      const text = await res.text();
-      get().updateLastAssistant(text);
+      // Start streaming — add assistant message placeholder
+      set((s) => ({
+        messages: [...s.messages, { id: crypto.randomUUID(), role: "assistant", content: "", createdAt: new Date().toISOString() }],
+        isStreaming: true,
+      }));
 
-      set({ isStreaming: false });
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          // Append chunk to last message
+          set((s) => {
+            const messages = [...s.messages];
+            messages[messages.length - 1] = {
+              ...messages[messages.length - 1],
+              content: messages[messages.length - 1].content + chunk,
+            };
+            return { messages };
+          });
+        }
+      } finally {
+        reader.releaseLock();
+        set({ isStreaming: false });
+      }
     } catch (err) {
       set({
         isStreaming: false,

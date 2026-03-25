@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.2.0",
+    "version": "1.3.0",
     "lastUpdated": "2026-03-25",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
@@ -9,7 +9,7 @@
     "title": "About MagellAIn",
     "subtitle": "Sailing Intelligence for Great Lakes Racers",
     "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management, analytics, GPS track recording and replay, offline support, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
-    "version": "1.2",
+    "version": "1.3",
     "builtFor": "Ford Yacht Club, West Shore Sail Club, and the DRYA racing community"
   },
   "features": [
@@ -22,8 +22,20 @@
     {
       "id": "ai-coach",
       "title": "AI Sailing Coach",
-      "summary": "A Claude-powered assistant that knows your boat, your waters, and racing strategy — with voice input support.",
-      "details": "Ask about tactics, sail trim, weather interpretation, racing rules, or post-race analysis. The coach factors in current conditions, your boat specs, and local knowledge about Lake Erie and Detroit River sailing patterns. Tap the microphone button to ask hands-free using voice — interim transcription appears in real time so you can review before sending."
+      "summary": "A Claude-powered assistant that streams real-time responses with live weather context, voice input, and full knowledge of your boat and local waters.",
+      "details": "Ask about tactics, sail trim, weather interpretation, racing rules, or post-race analysis. The coach receives live NDBC buoy readings injected into its context at the time of every message — so when you ask what the wind is doing, it references actual observed conditions, not a general forecast. Responses stream token-by-token so you start reading within seconds. Tap the microphone button to ask hands-free."
+    },
+    {
+      "id": "race-timer",
+      "title": "Pre-Race Start Timer",
+      "summary": "The classic 5-minute US Sailing gun sequence with audio signals, built for one-handed cockpit use.",
+      "details": "Open the Flag icon panel on the map and tap '5 MIN' to start the Warning → Prep → One Minute → Start sequence. Audio beeps sound at each transition with a long horn tone at the gun. Tap 'SYNC' to lock the timer to an actual race committee gun. Large countdown display with color-coded phase labels — yellow for Warning, orange for Prep, red for One Minute, green for Racing."
+    },
+    {
+      "id": "wind-arrows",
+      "title": "Wind Arrow Overlay",
+      "summary": "Live observed wind vectors drawn at every NDBC buoy station across Western Lake Erie and the Detroit River.",
+      "details": "Toggle on from the map controls panel. Directional arrows appear at each monitoring station showing where the wind is blowing toward. Color scales from green (light air) through yellow, orange, and red as wind speed increases. Size also scales with speed. Tap any arrow for a station popup showing speed in knots, compass direction, degrees, and gusts."
     },
     {
       "id": "gps-tracking",
