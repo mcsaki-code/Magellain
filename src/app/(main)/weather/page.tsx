@@ -82,6 +82,9 @@ export default function WeatherPage() {
           </button>
         </div>
 
+        {/* Wind Shift History — moved above station cards for quick tactical view */}
+        <WindShiftSection observations={observations} />
+
         {/* Station cards */}
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-muted-foreground">BUOY STATIONS</h2>
@@ -148,9 +151,6 @@ export default function WeatherPage() {
             );
           })}
         </div>
-
-        {/* Wind Shift History */}
-        <WindShiftSection observations={observations} />
 
         {/* Forecasts */}
         {forecasts.length > 0 && (

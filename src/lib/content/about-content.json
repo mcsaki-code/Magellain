@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.6.0",
+    "version": "1.7.0",
     "lastUpdated": "2026-03-25",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
@@ -9,7 +9,7 @@
     "title": "About MagellAIn",
     "subtitle": "Sailing Intelligence for Great Lakes Racers",
     "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management and analytics, GPS track recording and replay, race course tactical analysis, start line bias calculation, wind shift tracking, layline overlay, pre-race checklist, crew messaging, offline support, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
-    "version": "1.6",
+    "version": "1.7",
     "builtFor": "Ford Yacht Club, West Shore Sail Club, and the DRYA racing community"
   },
   "features": [
@@ -17,7 +17,7 @@
       "id": "live-data",
       "title": "Live Marine Data",
       "summary": "Real-time NOAA weather, NDBC buoy observations, and marine forecasts displayed on interactive charts.",
-      "details": "Wind speed and direction, wave height, water temperature, and marine forecasts updated continuously from official government sources. Active shore stations include Marblehead OH, South Bass Island OH, Toledo Harbor OH, and Dunkirk NY. Offshore Great Lakes buoys are seasonal, deploying in late spring. Active NOAA weather alerts (Small Craft Advisories, Gale Warnings) appear as prominent banners on the Home and Weather screens."
+      "details": "Wind speed and direction, wave height, water temperature, and marine forecasts updated continuously from official government sources. Year-round shore stations include Toledo Harbor (THRO1), South Bass Island OH (SBIO1), and Marblehead OH (MRHO1). Seasonal offshore buoys — Toledo Channel Light (45132), W Lake Erie Buoy (45005), and Cleveland Buoy (45142) — deploy in late spring. Active NOAA weather alerts (Small Craft Advisories, Gale Warnings) appear as prominent banners on the Home and Weather screens."
     },
     {
       "id": "ai-coach",
@@ -47,13 +47,13 @@
       "id": "start-line-bias",
       "title": "Start Line Bias Tool",
       "summary": "Mark the two ends of your start line on the chart and instantly see which end is favored based on live wind data.",
-      "details": "Open the Start Line Bias tool from the Flag button in the map controls panel. Tap 'Boat / Pin End' then tap its position on the chart, then do the same for 'Committee Boat End.' MagellAIn calculates the bias angle — how far the line deviates from perpendicular to the wind — and tells you which end is favored and by how many degrees. The line draws on the chart in amber with color-coded pins. Bias under 2° is flagged as a square line. Wind direction is pulled automatically from the nearest active NDBC buoy. Use in the 5-15 minutes before your start gun."
+      "details": "Open the Start Line Bias tool from the Tools tab in the bottom drawer on the map. Tap 'Boat / Pin End' then tap its position on the chart, then do the same for 'Committee.' MagellAIn calculates the bias angle — how far the line deviates from perpendicular to the wind — and tells you which end is favored and by how many degrees. The line draws on the chart in amber with color-coded pins. Bias under 2° is flagged as a square line. Wind direction is pulled automatically from the nearest active NDBC buoy. Use in the 5-15 minutes before your start gun."
     },
     {
       "id": "wind-shift-graph",
       "title": "Wind Shift Tracking",
       "summary": "See the last 90 minutes of wind direction history from any active NDBC station as a live chart on the map or weather screen.",
-      "details": "The Wind Shift panel on the Map tab (Trending Up button in controls) and the Wind Shift History section on the Weather tab show a time-series chart of wind direction over the last 90 minutes from any NDBC shore station you select. The chart highlights veering (clockwise shift) or backing (counter-clockwise shift) trends and shows the current wind speed. Veering wind in the northern hemisphere typically signals an approaching warm front; backing may indicate building pressure. Data is fetched from the NDBC realtime observation feed, typically updated every 10-30 minutes."
+      "details": "The Wind Shift panel on the Map tab (accessible via the Tools tab in the bottom drawer) and the Wind Shift History section on the Weather tab (now near the top of the weather screen) show a time-series chart of wind direction over the last 90 minutes from any NDBC shore station you select. The chart highlights veering (clockwise shift) or backing (counter-clockwise shift) trends and shows the current wind speed. Veering wind in the northern hemisphere typically signals an approaching warm front; backing may indicate building pressure. Data is fetched from the NDBC realtime observation feed, typically updated every 10-30 minutes."
     },
     {
       "id": "laylines",
@@ -65,7 +65,7 @@
       "id": "race-checklist",
       "title": "Pre-Race Checklist",
       "summary": "A comprehensive 30-item race preparation checklist covering rig, sails, safety, boat systems, and race day specifics.",
-      "details": "Tap the Checklist icon in the map controls panel to open the Pre-Race Checklist. Five accordion sections — Rig, Sails, Safety, Boat, and Race Day — contain the key items every racing sailor should verify before the start gun. A live progress bar tracks completion. Items can be checked off individually; Reset clears all checks for the next race. The checklist is session-based and resets when the app reloads. Designed for one-handed use on the water."
+      "details": "The Pre-Race Checklist lives on the Races tab as a collapsible card at the top of the page, always accessible alongside your race schedule. Five accordion sections — Rig, Sails, Safety, Boat, and Race Day — contain the key items every racing sailor should verify before the start gun. A live progress bar tracks completion. Items can be checked off individually; Reset clears all checks for the next race. The checklist is session-based and resets when the app reloads. Designed for one-handed use on the water."
     },
     {
       "id": "gps-tracking",

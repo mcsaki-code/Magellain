@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.6.0",
+    "version": "1.7.0",
     "lastUpdated": "2026-03-25",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
@@ -24,12 +24,12 @@
         {
           "id": "home-screen",
           "title": "Your Home Dashboard",
-          "content": "The home screen is your at-a-glance command center. It shows an AI-generated sailing conditions summary (rated Excellent, Good, Fair, Marginal, or Poor) with tips for the day, current wind and wave data from NOAA and NDBC buoys, your next scheduled race from FYC or WSSC, your primary boat details, quick-access buttons for Chart, Weather, Coach, and GPS Speed, and a live sailing news feed pulling recent articles from Sail Magazine, Scuttlebutt, World Sailing, and Sailing World. Sign in to also see your boat and personalized data."
+          "content": "The home screen is your at-a-glance command center. It shows an AI-generated sailing conditions summary (rated Excellent, Good, Fair, Marginal, or Poor) with tips for the day, current wind and wave data from NOAA and NDBC buoys, your next scheduled race from FYC or WSSC, your primary boat details, quick-access buttons for Chart, Weather, AI Coach, and GPS Speed, and a live sailing news feed pulling recent articles from Sail Magazine, Scuttlebutt, World Sailing, and Sailing World. Sign in to also see your personalized boat and race data."
         },
         {
           "id": "navigation",
           "title": "Navigating the App",
-          "content": "MagellAIn uses a bottom navigation bar designed for one-handed use on the water. The five main tabs are: Home (dashboard overview), Map (nautical charts, GPS tracking, race courses, and live buoy data), Weather (marine forecasts and wind data), Coach (AI sailing coach with voice input), and Menu (profile, boats, races, performance, crew messages, safety, settings, and help)."
+          "content": "MagellAIn uses a bottom navigation bar designed for one-handed use on the water. The main tabs are: Map (nautical charts, GPS tracking, race courses, and race tools), Weather (marine forecasts and wind data), Coach (AI sailing coach with voice input), Crew (crew messaging), Races (schedules, results, and checklist), and Menu (profile, boats, performance, safety, settings, and help). The MagellAIn wordmark on the home screen taps back to the home dashboard."
         }
       ]
     },
@@ -41,67 +41,67 @@
         {
           "id": "map-overview",
           "title": "Using the Map",
-          "content": "The map view centers on your home waters (default: Ford Yacht Club, Lake Erie / Detroit River). Pinch to zoom, drag to pan. The map overlays nautical chart data showing depths, channel markers, buoys, and hazards. All data is specific to Western Lake Erie and the Detroit River. Multiple panels are available at the corners of the map: wind arrows and buoy data (upper area), course selection and GPS tools (lower area), race timer (lower right), and tactical analysis (lower left)."
+          "content": "The map centers on Ford Yacht Club / Detroit River by default. Pinch to zoom, drag to pan. The NOAA chart overlay shows depths, channel markers, aids to navigation, and hazards. Map controls are in the top-left (Layers, Reset view, Refresh weather). Your GPS speed displays as a compact chip at the top-center. All race tools — Courses, GPS tracking, Race Timer, Wind Shifts, and Start Line Bias — are accessed from the tab bar at the bottom of the map. Tap any tab (Courses, GPS, Timer, Tools) to open the corresponding panel. Tap the tab again, or tap anywhere on the map above the panel, to dismiss it. Wind Shift and Start Line Bias panels open from the Tools tab and slide up above the tab bar."
         },
         {
           "id": "race-timer",
           "title": "Pre-Race Start Timer",
-          "content": "Tap the Flag icon in the lower-right of the map (above the GPS Tracker) to open the Start Timer panel. Tap '5 MIN' to begin the standard 5-minute US Sailing starting sequence — the timer counts down through Warning (yellow), Prep (orange), and One Minute (red) phases, then switches to a racing elapsed clock when the gun fires. Tap 'SYNC' instead when you hear the actual race committee gun — the timer immediately starts your racing clock from that moment. Audio signals play at each phase transition: three beeps at Warning and Prep, six rapid beeps at One Minute, and a long horn tone at the start. Tap Pause to freeze the countdown and resume with Play. Tap Reset to return to idle."
+          "content": "Tap the Timer tab in the bottom tab bar on the map to open the Race Timer panel. Tap '5 MIN' to begin the standard 5-minute US Sailing starting sequence — the timer counts down through Warning (yellow), Prep (orange), and One Minute (red) phases, then switches to a racing elapsed clock when the gun fires. Tap 'SYNC' instead when you hear the actual race committee gun — the timer immediately starts your racing clock from that moment. Audio signals play at each phase transition: three beeps at Warning and Prep, six rapid beeps at One Minute, and a long horn tone at the start. Tap Pause to freeze the countdown and resume with Play. Tap Reset to return to idle. The timer keeps running even when you switch to a different tab."
         },
         {
           "id": "wind-arrows",
           "title": "Wind Arrow Overlay",
-          "content": "Toggle the wind arrow overlay from the map controls panel (upper-left of the map). When on, colored directional arrows appear at each NDBC buoy station across Western Lake Erie and the Detroit River, showing the current observed wind direction and speed. Arrow color indicates intensity: green for light air, yellow for moderate breeze, orange for fresh, and red for strong or gale-force winds. Arrow size grows with wind speed. Tap any arrow to see a popup with the station name, exact wind speed in knots, compass direction, and gust speed if available. Arrows update whenever the weather data refreshes."
+          "content": "Toggle the wind arrow overlay from the Layers panel in the top-left map controls. When on, colored directional arrows appear at each NDBC station, showing observed wind direction and speed. Arrow color indicates intensity: green for light air, yellow for moderate breeze, orange for fresh, and red for strong winds. Arrow size grows with wind speed. Tap any arrow to see a popup with station name, exact wind speed in knots, compass direction, and gust speed if available. Arrows update whenever weather data refreshes."
         },
         {
           "id": "buoy-data",
           "title": "Live Buoy Data",
-          "content": "Tap any NDBC buoy marker on the map to see real-time observations: wind speed and direction, wave height and period, water temperature, and air pressure. Key stations for our area include Marblehead OH, South Bass Island OH, Toledo Harbor OH, and Dunkirk NY. Offshore Great Lakes buoys (45005, 45132, 45142) are seasonal and deploy in late spring. Data refreshes automatically every few minutes."
+          "content": "Tap any NDBC buoy marker on the map to see real-time observations: wind speed and direction, wave height and period, water temperature, and air pressure. Year-round shore stations include Toledo Harbor (THRO1), South Bass Island (SBIO1), and Marblehead OH (MRHO1). Seasonal offshore buoys — Toledo Channel Light (45132), W Lake Erie Buoy (45005), and Cleveland Buoy (45142) — deploy in late spring and show 'Seasonal buoy — not yet deployed' before then. Data refreshes automatically every few minutes."
         },
         {
           "id": "course-panel",
           "title": "Race Course Selection",
-          "content": "Tap the Race Courses button in the lower-right corner of the map (below the GPS Tracker) to open the course selection panel. It lists all active race courses from Ford YC and WSSC stored in the database, with course type (windward-leeward, triangle, etc.) and total distance in nautical miles. Tap any course to select it and see its legs — each leg shows the mark name, rounding direction (port or starboard), and order. Toggle 'Show course marks on map' to display all racing marks as colored pins on the chart. Select a course and tap 'AI Tactical Analysis' to get leg-by-leg tactical guidance based on current wind conditions."
+          "content": "Tap the Courses tab in the bottom tab bar to open the course selection panel. It lists all active race courses from Ford YC and WSSC, with course type (windward-leeward, triangle, etc.) and total distance in nautical miles. Tap any course to select it and see its legs — each leg shows the mark name, rounding direction (port or starboard), bearing, and distance. Toggle 'Show course marks on map' to display racing marks as colored pins on the chart. Select a course and tap 'AI Tactical Analysis' to get leg-by-leg tactical guidance based on current wind conditions."
         },
         {
           "id": "tactical-analysis",
           "title": "AI Tactical Analysis",
-          "content": "After selecting a race course in the Course Panel, tap the 'AI Tactical Analysis' button to open the tactical analysis panel. For each leg of the course it shows the leg bearing (true degrees and compass direction), leg distance in nautical miles, your point of sail (Close Hauled, Beam Reach, Broad Reach, Running, etc.) based on the current wind direction from NDBC buoys, and specific tactical advice tailored to conditions. For example: 'Hike hard, depower with traveler/backstay in 18 knots upwind' or 'Fly the spinnaker if available on the broad reach.' The analysis updates with live wind data. It does not draw visual laylines on the map — use it alongside the AI coach for deeper strategic questions."
+          "content": "After selecting a race course in the Courses panel, tap the 'AI Tactical Analysis' button to open the tactical analysis overlay. For each leg of the course it shows the leg bearing (true degrees and compass direction), leg distance in nautical miles, your point of sail (Close Hauled, Beam Reach, Broad Reach, Running, etc.) based on current NDBC wind direction, and specific tactical advice tailored to conditions — for example: 'Hike hard, depower with traveler/backstay in 18 knots upwind' or 'Fly the spinnaker if available on the broad reach.' The analysis updates with live wind data."
         },
         {
           "id": "gps-track",
           "title": "GPS Track Recording",
-          "content": "The GPS Tracker panel appears in the lower-right corner of the map (above the race timer). Tap 'Start' to begin recording your track — your device GPS will log position, speed, and heading continuously. Live stats show elapsed time, current speed in knots, total distance in nautical miles, and max speed. When finished, tap 'Stop' then 'Save' to store the track. Saved tracks sync to your account when signed in, or save locally if you are offline or not signed in."
+          "content": "Tap the GPS tab in the bottom tab bar to open the GPS & Track panel. Tap 'Start' to begin recording your track — your device GPS logs position, speed, and heading continuously. Live stats show elapsed time, current speed in knots, total distance in nautical miles, and max speed. When finished, tap 'Stop' then 'Save' to store the track. Saved tracks appear in the Track Replay list in the same panel and sync to your account when signed in, or save locally if you are offline or not signed in."
         },
         {
           "id": "track-replay",
           "title": "Track Replay",
-          "content": "Tap the Route icon in the lower-left corner of the map to open the Track Replay panel. It lists all your saved tracks with date, duration, distance, and max speed. Tap a track to load it — the full route draws on the map in orange. Use the playback controls to Play, Pause, or Stop the replay. A pulsing dot moves along the route showing your position at each recorded moment. Choose from 1x, 5x, 20x, or 50x playback speed. Tap the eject icon to return to the track list without clearing the map."
+          "content": "Tap the GPS tab in the bottom tab bar to open the GPS & Track panel, then scroll down to Track Replay. It lists all your saved tracks with date, duration, distance, and max speed. Tap a track to load it — the full route draws on the map in orange. Use the playback controls to Play, Pause, or Stop the replay. A pulsing dot moves along the route showing your position at each recorded moment. Choose from 1x, 5x, 20x, or 50x playback speed. Tap the X icon to return to the track list."
         },
         {
           "id": "speedometer",
           "title": "Speedometer and GPS Speed",
-          "content": "The on-screen speedometer displays your current GPS boat speed and heading when location tracking is active. You can share your live speed and conditions with the AI coach by mentioning them in your conversation (e.g. 'I'm doing 5.2 knots upwind in 14 knots of breeze — any trim tips?')."
+          "content": "MagellAIn automatically starts GPS speed tracking when you open the map — no button press needed. Your current speed appears as a compact pill at the top-center of the map, alongside a compass arrow showing heading. Tap the pill to cycle through knots, mph, and km/h. The speedometer disappears if your device denies GPS permission. You can also mention your current speed in the AI Coach chat for real-time trim advice."
         },
         {
           "id": "start-line-bias",
           "title": "Start Line Bias Tool",
-          "content": "Tap the Flag button in the map controls panel (left side) to open the Start Line Bias tool. Place the two ends of your start line on the chart: first tap 'Boat / Pin End,' then tap the map where the boat end of the line is, then tap 'Committee Boat End' and tap the committee boat position on the chart. The tool calculates the bias angle — how many degrees the line is tipped from perpendicular to the current wind. A positive bias (green) means the port/pin end is favored; a negative bias means the starboard/committee end is favored. Bias under 2° is treated as a square line. The line itself draws on the chart in amber with a green dot at the boat end and blue dot at the committee end. Wind direction is pulled automatically from the nearest active NDBC buoy. Tap 'Clear Line' to reset and re-mark. This tool works best in the 5-15 minutes before your start, after the wind has settled. Reassess if the wind shifts significantly."
+          "content": "Tap the Tools tab in the bottom tab bar, then tap 'Start Line Bias' to open the tool. The panel slides up above the tab bar. Place the two ends of your start line: tap 'Boat / Pin End,' then tap the map where the pin end of the line is; next tap 'Committee' and tap the committee boat position. The tool calculates the bias angle — how many degrees the line deviates from perpendicular to the wind — and tells you which end is favored and by how many degrees. The line draws on the chart in amber with a green circle at the boat end and blue square at the committee end. Bias under 2° is a square line. Wind direction is pulled automatically from the nearest active NDBC station. Tap 'Clear Line' to reset and re-mark. Use this in the 5-15 minutes before your start."
         },
         {
           "id": "wind-shift-panel",
-          "title": "Wind Shift Graph",
-          "content": "Tap the Trending Up button in the map controls panel to open the Wind Shift panel, which shows the last 90 minutes of wind direction changes from any active NDBC shore station. Use the dropdown to switch between stations. The graph plots wind direction over time, and the summary line tells you if the wind is veering (shifting clockwise — S to SW to W) or backing (shifting counter-clockwise). Veering wind in the northern hemisphere often indicates an approaching warm front. Backing wind can indicate increased pressure and stronger conditions ahead. This panel is also available on the Weather tab as 'Wind Shift History.' Data comes directly from the NDBC realtime observation feed, typically updated every 10-30 minutes depending on the station."
+          "title": "Wind Shift Graph (Map)",
+          "content": "Tap the Tools tab in the bottom tab bar, then tap 'Wind Shifts' to open the Wind Shift panel. It shows the last 90 minutes of wind direction changes from any active NDBC shore station. Use the dropdown to switch between stations. The graph plots wind direction over time, and the summary line tells you if the wind is veering (shifting clockwise — S to SW to W) or backing (shifting counter-clockwise). Veering wind in the northern hemisphere often indicates an approaching warm front. This chart is also available on the Weather tab as 'Wind Shift History' (now shown near the top of the weather screen for quick access). Data from the NDBC realtime observation feed, updated every 10-30 minutes."
         },
         {
           "id": "laylines",
           "title": "Layline Overlay",
-          "content": "Enable laylines from the Layers panel (tap the Layers icon in map controls, then check 'Laylines'). Laylines appear as dashed lines extending from the windward mark — green for port tack, red for starboard tack. They show you exactly where to tack to fetch the mark on either tack. The tacking angle slider (30–55°, default 42°) lets you tune the calculation to your boat and conditions: a flat-water J/70 in 15 knots might tack in 40°, while a heavy-displacement PHRF boat in chop might be 48°. Laylines require a race course to be selected in the Course Panel and live wind data from an active NDBC station. They update automatically when wind direction changes. Note: laylines shown are theoretical — always account for tide, current, and pressure bands in your actual sailing."
+          "content": "Enable laylines from the Layers panel (tap the Layers icon in the top-left map controls, then check 'Laylines'). Laylines appear as dashed lines extending from the windward mark — green for port tack, red for starboard tack. They show you exactly where to tack to fetch the mark on either tack. The tacking angle slider (30–55°, default 42°) lets you tune the calculation to your boat and conditions: a flat-water J/70 in 15 knots might tack in 40°, while a heavy-displacement PHRF boat in chop might be 48°. Laylines require a race course to be selected in the Courses panel and live wind data from an active NDBC station. They update automatically when wind direction changes. Note: laylines are theoretical — always account for tide, current, and pressure bands in actual sailing."
         },
         {
           "id": "race-checklist",
           "title": "Pre-Race Checklist",
-          "content": "Tap the Checklist icon (list with lines) in the map controls panel to open the Pre-Race Checklist. The checklist has five sections: Rig (mast, rigging, running gear), Sails (halyards, battens, telltales, spinnaker), Safety (PFDs, horn, throwable, flares, VHF), Boat (bung, bilge, hatches, fire extinguisher), and Race Day (protest flag, class flag, timer sync, course number, crew brief, start plan). Tap any category header to expand it, then tap individual items to check them off. A progress bar at the top tracks your overall readiness. Tap 'Reset' to clear all checks before the next race, or 'Check All' to mark everything done when you know the boat is ready. Checklist state is session-only — it resets when you reload the app."
+          "content": "The Pre-Race Checklist is on the Races tab (tap Races in the bottom nav). It appears as a collapsible card at the top of the page, above the regatta schedules. The checklist has five sections: Rig (mast, rigging, running gear), Sails (halyards, battens, telltales, spinnaker), Safety (PFDs, horn, throwable, flares, VHF), Boat (bung, bilge, hatches, fire extinguisher), and Race Day (protest flag, class flag, timer sync, course number, crew brief, start plan). Tap any category header to expand it, then tap individual items to check them off. A progress bar tracks overall readiness. Tap 'Reset' to clear all checks before the next race, or 'Check All' to mark everything done. Checklist state is session-only and resets when you reload the app."
         }
       ]
     },
@@ -113,27 +113,27 @@
         {
           "id": "weather-overview",
           "title": "Weather Dashboard",
-          "content": "The Weather tab is in the bottom navigation bar (third from left). It shows a sailing conditions summary with a rating (Excellent through Poor) and tips, followed by current observations from all active NDBC stations in Western Lake Erie and the Detroit River. Wind data is displayed in knots with direction and gusts. A color-coded severity scale matches Beaufort categories. Tap Refresh to pull the latest data from NOAA."
+          "content": "The Weather tab shows: a sailing conditions summary (Excellent through Poor) with tactical tips; a Wind Shift History chart (90 minutes of wind direction from any active NDBC station — moved near the top so you see trends immediately); then current observations from all active NDBC stations in the area; and finally multi-day marine forecasts by zone. Tap Refresh to pull the latest data from NOAA."
         },
         {
           "id": "wind-data",
           "title": "Understanding Wind Data",
-          "content": "Wind is displayed in knots with direction shown as both a compass bearing in degrees and a compass abbreviation (e.g. 'ESE'). Color-coded severity bands map to Beaufort scale categories — green for calm/light air, yellow for breeze, orange for fresh, red for strong/gale. Data is sourced from NDBC buoy observations at shore stations and offshore buoys. Offshore buoys (Station 45005 W Lake Erie, 45132, 45142) are seasonal and show 'Not yet deployed' in early spring — they typically deploy in May."
+          "content": "Wind is displayed in knots with direction shown as both degrees and compass abbreviation (e.g. 'ESE'). Color-coded severity bands map to Beaufort scale categories — green for calm/light air, yellow for breeze, orange for fresh, red for strong/gale. Data is sourced from NDBC buoy observations at shore stations and offshore buoys. Offshore buoys (45005 W Lake Erie, 45132 Toledo Channel Light, 45142 Cleveland) are seasonal and show 'Not yet deployed' in early spring — they typically deploy in May."
         },
         {
           "id": "alerts",
           "title": "Weather Alerts",
-          "content": "MagellAIn monitors active NOAA weather alerts for your sailing area. Small Craft Advisories, Gale Warnings, and Thunderstorm Warnings appear as prominent amber banners on the Home and Weather screens. These alerts also feed into the AI coach, which can help you interpret conditions and decide whether to sail."
+          "content": "MagellAIn monitors active NOAA weather alerts for your sailing area. Small Craft Advisories, Gale Warnings, and Thunderstorm Warnings appear as prominent amber or red banners on the Home and Weather screens. These alerts also feed into the AI coach, which can help you interpret conditions and decide whether to sail."
         },
         {
           "id": "wind-shift-history",
           "title": "Wind Shift History",
-          "content": "The Weather tab includes a Wind Shift History section below the buoy station cards. Select any shore station using the dropdown, then view a chart of wind direction over the last 90 minutes. A summary line indicates whether the wind is veering (shifting clockwise) or backing (shifting counter-clockwise) and by how many degrees. Tap Refresh to reload the latest NDBC observation data. The same wind shift chart is also accessible directly from the Map tab via the Trending Up button in the controls panel."
+          "content": "The Weather tab includes a Wind Shift History section near the top of the page, right after the sailing conditions summary. Select any shore station using the dropdown, then view a chart of wind direction over the last 90 minutes. A summary line indicates whether the wind is veering (clockwise) or backing (counter-clockwise) and by how many degrees. Tap Refresh to reload the latest NDBC data. The same chart is accessible from the Map tab via the Tools tab (tap 'Wind Shifts')."
         },
         {
           "id": "forecast",
           "title": "Station Observations",
-          "content": "Each buoy station card shows wind speed and gust, wave height (where available), air temperature, water temperature, and barometric pressure. Active shore stations in our area include Marblehead OH (MRHO1), South Bass Island OH (SBIO1), Toledo Harbor OH (THRO1), and Dunkirk NY (DBLN6). Offshore seasonal buoys become available once deployed in spring."
+          "content": "Each buoy station card shows wind speed and gust, wave height (where available), air temperature, water temperature, and barometric pressure. Year-round shore stations include Toledo Harbor (THRO1), South Bass Island OH (SBIO1), and Marblehead OH (MRHO1). Seasonal offshore buoys — Toledo Channel Light (45132), W Lake Erie Buoy (45005), and Cleveland Buoy (45142) — become available once deployed in spring. Marine forecasts below the station cards cover the Detroit River/Lake St. Clair corridor (LEZ045) and Western Lake Erie open water zones."
         }
       ]
     },
@@ -150,7 +150,7 @@
         {
           "id": "streaming-responses",
           "title": "Streaming Responses with Live Weather",
-          "content": "The AI coach streams responses in real time — words appear as they are generated rather than arriving all at once after a delay. This means you start reading useful information within a second or two of sending a question. The coach also has access to live current conditions from the NDBC buoys when formulating a response, so if you ask what the wind is doing right now, it will reference actual observed readings from the nearest active station."
+          "content": "The AI coach streams responses in real time — words appear as they are generated rather than arriving all at once. This means you start reading useful information within a second or two of sending a question. The coach also has access to live current conditions from the NDBC buoys, so if you ask what the wind is doing right now, it will reference actual observed readings from the nearest active station."
         },
         {
           "id": "voice-input",
@@ -182,27 +182,27 @@
         {
           "id": "schedules",
           "title": "Race Schedules",
-          "content": "Access Races from Menu > Races or from the Home screen race card. It shows upcoming and past events from Ford Yacht Club, West Shore Sail Club, and DRYA series. Events include Wednesday Night at the Races (WNATR), weekend regattas, and championship series. Tap any event to expand and see race-by-race results and series standings."
+          "content": "Tap Races in the bottom nav to see upcoming and past events from Ford Yacht Club, West Shore Sail Club, and DRYA series — including Wednesday Night at the Races (WNATR), weekend regattas, and championship series. The Pre-Race Checklist card appears at the top of this screen. Tap any regatta to expand it and see race-by-race results and series standings."
         },
         {
           "id": "results",
           "title": "Race Results and Standings",
-          "content": "Tap any regatta to expand it. If results have been entered, you'll see each race row with finish date and fleet. Tap a race row to expand the full fleet result including boat names, sail numbers, positions, and elapsed/corrected times. Series standings are computed automatically from results within the regatta, showing points and place per fleet."
+          "content": "Tap any regatta to expand it. If results have been entered, you'll see each race row with status, course type, and wind. Expand a race to see the full fleet result with boat names, sail numbers, positions, and elapsed/corrected times. Series standings are computed automatically from results within the regatta, showing points and place per fleet. Export standings as a PDF using the PDF button."
         },
         {
           "id": "import-results",
           "title": "Importing Race Results from CSV",
-          "content": "Tap the 'Import' button on the Races screen (top-right) to open the CSV import wizard. The four-step wizard guides you through: (1) Upload — drag and drop or select a CSV file exported from YachtScoring, PHRF-LE, or any spreadsheet. (2) Column Mapping — the app auto-detects your column headers and maps sail number, boat name, skipper, elapsed time, corrected time, and finish position. Review and adjust as needed. (3) Select Race — choose an existing regatta and race number, or create a new one. (4) Preview and Confirm — review all entries before saving. Results are saved to your account and immediately appear in the Performance screen. Download a template CSV directly from the import page."
+          "content": "Tap the 'Import' button on the Races screen (top-right) to open the CSV import wizard. The four-step wizard guides you through: (1) Upload — select a CSV file exported from YachtScoring, PHRF-LE, or any spreadsheet. (2) Column Mapping — the app auto-detects your column headers and maps sail number, boat name, elapsed time, corrected time, and finish position. (3) Select Race — choose an existing regatta and race number, or create a new one. (4) Preview and Confirm — review all entries before saving. Results are saved to your account and immediately appear in the Performance screen."
         },
         {
           "id": "analytics",
           "title": "Performance Analytics",
-          "content": "Menu > Performance shows your full race history for your primary boat. Key stats at the top: total races, wins, podiums, and average finishing position. The season trend chart plots your position across races over time. Below that, Series Results show your standings in each active regatta series. The Race Log lists every race in reverse chronological order — tap any row to expand the full fleet result for that race. Tap the PDF button to export your complete race log and analytics."
+          "content": "Menu > Performance shows your full race history for your primary boat. Key stats at the top: total races, wins, podiums, average finishing position, and average VMG. The Season Trend chart plots your position across up to 20 recent races. Below that, Series Results show your standings in each active regatta. The Race Log lists every race in reverse chronological order — tap any row to expand the full fleet result. Tap the PDF button to export your complete race log and analytics."
         },
         {
           "id": "head-to-head",
           "title": "Head-to-Head Competitor Records",
-          "content": "The Performance screen includes a Head-to-Head section showing all competitors you've raced against in the same fleet. For each boat you'll see: number of shared races, your win/loss record, and the PHRF time correction advantage or disadvantage in seconds per mile. This helps you identify your closest rivals and understand where you win or lose on corrected time."
+          "content": "The Performance screen includes a Head-to-Head section showing all competitors you've raced against in the same fleet. For each boat you'll see: number of shared races, your win/loss record, and the PHRF time correction advantage or disadvantage in seconds per mile. A green/red win-rate bar gives a quick visual of your competitive record. This helps you identify your closest rivals and understand where you win or lose on corrected time."
         }
       ]
     },
@@ -214,7 +214,7 @@
         {
           "id": "crew-overview",
           "title": "Crew Messaging Overview",
-          "content": "Access Crew Messages from Menu > Crew Messages. The Messages screen has two tabs: Crews (group conversations tied to a boat or team) and Direct (one-on-one messages). You must be signed in to use messaging. All messages are saved to your account."
+          "content": "Access Crew Messages from the Crew tab in the bottom nav (or Menu > Crew Messages). The Messages screen has two tabs: Crews (group conversations tied to a boat or team) and Direct (one-on-one messages). You must be signed in to use messaging. All messages are saved to your account."
         },
         {
           "id": "crew-groups",
@@ -241,7 +241,7 @@
         {
           "id": "sos-contacts",
           "title": "SOS Text to Emergency Contacts",
-          "content": "After getting your location, tap any saved emergency contact's name to open a pre-filled SMS on your phone with your GPS coordinates and a Google Maps link. Tap Add on the Emergency page to save personal emergency contacts (name, phone, relationship). Contacts sync to your account. You can also set a primary emergency contact in Menu > Profile."
+          "content": "After getting your location on the Emergency page, tap any saved emergency contact to open a pre-filled SMS on your phone with your GPS coordinates and a Google Maps link. Tap Add on the Emergency page to save personal emergency contacts (name, phone, relationship). Contacts sync to your account. You can also set a primary emergency contact in Menu > Profile."
         },
         {
           "id": "float-plan",
@@ -263,12 +263,12 @@
         {
           "id": "offline-overview",
           "title": "How Offline Mode Works",
-          "content": "MagellAIn uses a service worker to cache app pages and recently loaded data so the app continues to function when you lose signal on the water. All five main screens (Home, Map, Weather, Coach, and Menu) remain accessible offline with cached content. An amber banner appears at the top of the screen automatically when your device goes offline, and disappears when connection is restored."
+          "content": "MagellAIn uses a service worker to cache app pages and recently loaded data so the app continues to function when you lose signal on the water. All main screens remain accessible offline with cached content. An amber banner appears at the top of the screen automatically when your device goes offline, and disappears when connection is restored."
         },
         {
           "id": "offline-gps",
           "title": "GPS Tracking Offline",
-          "content": "GPS track recording works fully offline — your device's GPS does not need an internet connection. Tracks recorded while offline are saved to your device's local storage and will sync to your account automatically the next time you open the app with a connection."
+          "content": "GPS track recording works fully offline — your device's GPS does not need an internet connection. The always-on GPS speedometer also works offline. Tracks recorded while offline are saved to your device's local storage and will sync to your account automatically the next time you open the app with a connection."
         },
         {
           "id": "offline-data",
@@ -290,7 +290,7 @@
         {
           "id": "units",
           "title": "Speed Units",
-          "content": "Choose your preferred wind and boat speed units under Menu > Settings > Speed Units. Options include knots (standard nautical, recommended for racing), miles per hour, kilometers per hour, and nautical miles per hour (same as knots, displayed as nm/h). Knots is the default setting."
+          "content": "The GPS speedometer chip on the map cycles through knots, mph, and km/h when tapped. Wind and boat speed units elsewhere default to knots. Knots is the standard nautical unit recommended for racing."
         },
         {
           "id": "theme",
