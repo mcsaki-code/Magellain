@@ -1,7 +1,7 @@
 // ─── Geography ───────────────────────────────────────────────────────
 export const FORD_YC = {
-  lat: 42.1244,
-  lng: -83.1333,
+  lat: 42.0904,
+  lng: -83.1713,
   name: "Ford Yacht Club",
   shortName: "FYC",
 } as const;
@@ -38,8 +38,8 @@ export const CLUBS = [
     id: "ford-yc",
     name: "Ford Yacht Club",
     shortName: "FYC",
-    lat: 42.1244,
-    lng: -83.1333,
+    lat: 42.0904,
+    lng: -83.1713,
     website: "https://www.fordyachtclub.com",
   },
   {
