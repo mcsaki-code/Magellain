@@ -40,6 +40,18 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('magellain-theme');var dark=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.add(dark?'dark':'light');}catch(e){}})();`,
           }}
         />
+        {/* Service worker registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+      console.log('[MagellAIn] SW registration failed:', err);
+    });
+  });
+}`,
+          }}
+        />
       </head>
       <body className="font-sans antialiased bg-background">
         <ThemeProvider

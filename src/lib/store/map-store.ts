@@ -1,6 +1,16 @@
 import { create } from "zustand";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from "@/lib/constants";
 
+// ─── Track Point type ───────────────────────────────────────────
+
+export interface TrackPoint {
+  lat: number;
+  lng: number;
+  timestamp: number;
+  speed_kts?: number | null;
+  heading?: number | null;
+}
+
 // ─── Course-related types ───────────────────────────────────────
 
 interface RaceCourse {
@@ -29,6 +39,13 @@ interface CourseLeg {
 
 // ─── Store ──────────────────────────────────────────────────────
 
+interface TrackMeta {
+  date: string;
+  distance_nm: number;
+  duration_s: number;
+  max_speed_kts: number;
+}
+
 interface MapState {
   center: [number, number];
   zoom: number;
@@ -45,6 +62,13 @@ interface MapState {
   showCourseOverlay: boolean;
   showTacticalAnalysis: boolean;
 
+  // Track replay state
+  activeTrackPoints: TrackPoint[] | null;
+  activeTrackId: string | null;
+  activeTrackMeta: TrackMeta | null;
+  playbackIndex: number;
+  isReplaying: boolean;
+
   setCenter: (center: [number, number]) => void;
   setZoom: (zoom: number) => void;
   setPitch: (pitch: number) => void;
@@ -60,6 +84,12 @@ interface MapState {
   setCourseLegs: (legs: CourseLeg[]) => void;
   toggleCourseOverlay: () => void;
   setShowTacticalAnalysis: (show: boolean) => void;
+
+  // Track replay actions
+  setActiveTrack: (id: string, points: TrackPoint[], meta: TrackMeta) => void;
+  clearActiveTrack: () => void;
+  setPlaybackIndex: (index: number) => void;
+  setIsReplaying: (isReplaying: boolean) => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -77,6 +107,13 @@ export const useMapStore = create<MapState>((set) => ({
   courseLegs: [],
   showCourseOverlay: true,
   showTacticalAnalysis: false,
+
+  // Track replay defaults
+  activeTrackPoints: null,
+  activeTrackId: null,
+  activeTrackMeta: null,
+  playbackIndex: 0,
+  isReplaying: false,
 
   setCenter: (center) => set({ center }),
   setZoom: (zoom) => set({ zoom }),
@@ -100,4 +137,24 @@ export const useMapStore = create<MapState>((set) => ({
   setCourseLegs: (legs) => set({ courseLegs: legs }),
   toggleCourseOverlay: () => set((s) => ({ showCourseOverlay: !s.showCourseOverlay })),
   setShowTacticalAnalysis: (show) => set({ showTacticalAnalysis: show }),
+
+  // Track replay actions
+  setActiveTrack: (id, points, meta) =>
+    set({
+      activeTrackId: id,
+      activeTrackPoints: points,
+      activeTrackMeta: meta,
+      playbackIndex: 0,
+      isReplaying: false,
+    }),
+  clearActiveTrack: () =>
+    set({
+      activeTrackId: null,
+      activeTrackPoints: null,
+      activeTrackMeta: null,
+      playbackIndex: 0,
+      isReplaying: false,
+    }),
+  setPlaybackIndex: (index) => set({ playbackIndex: index }),
+  setIsReplaying: (isReplaying) => set({ isReplaying }),
 }));

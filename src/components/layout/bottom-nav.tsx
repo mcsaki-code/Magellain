@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Compass, Map, Cloud, MessageSquare, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { OfflineIndicator } from "./offline-indicator";
 
 const navItems = [
   { key: "home",    label: "Home",    href: "/home",    icon: Compass },
@@ -17,7 +18,9 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav
+    <>
+      <OfflineIndicator />
+      <nav
       className="fixed bottom-0 left-0 right-0 z-50 bg-card"
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
@@ -55,5 +58,6 @@ export function BottomNav() {
         })}
       </div>
     </nav>
+    </>
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { createClient } from "@/lib/supabase/client";
-import { Trophy, Calendar, MapPin, ChevronRight, Loader2, Medal, Download } from "lucide-react";
+import { Trophy, Calendar, MapPin, ChevronRight, Loader2, Medal, Download, Upload } from "lucide-react";
 import type { Regatta, Race, Club, Boat } from "@/lib/types";
 import { exportSeriesStandingsPDF } from "@/lib/utils/pdf-export";
 
@@ -202,7 +203,16 @@ export default function RacesPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
-      <Header title="Races" />
+      <Header title="Races">
+        <Link
+          href="/races/import"
+          className="flex items-center gap-2 rounded-lg border border-muted-foreground/20 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          title="Import race results"
+        >
+          <Upload className="h-3.5 w-3.5" />
+          Import
+        </Link>
+      </Header>
       <div className="space-y-4 p-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">

@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.1.0",
-    "lastUpdated": "2026-03-24",
+    "version": "1.2.0",
+    "lastUpdated": "2026-03-25",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
   },
@@ -36,7 +36,7 @@
     "mapAndCharts": {
       "id": "map-charts",
       "title": "Map and Charts",
-      "description": "Interactive nautical charts with live data overlays and GPS track recording.",
+      "description": "Interactive nautical charts with live data overlays, GPS track recording, and track replay.",
       "items": [
         {
           "id": "map-overview",
@@ -52,6 +52,11 @@
           "id": "gps-track",
           "title": "GPS Track Recording",
           "content": "The GPS Tracker panel appears in the lower-right corner of the map. Tap 'Start' to begin recording your track — your device GPS will log position, speed, and heading continuously. Live stats show elapsed time, current speed in knots, total distance in nautical miles, and max speed. When finished, tap 'Stop' then 'Save' to store the track. Saved tracks sync to your account when signed in, or save locally if you are offline or not signed in."
+        },
+        {
+          "id": "track-replay",
+          "title": "Track Replay",
+          "content": "Tap the Route icon in the lower-left corner of the map to open the Track Replay panel. It lists all your saved tracks with date, duration, distance, and max speed. Tap a track to load it — the full route draws on the map in orange. Use the playback controls to Play, Pause, or Stop the replay. A pulsing dot moves along the route showing your position at each recorded moment. Choose from 1x, 5x, 20x, or 50x playback speed. Tap the eject icon to return to the track list without clearing the map."
         },
         {
           "id": "speedometer",
@@ -127,7 +132,7 @@
     "racing": {
       "id": "racing",
       "title": "Race Management",
-      "description": "Schedules, results, and performance analytics for your racing.",
+      "description": "Schedules, results, performance analytics, and race result import for your racing.",
       "items": [
         {
           "id": "schedules",
@@ -138,6 +143,11 @@
           "id": "results",
           "title": "Race Results",
           "content": "View results from completed races, imported from YachtScoring and club sources. Results show finish positions, corrected times for PHRF handicap races, and series standings by fleet. Tap any race row on the Performance screen to expand the full fleet result for that race."
+        },
+        {
+          "id": "import-results",
+          "title": "Importing Race Results from CSV",
+          "content": "Tap the 'Import' button on the Races screen (top-right) to open the CSV import wizard. The four-step wizard guides you through: (1) Upload — drag and drop or select a CSV file exported from YachtScoring, PHRF-LE, or any spreadsheet. (2) Column Mapping — the app auto-detects your column headers and maps sail number, boat name, skipper, elapsed time, corrected time, and finish position. Review and adjust as needed. (3) Select Race — choose an existing regatta and race number, or create a new one. (4) Preview and Confirm — review all entries before saving. Results are saved to your account and immediately appear in the Performance screen."
         },
         {
           "id": "analytics",
@@ -175,6 +185,33 @@
           "id": "sos-contacts",
           "title": "Emergency Contacts",
           "content": "Go to Menu > Emergency to save personal emergency contacts. Each contact can be called directly or sent an SOS text message that includes your current GPS coordinates. Contacts are synced to your account when signed in. You can also set a primary emergency contact in your profile (Menu > Profile) for quick access."
+        }
+      ]
+    },
+    "offlineMode": {
+      "id": "offline-mode",
+      "title": "Offline Mode",
+      "description": "MagellAIn keeps working even when you lose connectivity on the water.",
+      "items": [
+        {
+          "id": "offline-overview",
+          "title": "How Offline Mode Works",
+          "content": "MagellAIn uses a service worker to cache app pages and recently loaded data so the app continues to function when you lose signal on the water. All five main screens (Home, Map, Weather, Coach, and Menu) remain accessible offline with cached content. An amber banner appears at the top of the screen automatically when your device goes offline, and disappears when connection is restored."
+        },
+        {
+          "id": "offline-gps",
+          "title": "GPS Tracking Offline",
+          "content": "GPS track recording works fully offline — your device's GPS does not need an internet connection. Tracks recorded while offline are saved to your device's local storage and will sync to your account automatically the next time you open the app with a connection."
+        },
+        {
+          "id": "offline-data",
+          "title": "What Data Is Available Offline",
+          "content": "Weather data, race schedules, and AI coach conversations require an internet connection to refresh. However, the most recently loaded weather data, your saved race results, and your saved GPS tracks remain accessible from cache when you're offline. NOAA weather and buoy data is cached for up to one hour."
+        },
+        {
+          "id": "offline-page",
+          "title": "Offline Page",
+          "content": "If MagellAIn cannot load a page you haven't visited before due to no connection, you'll see the offline page with a prompt to return to home. Navigate to any recently visited screen and your cached data will be available."
         }
       ]
     },

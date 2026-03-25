@@ -17,7 +17,7 @@ export function MapView() {
   const [debugInfo, setDebugInfo] = useState("");
   const [raceMarks, setRaceMarks] = useState<Array<{ id: string; name: string; short_name: string; latitude: number; longitude: number; mark_type: string; color: string | null }>>([]);
 
-  const { center, zoom, showBuoyMarkers, setSelectedBuoy, showCourseOverlay, courseLegs, selectedCourse } = useMapStore();
+  const { center, zoom, showBuoyMarkers, setSelectedBuoy, showCourseOverlay, courseLegs, selectedCourse, activeTrackPoints, playbackIndex } = useMapStore();
   const { observations, fetchWeather, isLoading: weatherLoading } = useWeatherStore();
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -376,6 +376,104 @@ export function MapView() {
       syncCourseOverlay();
     }
   }, [showCourseOverlay, raceMarks, courseLegs, selectedCourse, syncCourseOverlay]);
+
+  // Handle track replay line rendering
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady.current) return;
+
+    // Remove old track layers and sources if they exist
+    if (m.getLayer("track-replay-line")) m.removeLayer("track-replay-line");
+    if (m.getLayer("track-replay-point-layer")) m.removeLayer("track-replay-point-layer");
+    if (m.getSource("track-replay")) m.removeSource("track-replay");
+    if (m.getSource("track-replay-point")) m.removeSource("track-replay-point");
+
+    if (!activeTrackPoints || activeTrackPoints.length === 0) {
+      return;
+    }
+
+    // Add track line as GeoJSON source and layer
+    const lineCoordinates = activeTrackPoints.map((pt) => [pt.lng, pt.lat]);
+
+    m.addSource("track-replay", {
+      type: "geojson",
+      data: {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "LineString",
+          coordinates: lineCoordinates,
+        },
+      },
+    });
+
+    m.addLayer({
+      id: "track-replay-line",
+      type: "line",
+      source: "track-replay",
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": "#F97316", // orange
+        "line-width": 3,
+        "line-opacity": 0.8,
+      },
+    });
+
+    // Add starting point marker
+    m.addSource("track-replay-point", {
+      type: "geojson",
+      data: {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Point",
+          coordinates: [activeTrackPoints[0].lng, activeTrackPoints[0].lat],
+        },
+      },
+    });
+
+    m.addLayer({
+      id: "track-replay-point-layer",
+      type: "circle",
+      source: "track-replay-point",
+      paint: {
+        "circle-color": "#F97316", // orange
+        "circle-radius": 7,
+        "circle-opacity": 1,
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#ffffff",
+      },
+    });
+
+    console.log("[MagellAIn] Track replay layers added, points:", activeTrackPoints.length);
+  }, [activeTrackPoints]);
+
+  // Handle playback point position updates
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady.current || !activeTrackPoints || activeTrackPoints.length === 0) {
+      return;
+    }
+
+    // Clamp playbackIndex to valid range
+    const validIndex = Math.max(0, Math.min(playbackIndex, activeTrackPoints.length - 1));
+    const point = activeTrackPoints[validIndex];
+
+    const source = m.getSource("track-replay-point");
+    if (source && "setData" in source) {
+      source.setData({
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Point",
+          coordinates: [point.lng, point.lat],
+        },
+      });
+    }
+  }, [activeTrackPoints, playbackIndex]);
 
   if (!token) {
     return (
