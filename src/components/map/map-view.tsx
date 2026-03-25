@@ -17,7 +17,7 @@ export function MapView() {
   const [debugInfo, setDebugInfo] = useState("");
   const [raceMarks, setRaceMarks] = useState<Array<{ id: string; name: string; short_name: string; latitude: number; longitude: number; mark_type: string; color: string | null }>>([]);
 
-  const { center, zoom, showBuoyMarkers, showWindArrows, setSelectedBuoy, showCourseOverlay, courseLegs, selectedCourse, activeTrackPoints, playbackIndex } = useMapStore();
+  const { center, zoom, showBuoyMarkers, showWindArrows, setSelectedBuoy, showCourseOverlay, courseLegs, selectedCourse, activeTrackPoints, playbackIndex, startLine, startLinePlacing, setStartLineEnd } = useMapStore();
   const { observations, fetchWeather, isLoading: weatherLoading } = useWeatherStore();
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -28,6 +28,12 @@ export function MapView() {
 
   const showMarkersRef = useRef(showBuoyMarkers);
   showMarkersRef.current = showBuoyMarkers;
+
+  const startLinePlacingRef = useRef(startLinePlacing);
+  startLinePlacingRef.current = startLinePlacing;
+
+  const setStartLineEndRef = useRef(setStartLineEnd);
+  setStartLineEndRef.current = setStartLineEnd;
 
   const syncMarkers = useCallback(() => {
     const m = map.current;
@@ -314,6 +320,14 @@ export function MapView() {
     });
     mapInstance.addControl(geolocate, "top-right");
 
+    // General map click handler — used for start line placement
+    mapInstance.on("click", (e) => {
+      const placing = startLinePlacingRef.current;
+      if (!placing) return;
+      const lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+      setStartLineEndRef.current(placing, lngLat);
+    });
+
     mapInstance.on("load", () => {
       mapReady.current = true;
       console.log("[MagellAIn] Map style loaded, syncing markers...");
@@ -491,6 +505,93 @@ export function MapView() {
       });
     }
   }, [activeTrackPoints, playbackIndex]);
+
+  // Update map cursor when in start line placement mode
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    m.getCanvas().style.cursor = startLinePlacing ? "crosshair" : "";
+  }, [startLinePlacing]);
+
+  // Render start line on the map
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady.current) return;
+
+    // Remove old start line layers / sources
+    if (m.getLayer("start-line-layer")) m.removeLayer("start-line-layer");
+    if (m.getLayer("start-line-boat-pin")) m.removeLayer("start-line-boat-pin");
+    if (m.getLayer("start-line-committee-pin")) m.removeLayer("start-line-committee-pin");
+    if (m.getSource("start-line")) m.removeSource("start-line");
+    if (m.getSource("start-line-boat")) m.removeSource("start-line-boat");
+    if (m.getSource("start-line-committee")) m.removeSource("start-line-committee");
+
+    const { boatEnd, committeeEnd } = startLine;
+
+    // Draw boat end pin
+    if (boatEnd) {
+      m.addSource("start-line-boat", {
+        type: "geojson",
+        data: { type: "Feature", properties: {}, geometry: { type: "Point", coordinates: boatEnd } },
+      });
+      m.addLayer({
+        id: "start-line-boat-pin",
+        type: "circle",
+        source: "start-line-boat",
+        paint: {
+          "circle-radius": 8,
+          "circle-color": "#22c55e",   // green = boat/port end
+          "circle-stroke-width": 2.5,
+          "circle-stroke-color": "#ffffff",
+          "circle-opacity": 0.95,
+        },
+      });
+    }
+
+    // Draw committee end pin
+    if (committeeEnd) {
+      m.addSource("start-line-committee", {
+        type: "geojson",
+        data: { type: "Feature", properties: {}, geometry: { type: "Point", coordinates: committeeEnd } },
+      });
+      m.addLayer({
+        id: "start-line-committee-pin",
+        type: "circle",
+        source: "start-line-committee",
+        paint: {
+          "circle-radius": 8,
+          "circle-color": "#3b82f6",   // blue = committee/starboard end
+          "circle-stroke-width": 2.5,
+          "circle-stroke-color": "#ffffff",
+          "circle-opacity": 0.95,
+        },
+      });
+    }
+
+    // Draw line between both ends
+    if (boatEnd && committeeEnd) {
+      m.addSource("start-line", {
+        type: "geojson",
+        data: {
+          type: "Feature",
+          properties: {},
+          geometry: { type: "LineString", coordinates: [boatEnd, committeeEnd] },
+        },
+      });
+      m.addLayer({
+        id: "start-line-layer",
+        type: "line",
+        source: "start-line",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#f59e0b",  // amber — visible on chart
+          "line-width": 4,
+          "line-opacity": 0.9,
+          "line-dasharray": [3, 1.5],
+        },
+      });
+    }
+  }, [startLine]);
 
   // Handle wind arrow layer
   useEffect(() => {

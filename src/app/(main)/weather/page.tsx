@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Header } from "@/components/layout/header";
 import { useWeatherStore } from "@/lib/store/weather-store";
 import { BUOY_STATIONS, getWindColor, WIND_COLORS } from "@/lib/constants";
-import { Wind, Waves, Thermometer, Gauge, AlertTriangle, RefreshCw, CloudRain, Sailboat } from "lucide-react";
+import { Wind, Waves, Thermometer, Gauge, AlertTriangle, RefreshCw, CloudRain, Sailboat, TrendingUp } from "lucide-react";
 import type { SailingConditions } from "@/lib/store/weather-store";
+import type { WindHistoryPoint } from "@/app/api/wind-history/[stationId]/route";
 
 function degToCompass(deg: number): string {
   const dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
@@ -148,6 +149,9 @@ export default function WeatherPage() {
           })}
         </div>
 
+        {/* Wind Shift History */}
+        <WindShiftSection observations={observations} />
+
         {/* Forecasts */}
         {forecasts.length > 0 && (
           <div className="space-y-3">
@@ -187,6 +191,176 @@ const CONDITION_STYLES: Record<string, { bg: string; border: string; text: strin
   marginal: { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-700 dark:text-orange-400", label: "Marginal" },
   not_recommended: { bg: "bg-red-500/10", border: "border-red-500/30", text: "text-red-700 dark:text-red-400", label: "Not Recommended" },
 };
+
+// ─── Wind Shift Section ──────────────────────────────────────────
+
+interface ObsMap {
+  [key: string]: { wind_speed_kts?: number | null; wind_direction_deg?: number | null } | undefined;
+}
+
+function WindShiftSection({ observations }: { observations: ObsMap }) {
+  const stationsWithData = BUOY_STATIONS.filter(
+    (s) => observations[s.id]?.wind_speed_kts != null
+  );
+  const defaultStation =
+    stationsWithData[0] ?? BUOY_STATIONS.find((s) => !/^\d/.test(s.id));
+
+  const [selectedId, setSelectedId] = useState<string>(defaultStation?.id ?? "");
+  const [points, setPoints] = useState<WindHistoryPoint[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(false);
+
+  const fetchHistory = useCallback(async (id: string) => {
+    if (!id) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/wind-history/${id}`);
+      if (!res.ok) throw new Error("fetch failed");
+      const data = await res.json();
+      setPoints(data.points ?? []);
+      setFetched(true);
+    } catch {
+      setPoints([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Auto-fetch on mount
+  useEffect(() => {
+    if (selectedId && !fetched) fetchHistory(selectedId);
+  }, [selectedId, fetched, fetchHistory]);
+
+  if (!selectedId) return null;
+
+  // Build mini SVG chart
+  const renderChart = () => {
+    if (loading) return (
+      <div className="flex h-24 items-center justify-center">
+        <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+    if (points.length < 2) return (
+      <p className="py-6 text-center text-sm text-muted-foreground">
+        No history available for this station.
+      </p>
+    );
+
+    const W = 320;
+    const H = 100;
+    const PAD = { top: 10, bottom: 22, left: 32, right: 10 };
+
+    const dirs = points.map((p) => p.wind_dir);
+    const speeds = points.map((p) => p.wind_speed);
+    const minDir = Math.min(...dirs);
+    const maxDir = Math.max(...dirs);
+    const range = Math.max(maxDir - minDir, 8);
+
+    const xScale = (i: number) =>
+      PAD.left + (i / (points.length - 1)) * (W - PAD.left - PAD.right);
+    const yScale = (d: number) =>
+      PAD.top + (1 - (d - minDir) / range) * (H - PAD.top - PAD.bottom);
+
+    const polyline = points
+      .map((p, i) => `${xScale(i).toFixed(1)},${yScale(p.wind_dir).toFixed(1)}`)
+      .join(" ");
+
+    const fmt = (ts: number) => {
+      const d = new Date(ts);
+      return `${d.getUTCHours().toString().padStart(2, "0")}:${d.getUTCMinutes().toString().padStart(2, "0")}`;
+    };
+
+    // Trend
+    const recent = dirs.slice(-3);
+    const older = dirs.slice(0, 3);
+    const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+    const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
+    const shift = recentAvg - olderAvg;
+    const currentSpeed = speeds[speeds.length - 1];
+
+    return (
+      <div>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }}>
+          {/* Mid grid line */}
+          <line
+            x1={PAD.left} y1={yScale((minDir + maxDir) / 2)}
+            x2={W - PAD.right} y2={yScale((minDir + maxDir) / 2)}
+            stroke="hsl(var(--border))" strokeWidth="0.5" strokeDasharray="4,3"
+          />
+          {/* Y labels */}
+          <text x={PAD.left - 4} y={yScale(maxDir) + 4} fontSize="10" textAnchor="end" className="fill-muted-foreground">
+            {Math.round(maxDir)}°
+          </text>
+          <text x={PAD.left - 4} y={yScale(minDir) + 4} fontSize="10" textAnchor="end" className="fill-muted-foreground">
+            {Math.round(minDir)}°
+          </text>
+          {/* Wind direction line */}
+          <polyline points={polyline} fill="none" stroke="#0ea5e9" strokeWidth="2.5"
+            strokeLinejoin="round" strokeLinecap="round" />
+          {/* End dot */}
+          <circle cx={xScale(points.length - 1)} cy={yScale(dirs[dirs.length - 1])}
+            r="4" fill="#0ea5e9" stroke="white" strokeWidth="1.5" />
+          {/* X labels */}
+          <text x={xScale(0)} y={H - 4} fontSize="10" textAnchor="middle" className="fill-muted-foreground">
+            {fmt(points[0].timestamp)}
+          </text>
+          <text x={xScale(points.length - 1)} y={H - 4} fontSize="10" textAnchor="middle" className="fill-muted-foreground">
+            {fmt(points[points.length - 1].timestamp)}
+          </text>
+        </svg>
+        {/* Summary row */}
+        <div className="mt-2 flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2 text-sm">
+          <div>
+            <span className="font-semibold">{Math.abs(shift) < 2 ? "Steady" : shift > 0 ? "Veering" : "Backing"}</span>
+            {Math.abs(shift) >= 2 && (
+              <span className="ml-1.5 text-muted-foreground text-xs">
+                {Math.abs(shift).toFixed(1)}° {shift > 0 ? "clockwise" : "counter-clockwise"}
+              </span>
+            )}
+          </div>
+          <div className="text-right text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">{currentSpeed.toFixed(1)} kts</span>
+            <span className="ml-1">now</span>
+          </div>
+        </div>
+        <p className="mt-1 text-[10px] text-muted-foreground">
+          Veering = wind shifting clockwise (S→SW→W). Backing = counter-clockwise.
+          In the northern hemisphere, a veering wind typically indicates an approaching warm front.
+        </p>
+      </div>
+    );
+  };
+
+  return (
+    <div className="rounded-xl border bg-card p-4 shadow-sm">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-ocean" />
+          <h2 className="text-sm font-semibold text-muted-foreground">WIND SHIFT HISTORY</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedId}
+            onChange={(e) => { setSelectedId(e.target.value); setFetched(false); setPoints([]); }}
+            className="rounded border border-border bg-background px-2 py-0.5 text-xs text-foreground focus:outline-none"
+          >
+            {(stationsWithData.length > 0 ? stationsWithData : BUOY_STATIONS.filter((s) => !/^\d/.test(s.id))).map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <button
+            onClick={() => fetchHistory(selectedId)}
+            disabled={loading}
+            className="rounded p-1 hover:bg-muted disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${loading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+      </div>
+      {renderChart()}
+    </div>
+  );
+}
 
 function SailingConditionsCard({ conditions }: { conditions: SailingConditions }) {
   const style = CONDITION_STYLES[conditions.rating] ?? CONDITION_STYLES.fair;

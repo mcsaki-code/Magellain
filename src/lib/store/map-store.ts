@@ -46,6 +46,11 @@ interface TrackMeta {
   max_speed_kts: number;
 }
 
+export interface StartLine {
+  boatEnd: [number, number] | null;   // [lng, lat]
+  committeeEnd: [number, number] | null;
+}
+
 interface MapState {
   center: [number, number];
   zoom: number;
@@ -69,6 +74,14 @@ interface MapState {
   playbackIndex: number;
   isReplaying: boolean;
 
+  // Start line state
+  startLine: StartLine;
+  startLinePlacing: "boat" | "committee" | null;
+  showStartLineTool: boolean;
+
+  // Wind shift state
+  showWindShift: boolean;
+
   setCenter: (center: [number, number]) => void;
   setZoom: (zoom: number) => void;
   setPitch: (pitch: number) => void;
@@ -90,6 +103,15 @@ interface MapState {
   clearActiveTrack: () => void;
   setPlaybackIndex: (index: number) => void;
   setIsReplaying: (isReplaying: boolean) => void;
+
+  // Start line actions
+  setStartLineEnd: (end: "boat" | "committee", lngLat: [number, number]) => void;
+  clearStartLine: () => void;
+  setStartLinePlacing: (mode: "boat" | "committee" | null) => void;
+  setShowStartLineTool: (show: boolean) => void;
+
+  // Wind shift actions
+  toggleWindShift: () => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -114,6 +136,14 @@ export const useMapStore = create<MapState>((set) => ({
   activeTrackMeta: null,
   playbackIndex: 0,
   isReplaying: false,
+
+  // Start line defaults
+  startLine: { boatEnd: null, committeeEnd: null },
+  startLinePlacing: null,
+  showStartLineTool: false,
+
+  // Wind shift defaults
+  showWindShift: false,
 
   setCenter: (center) => set({ center }),
   setZoom: (zoom) => set({ zoom }),
@@ -157,4 +187,22 @@ export const useMapStore = create<MapState>((set) => ({
     }),
   setPlaybackIndex: (index) => set({ playbackIndex: index }),
   setIsReplaying: (isReplaying) => set({ isReplaying }),
+
+  // Start line actions
+  setStartLineEnd: (end, lngLat) =>
+    set((s) => ({
+      startLine: {
+        ...s.startLine,
+        boatEnd: end === "boat" ? lngLat : s.startLine.boatEnd,
+        committeeEnd: end === "committee" ? lngLat : s.startLine.committeeEnd,
+      },
+      startLinePlacing: null,
+    })),
+  clearStartLine: () =>
+    set({ startLine: { boatEnd: null, committeeEnd: null }, startLinePlacing: null }),
+  setStartLinePlacing: (mode) => set({ startLinePlacing: mode }),
+  setShowStartLineTool: (show) => set({ showStartLineTool: show }),
+
+  // Wind shift actions
+  toggleWindShift: () => set((s) => ({ showWindShift: !s.showWindShift })),
 }));

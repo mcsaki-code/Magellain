@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.4.0",
+    "version": "1.5.0",
     "lastUpdated": "2026-03-25",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
@@ -8,8 +8,8 @@
   "about": {
     "title": "About MagellAIn",
     "subtitle": "Sailing Intelligence for Great Lakes Racers",
-    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management and analytics, GPS track recording and replay, race course tactical analysis, crew messaging, offline support, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
-    "version": "1.4",
+    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management and analytics, GPS track recording and replay, race course tactical analysis, start line bias calculation, wind shift tracking, crew messaging, offline support, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
+    "version": "1.5",
     "builtFor": "Ford Yacht Club, West Shore Sail Club, and the DRYA racing community"
   },
   "features": [
@@ -42,6 +42,18 @@
       "title": "Race Courses and Tactical Analysis",
       "summary": "Select any FYC or WSSC course and get leg-by-leg tactical advice using live wind data.",
       "details": "The Race Courses panel on the Map screen lets you choose from all active race courses stored in the database. Selecting a course shows its legs: mark name, rounding direction, bearing, and distance. Toggle course marks on the chart as colored pins. Tap 'AI Tactical Analysis' to see each leg's point of sail (Close Hauled, Beam Reach, Running, etc.) calculated from current NDBC wind direction, with specific tactical advice for conditions — upwind depower tips in heavy air, VMG running guidance downwind, spinnaker advice on reaching legs."
+    },
+    {
+      "id": "start-line-bias",
+      "title": "Start Line Bias Tool",
+      "summary": "Mark the two ends of your start line on the chart and instantly see which end is favored based on live wind data.",
+      "details": "Open the Start Line Bias tool from the Flag button in the map controls panel. Tap 'Boat / Pin End' then tap its position on the chart, then do the same for 'Committee Boat End.' MagellAIn calculates the bias angle — how far the line deviates from perpendicular to the wind — and tells you which end is favored and by how many degrees. The line draws on the chart in amber with color-coded pins. Bias under 2° is flagged as a square line. Wind direction is pulled automatically from the nearest active NDBC buoy. Use in the 5-15 minutes before your start gun."
+    },
+    {
+      "id": "wind-shift-graph",
+      "title": "Wind Shift Tracking",
+      "summary": "See the last 90 minutes of wind direction history from any active NDBC station as a live chart on the map or weather screen.",
+      "details": "The Wind Shift panel on the Map tab (Trending Up button in controls) and the Wind Shift History section on the Weather tab show a time-series chart of wind direction over the last 90 minutes from any NDBC shore station you select. The chart highlights veering (clockwise shift) or backing (counter-clockwise shift) trends and shows the current wind speed. Veering wind in the northern hemisphere typically signals an approaching warm front; backing may indicate building pressure. Data is fetched from the NDBC realtime observation feed, typically updated every 10-30 minutes."
     },
     {
       "id": "gps-tracking",

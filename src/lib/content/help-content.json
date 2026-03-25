@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.4.0",
+    "version": "1.5.0",
     "lastUpdated": "2026-03-25",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
@@ -82,6 +82,16 @@
           "id": "speedometer",
           "title": "Speedometer and GPS Speed",
           "content": "The on-screen speedometer displays your current GPS boat speed and heading when location tracking is active. You can share your live speed and conditions with the AI coach by mentioning them in your conversation (e.g. 'I'm doing 5.2 knots upwind in 14 knots of breeze — any trim tips?')."
+        },
+        {
+          "id": "start-line-bias",
+          "title": "Start Line Bias Tool",
+          "content": "Tap the Flag button in the map controls panel (left side) to open the Start Line Bias tool. Place the two ends of your start line on the chart: first tap 'Boat / Pin End,' then tap the map where the boat end of the line is, then tap 'Committee Boat End' and tap the committee boat position on the chart. The tool calculates the bias angle — how many degrees the line is tipped from perpendicular to the current wind. A positive bias (green) means the port/pin end is favored; a negative bias means the starboard/committee end is favored. Bias under 2° is treated as a square line. The line itself draws on the chart in amber with a green dot at the boat end and blue dot at the committee end. Wind direction is pulled automatically from the nearest active NDBC buoy. Tap 'Clear Line' to reset and re-mark. This tool works best in the 5-15 minutes before your start, after the wind has settled. Reassess if the wind shifts significantly."
+        },
+        {
+          "id": "wind-shift-panel",
+          "title": "Wind Shift Graph",
+          "content": "Tap the Trending Up button in the map controls panel to open the Wind Shift panel, which shows the last 90 minutes of wind direction changes from any active NDBC shore station. Use the dropdown to switch between stations. The graph plots wind direction over time, and the summary line tells you if the wind is veering (shifting clockwise — S to SW to W) or backing (shifting counter-clockwise). Veering wind in the northern hemisphere often indicates an approaching warm front. Backing wind can indicate increased pressure and stronger conditions ahead. This panel is also available on the Weather tab as 'Wind Shift History.' Data comes directly from the NDBC realtime observation feed, typically updated every 10-30 minutes depending on the station."
         }
       ]
     },
@@ -104,6 +114,11 @@
           "id": "alerts",
           "title": "Weather Alerts",
           "content": "MagellAIn monitors active NOAA weather alerts for your sailing area. Small Craft Advisories, Gale Warnings, and Thunderstorm Warnings appear as prominent amber banners on the Home and Weather screens. These alerts also feed into the AI coach, which can help you interpret conditions and decide whether to sail."
+        },
+        {
+          "id": "wind-shift-history",
+          "title": "Wind Shift History",
+          "content": "The Weather tab includes a Wind Shift History section below the buoy station cards. Select any shore station using the dropdown, then view a chart of wind direction over the last 90 minutes. A summary line indicates whether the wind is veering (shifting clockwise) or backing (shifting counter-clockwise) and by how many degrees. Tap Refresh to reload the latest NDBC observation data. The same wind shift chart is also accessible directly from the Map tab via the Trending Up button in the controls panel."
         },
         {
           "id": "forecast",

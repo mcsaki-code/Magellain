@@ -2,13 +2,26 @@
 
 import { useMapStore } from "@/lib/store/map-store";
 import { useWeatherStore } from "@/lib/store/weather-store";
-import { Layers, RotateCcw, RefreshCw, Anchor, Navigation } from "lucide-react";
+import { Layers, RotateCcw, RefreshCw, Anchor, Navigation, Flag, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { FORD_YC } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 export function MapControls() {
   const [showLayers, setShowLayers] = useState(false);
-  const { showBuoyMarkers, showWindArrows, toggleBuoyMarkers, toggleWindArrows, resetView, setCenter, setZoom } = useMapStore();
+  const {
+    showBuoyMarkers,
+    showWindArrows,
+    toggleBuoyMarkers,
+    toggleWindArrows,
+    resetView,
+    setCenter,
+    setZoom,
+    showStartLineTool,
+    setShowStartLineTool,
+    showWindShift,
+    toggleWindShift,
+  } = useMapStore();
   const { fetchWeather, isLoading, lastFetched } = useWeatherStore();
 
   return (
@@ -33,7 +46,7 @@ export function MapControls() {
             />
             Buoy Stations
           </label>
-          <label className="flex items-center gap-2 text-sm">
+          <label className="mb-1.5 flex items-center gap-2 text-sm">
             <input
               type="checkbox"
               checked={showWindArrows}
@@ -41,6 +54,15 @@ export function MapControls() {
               className="rounded"
             />
             Wind Arrows
+          </label>
+          <label className="mb-1.5 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={showWindShift}
+              onChange={toggleWindShift}
+              className="rounded"
+            />
+            Wind Shift Graph
           </label>
           <div className="mt-2 flex flex-col gap-1 border-t border-border pt-2">
             <button
@@ -59,7 +81,7 @@ export function MapControls() {
         </div>
       )}
 
-      {/* Reset view (show all stations) */}
+      {/* Reset view */}
       <button
         onClick={resetView}
         className="rounded-lg bg-card/90 p-2 shadow-md backdrop-blur-sm hover:bg-card"
@@ -76,6 +98,34 @@ export function MapControls() {
         title={lastFetched ? `Last updated: ${new Date(lastFetched).toLocaleTimeString()}` : "Refresh weather"}
       >
         <RefreshCw className={`h-5 w-5 text-foreground ${isLoading ? "animate-spin" : ""}`} />
+      </button>
+
+      {/* Start Line Bias tool */}
+      <button
+        onClick={() => setShowStartLineTool(!showStartLineTool)}
+        className={cn(
+          "rounded-lg p-2 shadow-md backdrop-blur-sm",
+          showStartLineTool
+            ? "bg-ocean text-white"
+            : "bg-card/90 hover:bg-card text-foreground"
+        )}
+        title="Start Line Bias"
+      >
+        <Flag className="h-5 w-5" />
+      </button>
+
+      {/* Wind Shift graph */}
+      <button
+        onClick={toggleWindShift}
+        className={cn(
+          "rounded-lg p-2 shadow-md backdrop-blur-sm",
+          showWindShift
+            ? "bg-ocean text-white"
+            : "bg-card/90 hover:bg-card text-foreground"
+        )}
+        title="Wind Shifts"
+      >
+        <TrendingUp className="h-5 w-5" />
       </button>
     </div>
   );
