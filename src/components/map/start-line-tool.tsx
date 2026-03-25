@@ -112,8 +112,11 @@ export function StartLineTool() {
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-30">
-      {/* Backdrop tap to dismiss */}
-      <div className="absolute inset-0 -top-[100dvh]" onClick={handleClose} />
+      {/* Backdrop tap to dismiss — only when NOT in active placement mode
+          (when placing, clicks must reach the Mapbox canvas to drop the pin) */}
+      {startLinePlacing === null && (
+        <div className="absolute inset-0 -top-[100dvh]" onClick={handleClose} />
+      )}
 
       <div className="relative rounded-t-2xl bg-card shadow-[0_-4px_32px_rgba(0,0,0,0.18)] backdrop-blur-md">
         {/* Drag handle */}

@@ -27,14 +27,14 @@ import {
   Route, Navigation, Flag, ChevronDown,
   Play, Square, Pause, RotateCcw, Save,
   Timer, Gauge, MapPin, Ruler, Compass,
-  Sparkles, Loader2, X,
+  Sparkles, Loader2, X, Sailboat, TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TrackPoint } from "@/lib/store/map-store";
 
 // ─── Types shared across tabs ─────────────────────────────────────
 
-type DrawerTab = "courses" | "gps" | "timer";
+type DrawerTab = "courses" | "gps" | "timer" | "tools";
 
 interface RaceMark {
   id: string; name: string; short_name: string;
@@ -97,7 +97,11 @@ function computePhase(target: number | null): { phase: TimerPhase; remainingMs: 
 
 export function MapBottomDrawer() {
   const [activeTab, setActiveTab] = useState<DrawerTab | null>(null);
-  const { setDrawerActiveTab } = useMapStore();
+  const {
+    setDrawerActiveTab,
+    showWindShift, toggleWindShift,
+    showStartLineTool, setShowStartLineTool, clearStartLine,
+  } = useMapStore();
 
   const toggle = (tab: DrawerTab) => {
     const newTab = activeTab === tab ? null : tab;
@@ -444,6 +448,51 @@ export function MapBottomDrawer() {
             </div>
           )}
 
+          {/* ─ Race Tools panel ──────────────────────────────────── */}
+          {activeTab === "tools" && (
+            <div className="pb-4">
+              <div className="flex items-center gap-2 px-4 pb-2 pt-1">
+                <Sailboat className="h-5 w-5 text-ocean" />
+                <span className="text-base font-bold text-foreground">Race Tools</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 border-t border-border px-4 pt-3">
+                {/* Wind Shifts */}
+                <button
+                  onClick={() => { toggleWindShift(); toggle("tools"); }}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-xl border px-4 py-4 text-sm font-medium transition-all active:scale-95",
+                    showWindShift
+                      ? "border-ocean bg-ocean/10 text-ocean"
+                      : "border-border bg-muted/30 text-foreground hover:bg-muted"
+                  )}
+                >
+                  <TrendingUp className="h-6 w-6" />
+                  <span>Wind Shifts</span>
+                </button>
+                {/* Start Line Bias */}
+                <button
+                  onClick={() => {
+                    if (showStartLineTool) { setShowStartLineTool(false); clearStartLine(); }
+                    else setShowStartLineTool(true);
+                    toggle("tools");
+                  }}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-xl border px-4 py-4 text-sm font-medium transition-all active:scale-95",
+                    showStartLineTool
+                      ? "border-ocean bg-ocean/10 text-ocean"
+                      : "border-border bg-muted/30 text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Flag className="h-6 w-6" />
+                  <span>Start Line</span>
+                </button>
+              </div>
+              <p className="mt-3 px-4 text-center text-[10px] text-muted-foreground">
+                Wind Shifts graphs recent direction changes.{"\n"}Start Line sets marks for bias calculation.
+              </p>
+            </div>
+          )}
+
           {/* ─ GPS Track panel (always mounted while recording) ───── */}
           <div className={cn("pb-4", activeTab !== "gps" && "hidden")}>
             <div className="flex items-center justify-between px-4 pb-3">
@@ -583,7 +632,7 @@ export function MapBottomDrawer() {
       )}
 
       {/* ── Tab bar (always interactive) ───────────────────────────── */}
-      <div className="relative z-10 pointer-events-auto grid grid-cols-3 border-t border-border bg-card backdrop-blur-md">
+      <div className="relative z-10 pointer-events-auto grid grid-cols-4 border-t border-border bg-card backdrop-blur-md">
 
         {/* Courses tab */}
         <button onClick={() => toggle("courses")}
@@ -629,6 +678,21 @@ export function MapBottomDrawer() {
           <span className="tabular-nums">{timerLabel}</span>
           {timerIsActive && activeTab !== "timer" && (
             <div className={cn("h-1 w-1 rounded-full", timerPhaseColor.replace("text-", "bg-"))} />
+          )}
+        </button>
+
+        {/* Race Tools tab */}
+        <button onClick={() => toggle("tools")}
+          className={cn(
+            "flex flex-col items-center gap-0.5 py-3 min-h-[52px] text-xs font-medium transition-colors",
+            activeTab === "tools" ? "text-ocean" :
+              (showWindShift || showStartLineTool) ? "text-ocean" :
+              "text-muted-foreground hover:text-foreground"
+          )}>
+          <Sailboat className="h-5 w-5" />
+          <span>Tools</span>
+          {(showWindShift || showStartLineTool) && activeTab !== "tools" && (
+            <div className="h-1 w-1 rounded-full bg-ocean" />
           )}
         </button>
 

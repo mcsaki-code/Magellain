@@ -90,7 +90,7 @@ interface MapState {
   showChecklist: boolean;
 
   // Drawer coordination
-  drawerActiveTab: "courses" | "gps" | "timer" | null;
+  drawerActiveTab: "courses" | "gps" | "timer" | "tools" | null;
 
   setCenter: (center: [number, number]) => void;
   setZoom: (zoom: number) => void;
@@ -131,7 +131,7 @@ interface MapState {
   toggleChecklist: () => void;
 
   // Drawer coordination actions
-  setDrawerActiveTab: (tab: "courses" | "gps" | "timer" | null) => void;
+  setDrawerActiveTab: (tab: "courses" | "gps" | "timer" | "tools" | null) => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({

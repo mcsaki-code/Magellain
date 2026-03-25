@@ -6,7 +6,6 @@ import { BuoyPanel } from "@/components/map/buoy-panel";
 import { Speedometer } from "@/components/map/speedometer";
 import { TacticalAnalysis } from "@/components/map/tactical-analysis";
 import { MapBottomDrawer } from "@/components/map/map-bottom-drawer";
-import { RaceToolsFab } from "@/components/map/race-tools-fab";
 import { WindShiftPanel } from "@/components/map/wind-shift-panel";
 import { StartLineTool } from "@/components/map/start-line-tool";
 
@@ -43,9 +42,6 @@ export default function MapPage() {
 
       {/* Unified bottom drawer — Courses | GPS Track | Race Timer tabs */}
       <MapBottomDrawer />
-
-      {/* Race Tools FAB (bottom-right) — Wind Shift + Start Line Bias */}
-      <RaceToolsFab />
 
       {/* Race tool bottom sheets — mutually exclusive, z-30, above drawer */}
       <WindShiftPanel />
