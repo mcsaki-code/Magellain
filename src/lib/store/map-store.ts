@@ -82,6 +82,13 @@ interface MapState {
   // Wind shift state
   showWindShift: boolean;
 
+  // Laylines state
+  showLaylines: boolean;
+  tackingAngle: number; // degrees off the wind (default 42°)
+
+  // Race checklist state
+  showChecklist: boolean;
+
   setCenter: (center: [number, number]) => void;
   setZoom: (zoom: number) => void;
   setPitch: (pitch: number) => void;
@@ -112,6 +119,13 @@ interface MapState {
 
   // Wind shift actions
   toggleWindShift: () => void;
+
+  // Laylines actions
+  toggleLaylines: () => void;
+  setTackingAngle: (angle: number) => void;
+
+  // Race checklist actions
+  toggleChecklist: () => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -144,6 +158,13 @@ export const useMapStore = create<MapState>((set) => ({
 
   // Wind shift defaults
   showWindShift: false,
+
+  // Laylines defaults
+  showLaylines: false,
+  tackingAngle: 42,
+
+  // Race checklist defaults
+  showChecklist: false,
 
   setCenter: (center) => set({ center }),
   setZoom: (zoom) => set({ zoom }),
@@ -205,4 +226,11 @@ export const useMapStore = create<MapState>((set) => ({
 
   // Wind shift actions
   toggleWindShift: () => set((s) => ({ showWindShift: !s.showWindShift })),
+
+  // Laylines actions
+  toggleLaylines: () => set((s) => ({ showLaylines: !s.showLaylines })),
+  setTackingAngle: (angle) => set({ tackingAngle: angle }),
+
+  // Race checklist actions
+  toggleChecklist: () => set((s) => ({ showChecklist: !s.showChecklist })),
 }));

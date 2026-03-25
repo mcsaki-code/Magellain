@@ -11,6 +11,7 @@ import { TrackReplay } from "@/components/map/track-replay";
 import { RaceTimer } from "@/components/map/race-timer";
 import { StartLineTool } from "@/components/map/start-line-tool";
 import { WindShiftPanel } from "@/components/map/wind-shift-panel";
+import { RaceChecklist } from "@/components/map/race-checklist";
 
 // mapbox-gl accesses `window` at import time → must skip SSR
 const MapView = dynamic(
@@ -39,6 +40,7 @@ export default function MapPage() {
       <RaceTimer />
       <StartLineTool />
       <WindShiftPanel />
+      <RaceChecklist />
     </div>
   );
 }

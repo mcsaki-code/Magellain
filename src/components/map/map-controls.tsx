@@ -2,7 +2,7 @@
 
 import { useMapStore } from "@/lib/store/map-store";
 import { useWeatherStore } from "@/lib/store/weather-store";
-import { Layers, RotateCcw, RefreshCw, Anchor, Navigation, Flag, TrendingUp } from "lucide-react";
+import { Layers, RotateCcw, RefreshCw, Anchor, Navigation, Flag, TrendingUp, LayoutList } from "lucide-react";
 import { useState } from "react";
 import { FORD_YC } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,12 @@ export function MapControls() {
     setShowStartLineTool,
     showWindShift,
     toggleWindShift,
+    showLaylines,
+    toggleLaylines,
+    tackingAngle,
+    setTackingAngle,
+    showChecklist,
+    toggleChecklist,
   } = useMapStore();
   const { fetchWeather, isLoading, lastFetched } = useWeatherStore();
 
@@ -64,6 +70,30 @@ export function MapControls() {
             />
             Wind Shift Graph
           </label>
+          <label className="mb-1 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={showLaylines}
+              onChange={toggleLaylines}
+              className="rounded"
+            />
+            Laylines
+          </label>
+          {showLaylines && (
+            <div className="mb-1.5 ml-5 flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Tacking angle</span>
+              <input
+                type="range"
+                min={30}
+                max={55}
+                step={1}
+                value={tackingAngle}
+                onChange={(e) => setTackingAngle(Number(e.target.value))}
+                className="h-1 w-20 accent-ocean"
+              />
+              <span className="w-8 text-xs font-semibold text-ocean">{tackingAngle}°</span>
+            </div>
+          )}
           <div className="mt-2 flex flex-col gap-1 border-t border-border pt-2">
             <button
               onClick={() => { setCenter([FORD_YC.lng, FORD_YC.lat]); setZoom(13); }}
@@ -126,6 +156,20 @@ export function MapControls() {
         title="Wind Shifts"
       >
         <TrendingUp className="h-5 w-5" />
+      </button>
+
+      {/* Race Checklist */}
+      <button
+        onClick={toggleChecklist}
+        className={cn(
+          "rounded-lg p-2 shadow-md backdrop-blur-sm",
+          showChecklist
+            ? "bg-ocean text-white"
+            : "bg-card/90 hover:bg-card text-foreground"
+        )}
+        title="Pre-Race Checklist"
+      >
+        <LayoutList className="h-5 w-5" />
       </button>
     </div>
   );

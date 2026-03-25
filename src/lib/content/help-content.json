@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.5.0",
+    "version": "1.6.0",
     "lastUpdated": "2026-03-25",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
@@ -92,6 +92,16 @@
           "id": "wind-shift-panel",
           "title": "Wind Shift Graph",
           "content": "Tap the Trending Up button in the map controls panel to open the Wind Shift panel, which shows the last 90 minutes of wind direction changes from any active NDBC shore station. Use the dropdown to switch between stations. The graph plots wind direction over time, and the summary line tells you if the wind is veering (shifting clockwise — S to SW to W) or backing (shifting counter-clockwise). Veering wind in the northern hemisphere often indicates an approaching warm front. Backing wind can indicate increased pressure and stronger conditions ahead. This panel is also available on the Weather tab as 'Wind Shift History.' Data comes directly from the NDBC realtime observation feed, typically updated every 10-30 minutes depending on the station."
+        },
+        {
+          "id": "laylines",
+          "title": "Layline Overlay",
+          "content": "Enable laylines from the Layers panel (tap the Layers icon in map controls, then check 'Laylines'). Laylines appear as dashed lines extending from the windward mark — green for port tack, red for starboard tack. They show you exactly where to tack to fetch the mark on either tack. The tacking angle slider (30–55°, default 42°) lets you tune the calculation to your boat and conditions: a flat-water J/70 in 15 knots might tack in 40°, while a heavy-displacement PHRF boat in chop might be 48°. Laylines require a race course to be selected in the Course Panel and live wind data from an active NDBC station. They update automatically when wind direction changes. Note: laylines shown are theoretical — always account for tide, current, and pressure bands in your actual sailing."
+        },
+        {
+          "id": "race-checklist",
+          "title": "Pre-Race Checklist",
+          "content": "Tap the Checklist icon (list with lines) in the map controls panel to open the Pre-Race Checklist. The checklist has five sections: Rig (mast, rigging, running gear), Sails (halyards, battens, telltales, spinnaker), Safety (PFDs, horn, throwable, flares, VHF), Boat (bung, bilge, hatches, fire extinguisher), and Race Day (protest flag, class flag, timer sync, course number, crew brief, start plan). Tap any category header to expand it, then tap individual items to check them off. A progress bar at the top tracks your overall readiness. Tap 'Reset' to clear all checks before the next race, or 'Check All' to mark everything done when you know the boat is ready. Checklist state is session-only — it resets when you reload the app."
         }
       ]
     },

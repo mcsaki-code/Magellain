@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.5.0",
+    "version": "1.6.0",
     "lastUpdated": "2026-03-25",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
@@ -8,8 +8,8 @@
   "about": {
     "title": "About MagellAIn",
     "subtitle": "Sailing Intelligence for Great Lakes Racers",
-    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management and analytics, GPS track recording and replay, race course tactical analysis, start line bias calculation, wind shift tracking, crew messaging, offline support, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
-    "version": "1.5",
+    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management and analytics, GPS track recording and replay, race course tactical analysis, start line bias calculation, wind shift tracking, layline overlay, pre-race checklist, crew messaging, offline support, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
+    "version": "1.6",
     "builtFor": "Ford Yacht Club, West Shore Sail Club, and the DRYA racing community"
   },
   "features": [
@@ -54,6 +54,18 @@
       "title": "Wind Shift Tracking",
       "summary": "See the last 90 minutes of wind direction history from any active NDBC station as a live chart on the map or weather screen.",
       "details": "The Wind Shift panel on the Map tab (Trending Up button in controls) and the Wind Shift History section on the Weather tab show a time-series chart of wind direction over the last 90 minutes from any NDBC shore station you select. The chart highlights veering (clockwise shift) or backing (counter-clockwise shift) trends and shows the current wind speed. Veering wind in the northern hemisphere typically signals an approaching warm front; backing may indicate building pressure. Data is fetched from the NDBC realtime observation feed, typically updated every 10-30 minutes."
+    },
+    {
+      "id": "laylines",
+      "title": "Layline Overlay",
+      "summary": "See port and starboard laylines to the windward mark drawn directly on the chart, with an adjustable tacking angle.",
+      "details": "Enable laylines from the Layers panel in map controls. Green dashes show the port tack layline, red dashes show the starboard tack layline — both extending from the windward mark toward the fleet. The tacking angle slider (30–55°, default 42°) lets you tune the calculation for your boat class and conditions. Laylines update automatically as wind direction changes from NDBC observations. A course must be selected in the Course Panel for laylines to draw."
+    },
+    {
+      "id": "race-checklist",
+      "title": "Pre-Race Checklist",
+      "summary": "A comprehensive 30-item race preparation checklist covering rig, sails, safety, boat systems, and race day specifics.",
+      "details": "Tap the Checklist icon in the map controls panel to open the Pre-Race Checklist. Five accordion sections — Rig, Sails, Safety, Boat, and Race Day — contain the key items every racing sailor should verify before the start gun. A live progress bar tracks completion. Items can be checked off individually; Reset clears all checks for the next race. The checklist is session-based and resets when the app reloads. Designed for one-handed use on the water."
     },
     {
       "id": "gps-tracking",

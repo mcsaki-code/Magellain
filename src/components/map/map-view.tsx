@@ -17,7 +17,7 @@ export function MapView() {
   const [debugInfo, setDebugInfo] = useState("");
   const [raceMarks, setRaceMarks] = useState<Array<{ id: string; name: string; short_name: string; latitude: number; longitude: number; mark_type: string; color: string | null }>>([]);
 
-  const { center, zoom, showBuoyMarkers, showWindArrows, setSelectedBuoy, showCourseOverlay, courseLegs, selectedCourse, activeTrackPoints, playbackIndex, startLine, startLinePlacing, setStartLineEnd } = useMapStore();
+  const { center, zoom, showBuoyMarkers, showWindArrows, setSelectedBuoy, showCourseOverlay, courseLegs, selectedCourse, activeTrackPoints, playbackIndex, startLine, startLinePlacing, setStartLineEnd, showLaylines, tackingAngle } = useMapStore();
   const { observations, fetchWeather, isLoading: weatherLoading } = useWeatherStore();
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -592,6 +592,117 @@ export function MapView() {
       });
     }
   }, [startLine]);
+
+  // Handle layline rendering
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady.current) return;
+
+    // Remove old layline layers / sources
+    if (m.getLayer("layline-port")) m.removeLayer("layline-port");
+    if (m.getLayer("layline-starboard")) m.removeLayer("layline-starboard");
+    if (m.getLayer("layline-port-label")) m.removeLayer("layline-port-label");
+    if (m.getLayer("layline-starboard-label")) m.removeLayer("layline-starboard-label");
+    if (m.getSource("laylines")) m.removeSource("laylines");
+
+    if (!showLaylines || courseLegs.length === 0) return;
+
+    // Get wind direction from first station with data
+    let windFrom: number | null = null;
+    for (const obs of Object.values(observations)) {
+      if (obs?.wind_direction_deg != null) {
+        windFrom = obs.wind_direction_deg;
+        break;
+      }
+    }
+    if (windFrom === null) return;
+
+    // Windward mark = first leg's mark (smallest leg_order)
+    const sorted = [...courseLegs].sort((a, b) => a.leg_order - b.leg_order);
+    const windwardMark = sorted[0]?.mark;
+    if (!windwardMark) return;
+
+    const markLat = windwardMark.latitude;
+    const markLng = windwardMark.longitude;
+
+    // Layline bearings FROM the mark (extending toward the fleet)
+    // Port layline: boats on port tack approach from windFrom - tackAngle
+    //   so the layline FROM the mark goes at bearing (windFrom - tackAngle + 180°)
+    // Starboard layline: boats on stbd tack approach from windFrom + tackAngle
+    //   so the layline FROM the mark goes at bearing (windFrom + tackAngle + 180°)
+    const portBearing = ((windFrom - tackingAngle + 180) + 720) % 360;
+    const stbdBearing = ((windFrom + tackingAngle + 180) + 360) % 360;
+
+    // Destination point formula: project along bearing for given distance
+    const destination = (lat: number, lng: number, bearingDeg: number, distKm: number): [number, number] => {
+      const R = 6371;
+      const d = distKm / R;
+      const brng = (bearingDeg * Math.PI) / 180;
+      const lat1 = (lat * Math.PI) / 180;
+      const lng1 = (lng * Math.PI) / 180;
+      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(brng));
+      const lng2 = lng1 + Math.atan2(Math.sin(brng) * Math.sin(d) * Math.cos(lat1), Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
+      return [(lng2 * 180) / Math.PI, (lat2 * 180) / Math.PI];
+    };
+
+    // Layline length: use course distance if available, else 2.5nm (4.63 km)
+    const distKm = 4.63;
+
+    const portEnd = destination(markLat, markLng, portBearing, distKm);
+    const stbdEnd = destination(markLat, markLng, stbdBearing, distKm);
+    const markCoord: [number, number] = [markLng, markLat];
+
+    m.addSource("laylines", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: { side: "port" },
+            geometry: { type: "LineString", coordinates: [markCoord, portEnd] },
+          },
+          {
+            type: "Feature",
+            properties: { side: "starboard" },
+            geometry: { type: "LineString", coordinates: [markCoord, stbdEnd] },
+          },
+        ],
+      },
+    });
+
+    // Port layline — green
+    m.addLayer({
+      id: "layline-port",
+      type: "line",
+      source: "laylines",
+      filter: ["==", ["get", "side"], "port"],
+      layout: { "line-join": "round", "line-cap": "round" },
+      paint: {
+        "line-color": "#22c55e",
+        "line-width": 2.5,
+        "line-opacity": 0.85,
+        "line-dasharray": [6, 3],
+      },
+    });
+
+    // Starboard layline — red
+    m.addLayer({
+      id: "layline-starboard",
+      type: "line",
+      source: "laylines",
+      filter: ["==", ["get", "side"], "starboard"],
+      layout: { "line-join": "round", "line-cap": "round" },
+      paint: {
+        "line-color": "#ef4444",
+        "line-width": 2.5,
+        "line-opacity": 0.85,
+        "line-dasharray": [6, 3],
+      },
+    });
+
+    console.log(`[MagellAIn] Laylines drawn: wind ${windFrom}°, tacking ${tackingAngle}°, port→${portBearing.toFixed(0)}°, stbd→${stbdBearing.toFixed(0)}°`);
+  }, [showLaylines, courseLegs, observations, tackingAngle]);
 
   // Handle wind arrow layer
   useEffect(() => {
