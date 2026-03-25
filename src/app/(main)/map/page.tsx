@@ -12,6 +12,7 @@ import { RaceTimer } from "@/components/map/race-timer";
 import { StartLineTool } from "@/components/map/start-line-tool";
 import { WindShiftPanel } from "@/components/map/wind-shift-panel";
 import { RaceChecklist } from "@/components/map/race-checklist";
+import { RaceToolsFab } from "@/components/map/race-tools-fab";
 
 // mapbox-gl accesses `window` at import time → must skip SSR
 const MapView = dynamic(
@@ -29,8 +30,13 @@ const MapView = dynamic(
 export default function MapPage() {
   return (
     <div className="relative" style={{ height: "calc(100dvh - var(--nav-total-height))" }}>
+      {/* Base map layer */}
       <MapView />
+
+      {/* Utility controls — top-left (3 buttons: Layers, Reset, Refresh) */}
       <MapControls />
+
+      {/* Persistent info panels */}
       <BuoyPanel />
       <Speedometer />
       <CoursePanel />
@@ -38,8 +44,13 @@ export default function MapPage() {
       <GpsTracker />
       <TrackReplay />
       <RaceTimer />
-      <StartLineTool />
+
+      {/* Race Tools FAB — bottom-right floating action button */}
+      <RaceToolsFab />
+
+      {/* Mutually exclusive tool bottom sheets (z-30, rendered above everything) */}
       <WindShiftPanel />
+      <StartLineTool />
       <RaceChecklist />
     </div>
   );

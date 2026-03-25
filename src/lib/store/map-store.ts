@@ -222,15 +222,31 @@ export const useMapStore = create<MapState>((set) => ({
   clearStartLine: () =>
     set({ startLine: { boatEnd: null, committeeEnd: null }, startLinePlacing: null }),
   setStartLinePlacing: (mode) => set({ startLinePlacing: mode }),
-  setShowStartLineTool: (show) => set({ showStartLineTool: show }),
+  // Start line — mutually exclusive with other tool panels
+  setShowStartLineTool: (show) =>
+    set((s) => ({
+      showStartLineTool: show,
+      showWindShift: show ? false : s.showWindShift,
+      showChecklist: show ? false : s.showChecklist,
+    })),
 
-  // Wind shift actions
-  toggleWindShift: () => set((s) => ({ showWindShift: !s.showWindShift })),
+  // Wind shift actions — mutually exclusive with other tool panels
+  toggleWindShift: () =>
+    set((s) => ({
+      showWindShift: !s.showWindShift,
+      showChecklist: false,
+      showStartLineTool: s.showWindShift ? s.showStartLineTool : false,
+    })),
 
   // Laylines actions
   toggleLaylines: () => set((s) => ({ showLaylines: !s.showLaylines })),
   setTackingAngle: (angle) => set({ tackingAngle: angle }),
 
-  // Race checklist actions
-  toggleChecklist: () => set((s) => ({ showChecklist: !s.showChecklist })),
+  // Race checklist actions — mutually exclusive with other tool panels
+  toggleChecklist: () =>
+    set((s) => ({
+      showChecklist: !s.showChecklist,
+      showWindShift: false,
+      showStartLineTool: s.showChecklist ? s.showStartLineTool : false,
+    })),
 }));
