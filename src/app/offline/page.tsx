@@ -13,7 +13,7 @@ export default function OfflinePage() {
 
         {/* Heading */}
         <h2 className="text-3xl font-bold mb-4 text-foreground">
-          You're offline
+          You&apos;re offline
         </h2>
 
         {/* Message */}

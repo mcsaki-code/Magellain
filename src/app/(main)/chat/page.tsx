@@ -7,10 +7,39 @@ import { useChatStore } from "@/lib/store/chat-store";
 import { Send, Trash2, Loader2, Sailboat, Mic, MicOff } from "lucide-react";
 
 // Web Speech API type declarations
+interface ISpeechRecognitionResult {
+  isFinal: boolean;
+  [index: number]: { transcript: string };
+}
+interface ISpeechRecognitionResultList {
+  length: number;
+  [index: number]: ISpeechRecognitionResult;
+}
+interface ISpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: ISpeechRecognitionResultList;
+}
+interface ISpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+interface ISpeechRecognition extends EventTarget {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  continuous: boolean;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onstart: (() => void) | null;
+  onend: (() => void) | null;
+  onresult: ((event: ISpeechRecognitionEvent) => void) | null;
+  onerror: ((event: ISpeechRecognitionErrorEvent) => void) | null;
+}
+
 declare global {
   interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
+    SpeechRecognition: new () => ISpeechRecognition;
+    webkitSpeechRecognition: new () => ISpeechRecognition;
   }
 }
 
@@ -55,7 +84,7 @@ export default function ChatPage() {
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<ISpeechRecognition | null>(null);
   const { messages, isStreaming, error, sendMessage, clearMessages } = useChatStore();
 
   // Check for Web Speech API support
@@ -121,7 +150,7 @@ export default function ChatPage() {
       finalTranscript = "";
     };
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: ISpeechRecognitionEvent) => {
       let interim = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
@@ -141,7 +170,7 @@ export default function ChatPage() {
       inputRef.current?.focus();
     };
 
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    recognition.onerror = (event: ISpeechRecognitionErrorEvent) => {
       setIsListening(false);
       if (event.error === "not-allowed") {
         setVoiceError("Microphone access denied. Allow microphone in browser settings.");

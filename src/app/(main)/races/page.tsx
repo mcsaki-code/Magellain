@@ -251,6 +251,7 @@ export default function RacesPage() {
                     onToggle={() =>
                       setSelectedRegatta(selectedRegatta === regatta.id ? null : regatta.id)
                     }
+                    userBoatId={userBoatId}
                   />
                 ))}
               </div>
@@ -268,6 +269,7 @@ export default function RacesPage() {
                     onToggle={() =>
                       setSelectedRegatta(selectedRegatta === regatta.id ? null : regatta.id)
                     }
+                    userBoatId={userBoatId}
                   />
                 ))}
               </div>
@@ -279,7 +281,7 @@ export default function RacesPage() {
   );
 }
 
-function StandingsSection({ races, regattaName }: { races: RaceWithResults[]; regattaName?: string }) {
+function StandingsSection({ races, regattaName, userBoatId }: { races: RaceWithResults[]; regattaName?: string; userBoatId?: string | null }) {
   const standings = computeStandings(races);
   const fleets = Object.keys(standings).sort();
 
@@ -359,10 +361,12 @@ function RegattaCard({
   regatta,
   isExpanded,
   onToggle,
+  userBoatId,
 }: {
   regatta: RegattaWithClub;
   isExpanded: boolean;
   onToggle: () => void;
+  userBoatId?: string | null;
 }) {
   return (
     <div className="rounded-xl border bg-card shadow-sm">
@@ -487,7 +491,7 @@ function RegattaCard({
               </div>
 
               {/* Standings */}
-              <StandingsSection races={regatta.races} regattaName={regatta.name} />
+              <StandingsSection races={regatta.races} regattaName={regatta.name} userBoatId={userBoatId} />
             </>
           ) : (
             <p className="text-xs text-muted-foreground">No races posted yet</p>

@@ -467,13 +467,13 @@ export default function RacesImportPage() {
         .filter((row) => row.sail_number && boatMap.has(row.sail_number))
         .map((row) => ({
           race_id: raceId,
-          boat_id: boatMap.get(row.sail_number),
+          boat_id: boatMap.get(row.sail_number ?? "") ?? undefined,
           fleet: row.fleet || "Unknown",
           finish_position: row.finish_position,
           corrected_position: row.corrected_position,
           elapsed_time_sec: row.elapsed_time_sec,
           corrected_time_sec: row.corrected_time_sec,
-          status: row.status || "finished",
+          status: (row.status || "finished") as RaceResult["status"],
         }));
 
       if (results.length > 0) {

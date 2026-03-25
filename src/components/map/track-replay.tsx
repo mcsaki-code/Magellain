@@ -67,6 +67,8 @@ export function TrackReplay() {
   } = useMapStore();
 
   const playbackIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const playbackIndexRef = useRef(playbackIndex);
+  useEffect(() => { playbackIndexRef.current = playbackIndex; }, [playbackIndex]);
 
   // Fetch saved tracks from Supabase or localStorage
   useEffect(() => {
@@ -145,15 +147,13 @@ export function TrackReplay() {
     const interval = 100 / speedMultiplier; // ms per frame
 
     playbackIntervalRef.current = setInterval(() => {
-      setPlaybackIndex((currentIndex) => {
-        const nextIndex = currentIndex + 1;
-        if (nextIndex >= activeTrackPoints.length) {
-          // Stop at end
-          setIsReplaying(false);
-          return currentIndex;
-        }
-        return nextIndex;
-      });
+      const currentIndex = playbackIndexRef.current;
+      const nextIndex = currentIndex + 1;
+      if (nextIndex >= activeTrackPoints.length) {
+        setIsReplaying(false);
+      } else {
+        setPlaybackIndex(nextIndex);
+      }
     }, interval);
 
     return () => {
