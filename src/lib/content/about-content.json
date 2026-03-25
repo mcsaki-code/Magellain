@@ -1,15 +1,15 @@
 {
   "meta": {
-    "version": "1.0.0",
-    "lastUpdated": "2026-03-24",
+    "version": "1.1.0",
+    "lastUpdated": "2026-03-25",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
   },
   "about": {
     "title": "About MagellAIn",
     "subtitle": "Sailing Intelligence for Great Lakes Racers",
-    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management, analytics, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
-    "version": "1.0 (MVP)",
+    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management, analytics, GPS track recording, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
+    "version": "1.1",
     "builtFor": "Ford Yacht Club, West Shore Sail Club, and the DRYA racing community"
   },
   "features": [
@@ -17,31 +17,37 @@
       "id": "live-data",
       "title": "Live Marine Data",
       "summary": "Real-time NOAA weather, NDBC buoy observations, and GLERL lake data, all displayed on interactive nautical charts.",
-      "details": "Wind speed and direction, wave height, water temperature, and marine forecasts updated continuously from official government sources. NOAA electronic nautical chart overlays show depths, markers, and hazards."
+      "details": "Wind speed and direction, wave height, water temperature, and marine forecasts updated continuously from official government sources. NOAA electronic nautical chart overlays show depths, markers, and hazards. Active weather alerts (Small Craft Advisories, Gale Warnings) appear as prominent banners on the Home and Weather screens."
     },
     {
       "id": "ai-coach",
       "title": "AI Sailing Coach",
-      "summary": "A Claude-powered assistant that knows your boat, your waters, and racing strategy.",
-      "details": "Ask about tactics, sail trim, weather interpretation, racing rules, or post-race analysis. The coach factors in current conditions, your boat specs, and local knowledge about Lake Erie and Detroit River sailing patterns."
+      "summary": "A Claude-powered assistant that knows your boat, your waters, and racing strategy — with voice input support.",
+      "details": "Ask about tactics, sail trim, weather interpretation, racing rules, or post-race analysis. The coach factors in current conditions, your boat specs, and local knowledge about Lake Erie and Detroit River sailing patterns. Tap the microphone button to ask hands-free using voice — interim transcription appears in real time so you can review before sending."
+    },
+    {
+      "id": "gps-tracking",
+      "title": "GPS Track Recording",
+      "summary": "Record your track on the water with live speed, distance, and time stats.",
+      "details": "The GPS Tracker panel on the Map screen lets you start recording your position, speed (in knots), and heading using your device GPS. Live stats show elapsed time, current speed, total nautical miles, and max speed. Tracks save to your account when signed in, or to local device storage for offline use."
     },
     {
       "id": "race-management",
       "title": "Race Management and Analytics",
-      "summary": "Club schedules, results, and performance metrics all in one place.",
-      "details": "View upcoming races from Ford YC, West Shore SC, and DRYA series. Import results and GPS data to compute VMG, start analysis, speed polars, and leg-by-leg breakdowns. Track your improvement across a full series."
+      "summary": "Club schedules, results, series standings, and head-to-head performance all in one place.",
+      "details": "View upcoming and past races from Ford YC, West Shore SC, and DRYA series. The Performance screen shows your race history, season trend chart, series standings, and head-to-head competitor records. Export your race log and standings as a PDF directly from the app."
     },
     {
       "id": "safety",
       "title": "Safety First",
-      "summary": "Emergency USCG contact, float plans, and weather alert notifications.",
-      "details": "One-tap emergency button displays your GPS coordinates and connects to USCG Sector Detroit. File digital float plans with automatic overdue alerts. Push notifications for Small Craft Advisories and severe weather."
+      "summary": "Emergency USCG contact, float plans, and weather alert banners.",
+      "details": "One-tap emergency button displays your GPS coordinates and connects to USCG Sector Detroit. File digital float plans pre-filled with your vessel details before heading out. Active NOAA weather alerts appear as prominent banners on the Home and Weather screens whenever conditions warrant caution."
     },
     {
       "id": "mobile-first",
       "title": "Built for the Water",
       "summary": "Clean, one-handed mobile interface that works when conditions are tough.",
-      "details": "Designed for use on a wet, moving boat with one hand. Large touch targets, high-contrast display, offline caching for spotty cell coverage, and voice input when your hands are full. No clutter, no distractions."
+      "details": "Designed for use on a wet, moving boat with one hand. Large touch targets, high-contrast dark and light display themes, and voice input when your hands are full. No clutter, no distractions — a professional tool for serious sailors."
     }
   ],
   "dataSources": [

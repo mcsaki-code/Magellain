@@ -56,7 +56,7 @@
         {
           "id": "speedometer",
           "title": "Speedometer and GPS Speed",
-          "content": "The on-screen speedometer displays your current GPS boat speed and heading when location tracking is active. This live data feeds into the AI coach context so you can get condition-specific advice while on the water."
+          "content": "The on-screen speedometer displays your current GPS boat speed and heading when location tracking is active. You can share your live speed and conditions with the AI coach by mentioning them in your conversation (e.g. 'I'm doing 5.2 knots upwind in 14 knots of breeze — any trim tips?')."
         },
         {
           "id": "course-view",
@@ -78,7 +78,7 @@
         {
           "id": "wind-data",
           "title": "Understanding Wind Data",
-          "content": "Wind is displayed in knots with direction shown as both compass bearing and an animated arrow. The wind trend indicator shows whether conditions are building, steady, or dying. Data is sourced from NDBC buoy observations and NOAA NWS forecast models for the Great Lakes region."
+          "content": "Wind is displayed in knots with direction shown as both compass bearing and an animated arrow. Color-coded severity bands map to Beaufort scale categories — green for light air, yellow for breeze, orange for fresh, red for strong/gale. Data is sourced from NDBC buoy observations and NOAA NWS forecast models for the Great Lakes region."
         },
         {
           "id": "alerts",
@@ -120,7 +120,7 @@
         {
           "id": "coach-history",
           "title": "Chat History",
-          "content": "Your conversations with the AI coach are saved within your session. Start a fresh conversation at any time using the trash icon in the top-right corner of the Coach screen. Sign in to preserve your history across devices and sessions."
+          "content": "Your conversation with the AI coach is kept active while the Coach tab is open. Navigating away and returning within the same browser session will usually restore your messages, but a full page reload starts fresh. Tap the trash icon in the top-right corner of the Coach screen to clear the conversation and start a new one at any time."
         }
       ]
     },
@@ -142,7 +142,7 @@
         {
           "id": "analytics",
           "title": "Performance Analytics",
-          "content": "The Performance section (accessible from Menu > Performance) shows your race history, season trend, series standings, and head-to-head competitor records for your primary boat. Key metrics include total races, wins, podiums, and average finishing position. GPS track data from the Map screen feeds into speed and distance analytics."
+          "content": "The Performance section (accessible from Menu > Performance) shows your race history, season trend, series standings, and head-to-head competitor records for your primary boat. Key metrics include total races, wins, podiums, average finishing position, and average VMG when available in your race data. Tap any race row to expand the full fleet results for that race. Use the PDF button to export your full race log and competitor analysis."
         },
         {
           "id": "series-standings",
@@ -186,7 +186,7 @@
         {
           "id": "units",
           "title": "Speed Units",
-          "content": "Choose your preferred wind and boat speed units under Menu > Settings > Speed Units. Options include knots (standard nautical), miles per hour, and kilometers per hour. Knots is the default and recommended setting for racing sailors."
+          "content": "Choose your preferred wind and boat speed units under Menu > Settings > Speed Units. Options include knots (standard nautical, recommended for racing), miles per hour, kilometers per hour, and nautical miles per hour (same as knots, displayed as nm/h). Knots is the default setting."
         },
         {
           "id": "theme",
