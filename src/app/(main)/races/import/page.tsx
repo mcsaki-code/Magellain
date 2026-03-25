@@ -641,7 +641,7 @@ export default function RacesImportPage() {
                           onChange={(e) =>
                             handleMappingChange(header, e.target.value)
                           }
-                          className="rounded border bg-card px-2 py-1 text-xs"
+                          className="rounded border bg-muted px-2 py-1 text-xs"
                         >
                           <option value="ignore">— Ignore —</option>
                           <option value="boat_name">boat_name</option>
@@ -732,7 +732,7 @@ export default function RacesImportPage() {
               <select
                 value={selectedRegattaId}
                 onChange={(e) => handleRegattaChange(e.target.value)}
-                className="mt-1 w-full rounded-lg border bg-card px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border bg-muted px-3 py-2 text-sm"
               >
                 {regattas.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -754,7 +754,7 @@ export default function RacesImportPage() {
                     e.target.value === "new" ? "new" : parseInt(e.target.value, 10)
                   )
                 }
-                className="mt-1 w-full rounded-lg border bg-card px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border bg-muted px-3 py-2 text-sm"
               >
                 <option value="new">+ Create New Race</option>
                 {raceNumbers.map((num) => (
@@ -777,7 +777,7 @@ export default function RacesImportPage() {
                     type="date"
                     value={newRaceDate}
                     onChange={(e) => setNewRaceDate(e.target.value)}
-                    className="mt-1 w-full rounded border bg-card px-2 py-1 text-sm"
+                    className="mt-1 w-full rounded border bg-muted px-2 py-1 text-sm"
                   />
                 </div>
                 <div>
@@ -786,7 +786,7 @@ export default function RacesImportPage() {
                     type="time"
                     value={newRaceTime}
                     onChange={(e) => setNewRaceTime(e.target.value)}
-                    className="mt-1 w-full rounded border bg-card px-2 py-1 text-sm"
+                    className="mt-1 w-full rounded border bg-muted px-2 py-1 text-sm"
                   />
                 </div>
                 <div>
@@ -796,7 +796,7 @@ export default function RacesImportPage() {
                     placeholder="e.g. Course A, Triangle"
                     value={newRaceCourseType}
                     onChange={(e) => setNewRaceCourseType(e.target.value)}
-                    className="mt-1 w-full rounded border bg-card px-2 py-1 text-sm"
+                    className="mt-1 w-full rounded border bg-muted px-2 py-1 text-sm"
                   />
                 </div>
               </div>

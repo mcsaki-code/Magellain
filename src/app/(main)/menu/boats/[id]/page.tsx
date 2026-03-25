@@ -183,17 +183,17 @@ export default function BoatDetailPage() {
           <h2 className="text-sm font-semibold text-muted-foreground">BOAT DETAILS</h2>
           <div className="space-y-3">
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Boat Name *"
-              className="w-full rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
+              className="w-full rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
             <input value={className} onChange={(e) => setClassName(e.target.value)} placeholder="Class Name *"
-              className="w-full rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
+              className="w-full rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
             <div className="grid grid-cols-2 gap-3">
               <input value={sailNumber} onChange={(e) => setSailNumber(e.target.value)} placeholder="Sail Number"
-                className="rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
+                className="rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
               <input value={phrfRating} onChange={(e) => setPhrfRating(e.target.value)} placeholder="PHRF Rating" type="number"
-                className="rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
+                className="rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
             </div>
             <select value={hullType} onChange={(e) => setHullType(e.target.value)}
-              className="w-full rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none">
+              className="w-full rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none">
               <option value="monohull">Monohull</option>
               <option value="multihull">Multihull</option>
             </select>
@@ -205,19 +205,19 @@ export default function BoatDetailPage() {
           <h2 className="text-sm font-semibold text-muted-foreground">DIMENSIONS</h2>
           <div className="grid grid-cols-2 gap-3">
             <input value={loa} onChange={(e) => setLoa(e.target.value)} placeholder="LOA (ft)" type="number" step="0.01"
-              className="rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
+              className="rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
             <input value={beam} onChange={(e) => setBeam(e.target.value)} placeholder="Beam (ft)" type="number" step="0.01"
-              className="rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
+              className="rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
             <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Draft (ft)" type="number" step="0.01"
-              className="rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
+              className="rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
             <input value={displacement} onChange={(e) => setDisplacement(e.target.value)} placeholder="Displacement (lbs)" type="number"
-              className="rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
+              className="rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <input value={yearBuilt} onChange={(e) => setYearBuilt(e.target.value)} placeholder="Year Built" type="number"
-              className="rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
+              className="rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
             <input value={manufacturer} onChange={(e) => setManufacturer(e.target.value)} placeholder="Manufacturer"
-              className="rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
+              className="rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none" />
           </div>
         </section>
 
@@ -225,17 +225,17 @@ export default function BoatDetailPage() {
         <section className="space-y-3">
           <h2 className="text-sm font-semibold text-muted-foreground">RIGGING</h2>
           <select value={keelType} onChange={(e) => setKeelType(e.target.value)}
-            className="w-full rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none">
+            className="w-full rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none">
             <option value="">Select Keel Type</option>
             {KEEL_TYPES.map((k) => <option key={k} value={k}>{k.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</option>)}
           </select>
           <select value={rigType} onChange={(e) => setRigType(e.target.value)}
-            className="w-full rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none">
+            className="w-full rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none">
             <option value="">Select Rig Type</option>
             {RIG_TYPES.map((r) => <option key={r} value={r}>{r.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</option>)}
           </select>
           <select value={propType} onChange={(e) => setPropType(e.target.value)}
-            className="w-full rounded-xl border bg-card px-4 py-3 text-sm focus:border-ocean focus:outline-none">
+            className="w-full rounded-xl border bg-muted px-4 py-3 text-sm focus:border-ocean focus:outline-none">
             <option value="">Select Propeller Type</option>
             {PROP_TYPES.map((p) => <option key={p} value={p}>{p.replace(/\b\w/g, (c) => c.toUpperCase())}</option>)}
           </select>

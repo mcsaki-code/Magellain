@@ -176,7 +176,7 @@ export default function FloatPlanPage() {
   const input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
     <input
       {...props}
-      className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm placeholder:text-muted-foreground/50 focus:border-ocean focus:outline-none focus:ring-1 focus:ring-ocean"
+      className="w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm placeholder:text-muted-foreground/50 focus:border-ocean focus:outline-none focus:ring-1 focus:ring-ocean"
     />
   );
 
