@@ -8,7 +8,7 @@
   "about": {
     "title": "About MagellAIn",
     "subtitle": "Sailing Intelligence for Great Lakes Racers",
-    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management and analytics, GPS track recording and replay, race course tactical analysis, start line bias calculation, wind shift tracking, layline overlay, pre-race checklist, AI-powered route planning, crew messaging, offline support, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
+    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management and analytics, GPS track recording and replay, race course tactical analysis, start line bias calculation, wind shift tracking, layline overlay, pre-race checklist, AI-powered route planning, offline support, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
     "version": "1.7",
     "builtFor": "Ford Yacht Club, West Shore Sail Club, and the DRYA racing community"
   },
@@ -90,12 +90,6 @@
       "title": "AI Route Planner",
       "summary": "AI-powered passage planning with weather routing and boat polar performance optimization.",
       "details": "Select from pre-loaded Great Lakes passages (Lake St. Clair Circuit, Ford YC to Lake Erie, Detroit River to Put-in-Bay, Port Huron to Mackinac) or create custom routes. The planner computes optimal routes factoring in weather forecasts, your boat's polar performance data, and PHRF rating. Results show total distance, estimated duration, recommended sails per leg, and a comparison to the straight rhumb-line route. Accessible from the Route tab in the bottom navigation."
-    },
-    {
-      "id": "crew-messaging",
-      "title": "Crew Messaging",
-      "summary": "Crew group chat and direct messages for your sailing team.",
-      "details": "Access Crew Messages from Menu > Crew Messages (sign-in required). Create named crew groups tied to your boat for team pre-race briefings, weather sharing, and debrief discussions. Direct messages support one-on-one communication between signed-in users. All messages sync to your account."
     },
     {
       "id": "offline-mode",
