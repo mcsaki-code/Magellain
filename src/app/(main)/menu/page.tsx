@@ -19,6 +19,14 @@ const menuItems = [
   { label: "About",        href: "/menu/about",       icon: Info,       description: "App info, data sources & legal" },
 ];
 
+// Items visible to anonymous (not-signed-in) users
+const publicItems = [
+  { label: "Races",        href: "/races",            icon: Trophy,     description: "Schedules & results" },
+  { label: "Emergency",    href: "/menu/emergency",   icon: Shield,     description: "USCG & safety contacts" },
+  { label: "Help",         href: "/menu/help",        icon: HelpCircle, description: "How to use MagellAIn" },
+  { label: "About",        href: "/menu/about",       icon: Info,       description: "App info, data sources & legal" },
+];
+
 export default async function MenuPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -86,6 +94,28 @@ export default async function MenuPage() {
             >
               Create Account
             </Link>
+            <nav className="space-y-1 pt-2">
+              {publicItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex min-h-touch items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:bg-accent"
+                  >
+                    <Icon className="h-5 w-5 text-ocean" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">
+                        {item.label}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
         )}
       </div>

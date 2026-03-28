@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "1.7.0",
-    "lastUpdated": "2026-03-25",
+    "lastUpdated": "2026-03-28",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
   },
@@ -29,7 +29,7 @@
         {
           "id": "navigation",
           "title": "Navigating the App",
-          "content": "MagellAIn uses a bottom navigation bar designed for one-handed use on the water. The main tabs are: Map (nautical charts, GPS tracking, race courses, and race tools), Weather (marine forecasts and wind data), Coach (AI sailing coach with voice input), Crew (crew messaging), Races (schedules, results, and checklist), and Menu (profile, boats, performance, safety, settings, and help). The MagellAIn wordmark on the home screen taps back to the home dashboard."
+          "content": "MagellAIn uses a bottom navigation bar designed for one-handed use on the water. The five main tabs are: Home (dashboard with conditions summary, next race, quick actions, and news feed), Map (nautical charts, GPS tracking, race courses, and race tools), Route (AI-powered passage planning with weather routing), Coach (AI sailing coach with voice input), and Menu (profile, boats, performance, races, crew messages, safety, settings, and help). The MagellAIn wordmark on the home screen taps back to the home dashboard."
         }
       ]
     },
@@ -91,7 +91,7 @@
         {
           "id": "wind-shift-panel",
           "title": "Wind Shift Graph (Map)",
-          "content": "Tap the Tools tab in the bottom tab bar, then tap 'Wind Shifts' to open the Wind Shift panel. It shows the last 90 minutes of wind direction changes from any active NDBC shore station. Use the dropdown to switch between stations. The graph plots wind direction over time, and the summary line tells you if the wind is veering (shifting clockwise — S to SW to W) or backing (shifting counter-clockwise). Veering wind in the northern hemisphere often indicates an approaching warm front. This chart is also available on the Weather tab as 'Wind Shift History' (now shown near the top of the weather screen for quick access). Data from the NDBC realtime observation feed, updated every 10-30 minutes."
+          "content": "Tap the Tools tab in the bottom tab bar, then tap 'Wind Shifts' to open the Wind Shift panel. It shows the last 90 minutes of wind direction changes from any active NDBC shore station. Use the dropdown to switch between stations. The graph plots wind direction over time, and the summary line tells you if the wind is veering (shifting clockwise — S to SW to W) or backing (shifting counter-clockwise). Veering wind in the northern hemisphere often indicates an approaching warm front. This chart is also available on the Weather page as 'Wind Shift History' (shown near the top of the weather screen for quick access). Data from the NDBC realtime observation feed, updated every 10-30 minutes."
         },
         {
           "id": "laylines",
@@ -101,7 +101,29 @@
         {
           "id": "race-checklist",
           "title": "Pre-Race Checklist",
-          "content": "The Pre-Race Checklist is on the Races tab (tap Races in the bottom nav). It appears as a collapsible card at the top of the page, above the regatta schedules. The checklist has five sections: Rig (mast, rigging, running gear), Sails (halyards, battens, telltales, spinnaker), Safety (PFDs, horn, throwable, flares, VHF), Boat (bung, bilge, hatches, fire extinguisher), and Race Day (protest flag, class flag, timer sync, course number, crew brief, start plan). Tap any category header to expand it, then tap individual items to check them off. A progress bar tracks overall readiness. Tap 'Reset' to clear all checks before the next race, or 'Check All' to mark everything done. Checklist state is session-only and resets when you reload the app."
+          "content": "The Pre-Race Checklist is on the Races page (Menu > Races). It appears as a collapsible card at the top of the page, above the regatta schedules. The checklist has five sections: Rig (mast, rigging, running gear), Sails (halyards, battens, telltales, spinnaker), Safety (PFDs, horn, throwable, flares, VHF), Boat (bung, bilge, hatches, fire extinguisher), and Race Day (protest flag, class flag, timer sync, course number, crew brief, start plan). Tap any category header to expand it, then tap individual items to check them off. A progress bar tracks overall readiness. Tap 'Reset' to clear all checks before the next race, or 'Check All' to mark everything done. Checklist state is session-only and resets when you reload the app."
+        }
+      ]
+    },
+    "routePlanner": {
+      "id": "route-planner",
+      "title": "Route Planner",
+      "description": "AI-powered passage planning with weather routing and boat polar performance optimization.",
+      "items": [
+        {
+          "id": "route-overview",
+          "title": "Route Planner Overview",
+          "content": "The Route tab in the bottom navigation opens the AI-powered route planner. Select a pre-loaded Great Lakes passage (Lake St. Clair Circuit, Ford YC to Lake Erie, Detroit River to Put-in-Bay, Port Huron to Mackinac, or others), choose your boat, and set a departure time. MagellAIn computes the optimal route using real-time NDBC weather observations and your boat's polar performance data."
+        },
+        {
+          "id": "route-computation",
+          "title": "Computing a Route",
+          "content": "Select a passage from the dropdown, choose your boat (boats with PHRF ratings are listed), set your departure date and time, then tap 'Compute Route.' The planner fetches current weather observations from nearby NDBC stations, interpolates wind conditions along each leg using your boat's polar data, and calculates optimal speed, sail selection, and estimated duration for each leg. Results include total distance, estimated duration, average speed, ETA, and a comparison to the straight rhumb-line route."
+        },
+        {
+          "id": "route-results",
+          "title": "Understanding Route Results",
+          "content": "After computation, you see a Route Summary card with key metrics (distance, duration, average speed, ETA), a risk assessment (low/moderate/high/extreme based on wind strength and passage duration), recommended sail changes between legs, and expandable leg-by-leg details showing distance, bearing, true wind angle, boat speed, and sail type for each leg. The weather data section shows how many observations were used. For best results, compute routes close to your actual departure time when weather data is freshest."
         }
       ]
     },
@@ -113,7 +135,7 @@
         {
           "id": "weather-overview",
           "title": "Weather Dashboard",
-          "content": "The Weather tab shows: a sailing conditions summary (Excellent through Poor) with tactical tips; a Wind Shift History chart (90 minutes of wind direction from any active NDBC station — moved near the top so you see trends immediately); then current observations from all active NDBC stations in the area; and finally multi-day marine forecasts by zone. Tap Refresh to pull the latest data from NOAA."
+          "content": "The Weather page (accessible via Home screen quick actions or Menu) shows: a sailing conditions summary (Excellent through Poor) with tactical tips; a Wind Shift History chart (90 minutes of wind direction from any active NDBC station — shown near the top so you see trends immediately); then current observations from all active NDBC stations in the area; and finally multi-day marine forecasts by zone. Tap Refresh to pull the latest data from NOAA."
         },
         {
           "id": "wind-data",
@@ -128,7 +150,7 @@
         {
           "id": "wind-shift-history",
           "title": "Wind Shift History",
-          "content": "The Weather tab includes a Wind Shift History section near the top of the page, right after the sailing conditions summary. Select any shore station using the dropdown, then view a chart of wind direction over the last 90 minutes. A summary line indicates whether the wind is veering (clockwise) or backing (counter-clockwise) and by how many degrees. Tap Refresh to reload the latest NDBC data. The same chart is accessible from the Map tab via the Tools tab (tap 'Wind Shifts')."
+          "content": "The Weather page includes a Wind Shift History section near the top, right after the sailing conditions summary. Select any shore station using the dropdown, then view a chart of wind direction over the last 90 minutes. A summary line indicates whether the wind is veering (clockwise) or backing (counter-clockwise) and by how many degrees. Tap Refresh to reload the latest NDBC data. The same chart is accessible from the Map screen via the Tools tab (tap 'Wind Shifts')."
         },
         {
           "id": "forecast",
@@ -145,7 +167,7 @@
         {
           "id": "chat-overview",
           "title": "Talking to Your Coach",
-          "content": "The Coach tab connects you to MagellAIn's AI sailing coach, powered by Claude. Ask questions in plain English about racing tactics, sail trim, weather interpretation, rules, or boat handling. The coach knows your boat type, your waters, and current conditions, so answers are specific and actionable rather than generic."
+          "content": "The Coach tab in the bottom navigation connects you to MagellAIn's AI sailing coach, powered by Claude. Ask questions in plain English about racing tactics, sail trim, weather interpretation, rules, or boat handling. The coach knows your boat type, your waters, and current conditions, so answers are specific and actionable rather than generic."
         },
         {
           "id": "streaming-responses",
@@ -182,7 +204,7 @@
         {
           "id": "schedules",
           "title": "Race Schedules",
-          "content": "Tap Races in the bottom nav to see upcoming and past events from Ford Yacht Club, West Shore Sail Club, and DRYA series — including Wednesday Night at the Races (WNATR), weekend regattas, and championship series. The Pre-Race Checklist card appears at the top of this screen. Tap any regatta to expand it and see race-by-race results and series standings."
+          "content": "Go to Menu > Races to see upcoming and past events from Ford Yacht Club, West Shore Sail Club, and DRYA series — including Wednesday Night at the Races (WNATR), weekend regattas, and championship series. The Pre-Race Checklist card appears at the top of this screen. Tap any regatta to expand it and see race-by-race results and series standings."
         },
         {
           "id": "results",
@@ -214,7 +236,7 @@
         {
           "id": "crew-overview",
           "title": "Crew Messaging Overview",
-          "content": "Access Crew Messages from the Crew tab in the bottom nav (or Menu > Crew Messages). The Messages screen has two tabs: Crews (group conversations tied to a boat or team) and Direct (one-on-one messages). You must be signed in to use messaging. All messages are saved to your account."
+          "content": "Access Crew Messages from Menu > Crew Messages (sign-in required). The Messages screen has two tabs: Crews (group conversations tied to a boat or team) and Direct (one-on-one messages). All messages are saved to your account."
         },
         {
           "id": "crew-groups",

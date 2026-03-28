@@ -1,14 +1,14 @@
 {
   "meta": {
     "version": "1.7.0",
-    "lastUpdated": "2026-03-25",
+    "lastUpdated": "2026-03-28",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
   },
   "about": {
     "title": "About MagellAIn",
     "subtitle": "Sailing Intelligence for Great Lakes Racers",
-    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management and analytics, GPS track recording and replay, race course tactical analysis, start line bias calculation, wind shift tracking, layline overlay, pre-race checklist, crew messaging, offline support, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
+    "description": "MagellAIn is a sailing intelligence platform that combines real-time weather and water data, AI-powered coaching, race management and analytics, GPS track recording and replay, race course tactical analysis, start line bias calculation, wind shift tracking, layline overlay, pre-race checklist, AI-powered route planning, crew messaging, offline support, and safety features into a single app designed for racing sailors on Lake Erie and the Detroit River.",
     "version": "1.7",
     "builtFor": "Ford Yacht Club, West Shore Sail Club, and the DRYA racing community"
   },
@@ -29,7 +29,7 @@
       "id": "race-timer",
       "title": "Pre-Race Start Timer",
       "summary": "The classic 5-minute US Sailing gun sequence with audio signals, built for one-handed cockpit use.",
-      "details": "Open the Flag icon panel on the map and tap '5 MIN' to start the Warning → Prep → One Minute → Start sequence. Audio beeps sound at each transition with a long horn tone at the gun. Tap 'SYNC' to lock the timer to an actual race committee gun. Large countdown display with color-coded phase labels — yellow for Warning, orange for Prep, red for One Minute, green for Racing."
+      "details": "Open the Timer tab in the bottom tab bar on the map and tap '5 MIN' to start the Warning → Prep → One Minute → Start sequence. Audio beeps sound at each transition with a long horn tone at the gun. Tap 'SYNC' to lock the timer to an actual race committee gun. Large countdown display with color-coded phase labels — yellow for Warning, orange for Prep, red for One Minute, green for Racing."
     },
     {
       "id": "wind-arrows",
@@ -47,25 +47,25 @@
       "id": "start-line-bias",
       "title": "Start Line Bias Tool",
       "summary": "Mark the two ends of your start line on the chart and instantly see which end is favored based on live wind data.",
-      "details": "Open the Start Line Bias tool from the Tools tab in the bottom drawer on the map. Tap 'Boat / Pin End' then tap its position on the chart, then do the same for 'Committee.' MagellAIn calculates the bias angle — how far the line deviates from perpendicular to the wind — and tells you which end is favored and by how many degrees. The line draws on the chart in amber with color-coded pins. Bias under 2° is flagged as a square line. Wind direction is pulled automatically from the nearest active NDBC buoy. Use in the 5-15 minutes before your start gun."
+      "details": "Open the Start Line Bias tool from the Tools tab in the bottom drawer on the map. Tap 'Boat / Pin End' then tap its position on the chart, then do the same for 'Committee.' MagellAIn calculates the bias angle — how far the line deviates from perpendicular to the wind — and tells you which end is favored and by how many degrees. The line draws on the chart in amber with color-coded pins. Bias under 2 degrees is flagged as a square line. Wind direction is pulled automatically from the nearest active NDBC buoy. Use in the 5-15 minutes before your start gun."
     },
     {
       "id": "wind-shift-graph",
       "title": "Wind Shift Tracking",
       "summary": "See the last 90 minutes of wind direction history from any active NDBC station as a live chart on the map or weather screen.",
-      "details": "The Wind Shift panel on the Map tab (accessible via the Tools tab in the bottom drawer) and the Wind Shift History section on the Weather tab (now near the top of the weather screen) show a time-series chart of wind direction over the last 90 minutes from any NDBC shore station you select. The chart highlights veering (clockwise shift) or backing (counter-clockwise shift) trends and shows the current wind speed. Veering wind in the northern hemisphere typically signals an approaching warm front; backing may indicate building pressure. Data is fetched from the NDBC realtime observation feed, typically updated every 10-30 minutes."
+      "details": "The Wind Shift panel on the Map screen (accessible via the Tools tab in the bottom drawer) and the Wind Shift History section on the Weather page (near the top of the weather screen) show a time-series chart of wind direction over the last 90 minutes from any NDBC shore station you select. The chart highlights veering (clockwise shift) or backing (counter-clockwise shift) trends and shows the current wind speed. Veering wind in the northern hemisphere typically signals an approaching warm front; backing may indicate building pressure. Data is fetched from the NDBC realtime observation feed, typically updated every 10-30 minutes."
     },
     {
       "id": "laylines",
       "title": "Layline Overlay",
       "summary": "See port and starboard laylines to the windward mark drawn directly on the chart, with an adjustable tacking angle.",
-      "details": "Enable laylines from the Layers panel in map controls. Green dashes show the port tack layline, red dashes show the starboard tack layline — both extending from the windward mark toward the fleet. The tacking angle slider (30–55°, default 42°) lets you tune the calculation for your boat class and conditions. Laylines update automatically as wind direction changes from NDBC observations. A course must be selected in the Course Panel for laylines to draw."
+      "details": "Enable laylines from the Layers panel in map controls. Green dashes show the port tack layline, red dashes show the starboard tack layline — both extending from the windward mark toward the fleet. The tacking angle slider (30-55 degrees, default 42) lets you tune the calculation for your boat class and conditions. Laylines update automatically as wind direction changes from NDBC observations. A course must be selected in the Course Panel for laylines to draw."
     },
     {
       "id": "race-checklist",
       "title": "Pre-Race Checklist",
       "summary": "A comprehensive 30-item race preparation checklist covering rig, sails, safety, boat systems, and race day specifics.",
-      "details": "The Pre-Race Checklist lives on the Races tab as a collapsible card at the top of the page, always accessible alongside your race schedule. Five accordion sections — Rig, Sails, Safety, Boat, and Race Day — contain the key items every racing sailor should verify before the start gun. A live progress bar tracks completion. Items can be checked off individually; Reset clears all checks for the next race. The checklist is session-based and resets when the app reloads. Designed for one-handed use on the water."
+      "details": "The Pre-Race Checklist lives on the Races page (Menu > Races) as a collapsible card at the top of the page, always accessible alongside your race schedule. Five accordion sections — Rig, Sails, Safety, Boat, and Race Day — contain the key items every racing sailor should verify before the start gun. A live progress bar tracks completion. Items can be checked off individually; Reset clears all checks for the next race. The checklist is session-based and resets when the app reloads. Designed for one-handed use on the water."
     },
     {
       "id": "gps-tracking",
@@ -83,19 +83,25 @@
       "id": "race-management",
       "title": "Race Management and Analytics",
       "summary": "Club schedules, results, series standings, CSV result import, head-to-head records, and performance trend charts.",
-      "details": "View upcoming and past races from Ford YC, West Shore SC, and DRYA series. Import race results from any CSV export (YachtScoring, PHRF-LE, or spreadsheet) using the four-step wizard: upload, column mapping, race selection, and preview. The Performance screen shows 19 metrics per boat: race count, wins, podiums, average position, season trend chart, series standings per regatta, full race log, and head-to-head win/loss records against same-fleet competitors with PHRF correction details. Export your race log and standings as a PDF."
+      "details": "View upcoming and past races from Ford YC, West Shore SC, and DRYA series. Import race results from any CSV export (YachtScoring, PHRF-LE, or spreadsheet) using the four-step wizard: upload, column mapping, race selection, and preview. The Performance screen (Menu > Performance) shows 19 metrics per boat: race count, wins, podiums, average position, season trend chart, series standings per regatta, full race log, and head-to-head win/loss records against same-fleet competitors with PHRF correction details. Export your race log and standings as a PDF."
+    },
+    {
+      "id": "route-planner",
+      "title": "AI Route Planner",
+      "summary": "AI-powered passage planning with weather routing and boat polar performance optimization.",
+      "details": "Select from pre-loaded Great Lakes passages (Lake St. Clair Circuit, Ford YC to Lake Erie, Detroit River to Put-in-Bay, Port Huron to Mackinac) or create custom routes. The planner computes optimal routes factoring in weather forecasts, your boat's polar performance data, and PHRF rating. Results show total distance, estimated duration, recommended sails per leg, and a comparison to the straight rhumb-line route. Accessible from the Route tab in the bottom navigation."
     },
     {
       "id": "crew-messaging",
       "title": "Crew Messaging",
       "summary": "Crew group chat and direct messages for your sailing team.",
-      "details": "Access Crew Messages from Menu > Crew Messages. Create named crew groups tied to your boat for team pre-race briefings, weather sharing, and debrief discussions. Direct messages support one-on-one communication between signed-in users. All messages sync to your account."
+      "details": "Access Crew Messages from Menu > Crew Messages (sign-in required). Create named crew groups tied to your boat for team pre-race briefings, weather sharing, and debrief discussions. Direct messages support one-on-one communication between signed-in users. All messages sync to your account."
     },
     {
       "id": "offline-mode",
       "title": "Offline Support",
       "summary": "The app stays functional when you lose signal — cached pages, offline GPS tracking, and an offline indicator.",
-      "details": "A service worker caches all five main screens and recently loaded data so you can keep using MagellAIn underway without a connection. GPS track recording works fully offline, saving to local storage until sync is available. An amber banner appears at the top of the screen when offline and clears automatically when you reconnect. NOAA weather and buoy data remains available from cache for up to one hour after the last fetch."
+      "details": "A service worker caches all main screens and recently loaded data so you can keep using MagellAIn underway without a connection. GPS track recording works fully offline, saving to local storage until sync is available. An amber banner appears at the top of the screen when offline and clears automatically when you reconnect. NOAA weather and buoy data remains available from cache for up to one hour after the last fetch."
     },
     {
       "id": "safety",
