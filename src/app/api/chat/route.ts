@@ -349,8 +349,11 @@ export async function POST(req: NextRequest) {
                   }
                 }
               }
+              // Stream ended normally — close the controller so the client
+              // reader receives done=true instead of hanging forever
+              controller.close();
             } catch (err) {
-              controller.error(err);
+              try { controller.error(err); } catch { /* already closed */ }
             } finally {
               reader.releaseLock();
             }

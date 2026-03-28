@@ -11,7 +11,10 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Sign in to compute routes. Your route history and results will be saved to your account." },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();

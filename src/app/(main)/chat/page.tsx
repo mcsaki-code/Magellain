@@ -220,10 +220,13 @@ export default function ChatPage() {
                 <button
                   key={s}
                   onClick={() => {
-                    setInput(s);
-                    inputRef.current?.focus();
+                    if (!isStreaming) {
+                      setInput("");
+                      sendMessage(s);
+                    }
                   }}
-                  className="rounded-xl border bg-card p-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted"
+                  disabled={isStreaming}
+                  className="rounded-xl border bg-card p-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted disabled:opacity-50"
                 >
                   {s}
                 </button>

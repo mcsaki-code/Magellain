@@ -69,39 +69,54 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }),
       });
 
-      if (!response.ok || !response.body) {
+      if (!response.ok) {
         const errData = await response.json().catch(() => ({ error: "Chat failed" }));
         set({ error: errData.error || "Chat request failed", isStreaming: false });
         return;
       }
 
-      // Start streaming — add assistant message placeholder
+      // Add assistant message placeholder
       set((s) => ({
         messages: [...s.messages, { id: crypto.randomUUID(), role: "assistant", content: "", createdAt: new Date().toISOString() }],
         isStreaming: true,
       }));
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+      // Try streaming first, fall back to reading the full response as text
+      if (response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
 
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          // Append chunk to last message
-          set((s) => {
-            const messages = [...s.messages];
-            messages[messages.length - 1] = {
-              ...messages[messages.length - 1],
-              content: messages[messages.length - 1].content + chunk,
-            };
-            return { messages };
-          });
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            if (chunk) {
+              set((s) => {
+                const messages = [...s.messages];
+                const last = messages[messages.length - 1];
+                if (last) {
+                  messages[messages.length - 1] = { ...last, content: last.content + chunk };
+                }
+                return { messages };
+              });
+            }
+          }
+        } finally {
+          reader.releaseLock();
+          set({ isStreaming: false });
         }
-      } finally {
-        reader.releaseLock();
-        set({ isStreaming: false });
+      } else {
+        // Fallback: read the entire response as text (non-streaming)
+        const text = await response.text();
+        set((s) => {
+          const messages = [...s.messages];
+          const last = messages[messages.length - 1];
+          if (last) {
+            messages[messages.length - 1] = { ...last, content: text };
+          }
+          return { messages, isStreaming: false };
+        });
       }
     } catch (err) {
       set({

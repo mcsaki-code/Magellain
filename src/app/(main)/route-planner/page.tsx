@@ -93,18 +93,17 @@ export default function RoutePlannerPage() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
+      // Load boats for all users (both auth'd and anonymous) so route planner always works
       const [passagesRes, boatsRes] = await Promise.all([
         supabase
           .from("passage_routes")
           .select("*")
           .order("rhumb_line_distance_nm", { ascending: true }),
-        user
-          ? supabase
-              .from("boats")
-              .select("*")
-              .not("phrf_rating", "is", null)
-              .order("name")
-          : Promise.resolve({ data: [] }),
+        supabase
+          .from("boats")
+          .select("*")
+          .not("phrf_rating", "is", null)
+          .order("name"),
       ]);
 
       if (passagesRes.data) {
@@ -117,10 +116,19 @@ export default function RoutePlannerPage() {
         setBoats(boatsRes.data as Boat[]);
         if (!selectedBoatId) {
           const primary = (boatsRes.data as Boat[]).find((b) => b.is_primary);
-          if (primary) setSelectedBoat(primary.id);
-          else if (user) {
+          if (primary) {
+            setSelectedBoat(primary.id);
+          } else if (user) {
             const owned = (boatsRes.data as Boat[]).find((b) => b.owner_id === user.id);
-            if (owned) setSelectedBoat(owned.id);
+            if (owned) {
+              setSelectedBoat(owned.id);
+            } else {
+              // No primary or owned boat — select first available
+              setSelectedBoat(boatsRes.data[0].id);
+            }
+          } else {
+            // Anonymous user — select first available boat
+            setSelectedBoat(boatsRes.data[0].id);
           }
         }
       }
@@ -319,6 +327,17 @@ export default function RoutePlannerPage() {
             </>
           )}
         </button>
+
+        {/* Help text when button is disabled */}
+        {!isComputing && (!selectedPassageId || !selectedBoatId) && (
+          <p className="text-center text-xs text-muted-foreground">
+            {!selectedBoatId && boats.length === 0
+              ? "Sign in and add a boat with a PHRF rating to compute routes"
+              : !selectedPassageId
+              ? "Select a passage above to get started"
+              : "Select a boat above to compute a route"}
+          </p>
+        )}
 
         {/* Error */}
         {error && (

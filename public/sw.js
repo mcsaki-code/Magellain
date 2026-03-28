@@ -11,6 +11,8 @@ const STATIC_PATHS = [
   "/weather",
   "/chat",
   "/races",
+  "/races/import",
+  "/route-planner",
   "/performance",
   "/menu",
   "/menu/help",
