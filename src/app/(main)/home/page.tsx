@@ -452,11 +452,11 @@ export default function HomePage() {
               <p className="text-[11px] text-muted-foreground">Tactics & strategy</p>
             </div>
           </Link>
-          <Link href="/map" className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted">
+          <Link href="/route-planner" className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted">
             <Navigation className="h-6 w-6 text-ocean" />
             <div>
-              <p className="text-sm font-semibold">GPS Speed</p>
-              <p className="text-[11px] text-muted-foreground">Speedometer</p>
+              <p className="text-sm font-semibold">Route Plan</p>
+              <p className="text-[11px] text-muted-foreground">AI routing</p>
             </div>
           </Link>
         </section>
