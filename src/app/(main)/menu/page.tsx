@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
-import { User, Ship, Settings, LogOut, Shield, FileText, Users, Trophy, HelpCircle, Info, BarChart3, Sailboat, MessageSquareText, LayoutDashboard } from "lucide-react";
+import { User, Ship, Settings, LogOut, Shield, FileText, Trophy, HelpCircle, Info, BarChart3, Sailboat, MessageSquareText, LayoutDashboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,6 @@ const menuItems = [
   { label: "My Boats",     href: "/menu/boats",       icon: Ship,       description: "Manage your fleet" },
   { label: "Races",        href: "/races",            icon: Trophy,     description: "Schedules & results" },
   { label: "Performance",  href: "/performance",      icon: BarChart3,  description: "Analytics & standings" },
-  { label: "Crew Messages",href: "/messages",         icon: Users,      description: "Chat with your crew" },
   { label: "Float Plan",   href: "/menu/float-plan",  icon: FileText,   description: "Safety float plans" },
   { label: "Emergency",    href: "/menu/emergency",   icon: Shield,     description: "USCG & safety contacts" },
   { label: "Settings",     href: "/menu/settings",    icon: Settings,   description: "App preferences" },

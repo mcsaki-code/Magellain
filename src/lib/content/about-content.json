@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2.0.0",
+    "version": "2.1.0",
     "lastUpdated": "2026-03-29",
     "appName": "MagellAIn",
     "tagline": "Navigate Smarter. Race Harder."
@@ -17,25 +17,25 @@
       "id": "live-data",
       "title": "Live Marine Data",
       "summary": "Real-time NOAA weather, NDBC buoy observations, and marine forecasts displayed on interactive charts.",
-      "details": "Wind speed and direction, wave height, water temperature, and marine forecasts updated continuously from official government sources. Year-round shore stations include Toledo Harbor (THRO1), South Bass Island OH (SBIO1), and Marblehead OH (MRHO1). Seasonal offshore buoys \u2014 Toledo Channel Light (45132), W Lake Erie Buoy (45005), and Cleveland Buoy (45142) \u2014 deploy in late spring. Active NOAA weather alerts (Small Craft Advisories, Gale Warnings) appear as prominent banners on the Home and Weather screens."
+      "details": "Wind speed and direction, wave height, water temperature, and marine forecasts updated continuously from official government sources. Year-round shore stations include Toledo Harbor (THRO1), South Bass Island OH (SBIO1), and Marblehead OH (MRHO1). Seasonal offshore buoys — Toledo Channel Light (45132), W Lake Erie Buoy (45005), and Cleveland Buoy (45142) — deploy in late spring. Active NOAA weather alerts (Small Craft Advisories, Gale Warnings) appear as prominent banners on the Home and Weather screens."
     },
     {
       "id": "ai-coach",
       "title": "AI Sailing Coach",
       "summary": "A Claude-powered assistant that streams real-time responses with live weather context, voice input, and full knowledge of your boat and local waters.",
-      "details": "Ask about tactics, sail trim, weather interpretation, racing rules, or post-race analysis. The coach receives live NDBC buoy readings injected into its context at the time of every message \u2014 so when you ask what the wind is doing, it references actual observed conditions, not a general forecast. Responses stream token-by-token so you start reading within seconds. Tap the microphone button to ask hands-free using voice input."
+      "details": "Ask about tactics, sail trim, weather interpretation, racing rules, or post-race analysis. The coach receives live NDBC buoy readings injected into its context at the time of every message — so when you ask what the wind is doing, it references actual observed conditions, not a general forecast. Responses stream token-by-token so you start reading within seconds. Tap the microphone button to ask hands-free using voice input."
     },
     {
       "id": "route-planner",
       "title": "AI Route Planner",
       "summary": "AI-powered passage planning with custom course creation, CSV waypoint import, and weather routing optimization.",
-      "details": "Browse pre-loaded Great Lakes passages (Lake St. Clair Circuit, Ford YC to Lake Erie, Detroit River to Put-in-Bay, Port Huron to Mackinac) or create custom routes with three input modes: map click, manual coordinates, or CSV file import. Custom routes support named waypoints, notes, categories (Race, Cruise, Delivery, Practice), and public/private sharing. Edit, duplicate, or delete saved routes at any time. The AI compute engine factors in weather forecasts, your boat\u2019s polar performance data, and PHRF rating to calculate optimal speed, sail selection, and estimated duration per leg."
+      "details": "Browse pre-loaded Great Lakes passages (Lake St. Clair Circuit, Ford YC to Lake Erie, Detroit River to Put-in-Bay, Port Huron to Mackinac) or create custom routes with three input modes: map click, manual coordinates, or CSV file import. Custom routes support named waypoints, notes, categories (Race, Cruise, Delivery, Practice), and public/private sharing. Edit, duplicate, or delete saved routes at any time. The AI compute engine factors in weather forecasts, your boat’s polar performance data, and PHRF rating to calculate optimal speed, sail selection, and estimated duration per leg."
     },
     {
       "id": "race-timer",
       "title": "Pre-Race Start Timer",
       "summary": "The classic 5-minute US Sailing gun sequence with audio signals, built for one-handed cockpit use.",
-      "details": "Open the Timer tab in the bottom tab bar on the map and tap \u20185 MIN\u2019 to start the Warning \u2192 Prep \u2192 One Minute \u2192 Start sequence. Audio beeps sound at each transition with a long horn tone at the gun. Tap \u2018SYNC\u2019 to lock the timer to an actual race committee gun. Large countdown display with color-coded phase labels \u2014 yellow for Warning, orange for Prep, red for One Minute, green for Racing."
+      "details": "Open the Timer tab in the bottom tab bar on the map and tap ‘5 MIN’ to start the Warning → Prep → One Minute → Start sequence. Audio beeps sound at each transition with a long horn tone at the gun. Tap ‘SYNC’ to lock the timer to an actual race committee gun. Large countdown display with color-coded phase labels — yellow for Warning, orange for Prep, red for One Minute, green for Racing."
     },
     {
       "id": "wind-arrows",
@@ -47,13 +47,13 @@
       "id": "race-courses",
       "title": "Race Courses and Tactical Analysis",
       "summary": "Select any FYC or WSSC course and get leg-by-leg tactical advice using live wind data.",
-      "details": "The Race Courses panel on the Map screen lets you choose from all active race courses stored in the database. Selecting a course shows its legs: mark name, rounding direction, bearing, and distance. Toggle course marks on the chart as colored pins. Tap \u2018AI Tactical Analysis\u2019 to see each leg\u2019s point of sail calculated from current NDBC wind direction, with specific tactical advice for conditions."
+      "details": "The Race Courses panel on the Map screen lets you choose from all active race courses stored in the database. Selecting a course shows its legs: mark name, rounding direction, bearing, and distance. Toggle course marks on the chart as colored pins. Tap ‘AI Tactical Analysis’ to see each leg’s point of sail calculated from current NDBC wind direction, with specific tactical advice for conditions."
     },
     {
       "id": "start-line-bias",
       "title": "Start Line Bias Tool",
       "summary": "Mark the two ends of your start line on the chart and instantly see which end is favored based on live wind data.",
-      "details": "Open the Start Line Bias tool from the Tools tab in the bottom drawer on the map. Tap \u2018Boat / Pin End\u2019 then tap its position on the chart, then do the same for \u2018Committee.\u2019 MagellAIn calculates the bias angle and tells you which end is favored and by how many degrees. The line draws on the chart in amber with color-coded pins. Wind direction is pulled automatically from the nearest active NDBC buoy."
+      "details": "Open the Start Line Bias tool from the Tools tab in the bottom drawer on the map. Tap ‘Boat / Pin End’ then tap its position on the chart, then do the same for ‘Committee.’ MagellAIn calculates the bias angle and tells you which end is favored and by how many degrees. The line draws on the chart in amber with color-coded pins. Wind direction is pulled automatically from the nearest active NDBC buoy."
     },
     {
       "id": "wind-shift-graph",
@@ -71,7 +71,7 @@
       "id": "race-checklist",
       "title": "Pre-Race Checklist",
       "summary": "A comprehensive 30-item race preparation checklist covering rig, sails, safety, boat systems, and race day specifics.",
-      "details": "Five accordion sections \u2014 Rig, Sails, Safety, Boat, and Race Day \u2014 contain the key items every racing sailor should verify before the start gun. A live progress bar tracks completion. Session-based and designed for one-handed use on the water."
+      "details": "Five accordion sections — Rig, Sails, Safety, Boat, and Race Day — contain the key items every racing sailor should verify before the start gun. A live progress bar tracks completion. Session-based and designed for one-handed use on the water."
     },
     {
       "id": "gps-tracking",
@@ -95,7 +95,7 @@
       "id": "custom-routes",
       "title": "Custom Route Creation",
       "summary": "Build your own sailing routes with drag-and-drop map editing, manual coordinate entry, or CSV file import.",
-      "details": "The route creator supports three input modes. Map mode: tap the chart to place waypoints, drag markers to adjust. Coords mode: type exact lat/lng for precision. CSV mode: upload a file with waypoint coordinates \u2014 MagellAIn auto-detects delimiters and column headers. Routes are categorized (Race, Cruise, Delivery, Practice), can be public or private, and support named waypoints with notes. Edit, duplicate, or delete routes from the My Routes panel."
+      "details": "The route creator supports three input modes. Map mode: tap the chart to place waypoints, drag markers to adjust. Coords mode: type exact lat/lng for precision. CSV mode: upload a file with waypoint coordinates — MagellAIn auto-detects delimiters and column headers. Routes are categorized (Race, Cruise, Delivery, Practice), can be public or private, and support named waypoints with notes. Edit, duplicate, or delete routes from the My Routes panel."
     },
     {
       "id": "feedback",
@@ -106,7 +106,7 @@
     {
       "id": "offline-mode",
       "title": "Offline Support",
-      "summary": "The app stays functional when you lose signal \u2014 cached pages, offline GPS tracking, and an offline indicator.",
+      "summary": "The app stays functional when you lose signal — cached pages, offline GPS tracking, and an offline indicator.",
       "details": "A service worker caches all main screens and recently loaded data so you can keep using MagellAIn underway without a connection. GPS track recording works fully offline. An amber banner appears when offline and clears automatically when you reconnect. NOAA data remains available from cache for up to one hour."
     },
     {
@@ -125,7 +125,7 @@
       "id": "mobile-first",
       "title": "Built for the Water",
       "summary": "Clean, one-handed mobile interface that works when conditions are tough.",
-      "details": "Designed for use on a wet, moving boat with one hand. Large touch targets, high-contrast dark and light display themes, and voice input when your hands are full. No clutter, no distractions \u2014 a professional tool for serious sailors."
+      "details": "Designed for use on a wet, moving boat with one hand. Large touch targets, high-contrast dark and light display themes, and voice input when your hands are full. No clutter, no distractions — a professional tool for serious sailors."
     }
   ],
   "dataSources": [
@@ -152,7 +152,11 @@
   ],
   "contact": {
     "email": "mattcsaki@gmail.com",
-    "clubs": ["Ford Yacht Club", "West Shore Sail Club", "DRYA"]
+    "clubs": [
+      "Ford Yacht Club",
+      "West Shore Sail Club",
+      "DRYA"
+    ]
   },
   "legal": {
     "disclaimer": "MagellAIn is a decision-support tool, not a substitute for seamanship, proper safety equipment, or sound judgment. Weather data is sourced from NOAA and may be delayed. Always monitor VHF Channel 16 and carry required safety gear. The emergency feature connects to USCG but does not replace a VHF radio or EPIRB.",

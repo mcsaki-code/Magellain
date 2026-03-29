@@ -2,7 +2,7 @@
   "name": "MagellAIn",
   "short_name": "MagellAIn",
   "description": "Sailing intelligence for Great Lakes racing sailors",
-  "start_url": "/map",
+  "start_url": "/home",
   "display": "standalone",
   "background_color": "#1B2A4A",
   "theme_color": "#1B2A4A",
@@ -23,6 +23,11 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ]
 }
