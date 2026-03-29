@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Wordmark } from "@/components/layout/header";
+import { NotificationPrompt } from "@/components/layout/notification-prompt";
 import { useWeatherStore } from "@/lib/store/weather-store";
 import { createClient } from "@/lib/supabase/client";
 import { BUOY_STATIONS, FORD_YC, getWindColor } from "@/lib/constants";
@@ -196,6 +197,9 @@ export default function HomePage() {
           )}
         </Link>
       </header>
+
+      {/* Weather alert notification opt-in */}
+      <NotificationPrompt />
 
       <div className="space-y-4 p-4">
         {/* Alerts banner */}

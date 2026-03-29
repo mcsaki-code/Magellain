@@ -18,6 +18,7 @@ import {
   Anchor,
 } from "lucide-react";
 import { useRouteStore, computeTotalDistance, type PassageRoute } from "@/lib/store/route-store";
+import { ShareRouteButton } from "@/components/route/share-route-button";
 
 // ─── Route Card ───────────────────────────────────────────
 
@@ -113,6 +114,7 @@ function RouteCard({
               Duplicate
             </button>
           )}
+          <ShareRouteButton routeId={route.id} routeName={route.name} isPublic={route.is_public} size="sm" />
           <div className="flex-1" />
           {onDelete && !showConfirmDelete && (
             <button
@@ -146,7 +148,7 @@ function RouteCard({
         </div>
       )}
 
-      {/* Duplicate action for system/community routes */}
+      {/* Duplicate + Share actions for system/community routes */}
       {!isOwned && isSelected && onDuplicate && (
         <div className="flex items-center gap-1 border-t px-3 py-2">
           <button
@@ -156,6 +158,7 @@ function RouteCard({
             <Copy className="h-3 w-3" />
             Duplicate as my route
           </button>
+          <ShareRouteButton routeId={route.id} routeName={route.name} isPublic={route.is_public} size="sm" />
         </div>
       )}
     </div>
