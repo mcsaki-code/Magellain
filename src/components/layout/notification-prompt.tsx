@@ -48,7 +48,7 @@ async function subscribeToPush(): Promise<boolean> {
     if (!subscription && VAPID_PUBLIC_KEY) {
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
       });
     }
 
@@ -61,8 +61,8 @@ async function subscribeToPush(): Promise<boolean> {
       body: JSON.stringify({
         endpoint: subscription.endpoint,
         keys: {
-          p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey("p256dh") as ArrayBuffer))),
-          auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey("auth") as ArrayBuffer))),
+          p256dh: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(subscription.getKey("p256dh") as ArrayBuffer)))),
+          auth: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(subscription.getKey("auth") as ArrayBuffer)))),
         },
       }),
     });
