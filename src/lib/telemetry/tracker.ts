@@ -22,9 +22,11 @@ function isDuplicate(key: string, windowMs = 2000): boolean {
   recentEvents.set(key, now);
   // Clean old entries
   if (recentEvents.size > 100) {
-    for (const [k, v] of recentEvents) {
-      if (now - v > 10000) recentEvents.delete(k);
-    }
+    const toDelete: string[] = [];
+    recentEvents.forEach((v, k) => {
+      if (now - v > 10000) toDelete.push(k);
+    });
+    toDelete.forEach((k) => recentEvents.delete(k));
   }
   return false;
 }
