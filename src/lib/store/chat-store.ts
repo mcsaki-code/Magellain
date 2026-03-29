@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { AgentMode } from "@/lib/ai/agent-prompts";
 
 export interface ChatMsg {
   id: string;
@@ -12,6 +13,7 @@ interface ChatState {
   isStreaming: boolean;
   sessionId: string | null;
   error: string | null;
+  agentMode: AgentMode;
 
   addMessage: (msg: ChatMsg) => void;
   updateLastAssistant: (content: string) => void;
@@ -19,6 +21,7 @@ interface ChatState {
   setSessionId: (id: string) => void;
   setError: (error: string | null) => void;
   clearMessages: () => void;
+  setAgentMode: (mode: AgentMode) => void;
   sendMessage: (content: string) => Promise<void>;
 }
 
@@ -27,6 +30,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isStreaming: false,
   sessionId: null,
   error: null,
+  agentMode: "coach",
 
   addMessage: (msg) => set((s) => ({ messages: [...s.messages, msg] })),
   updateLastAssistant: (content) =>
@@ -40,6 +44,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   setSessionId: (sessionId) => set({ sessionId }),
   setError: (error) => set({ error }),
   clearMessages: () => set({ messages: [], sessionId: null }),
+  setAgentMode: (agentMode) => set({ agentMode, messages: [], sessionId: null }),
 
   sendMessage: async (content: string) => {
     const state = get();
@@ -65,6 +70,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         body: JSON.stringify({
           message: content,
           sessionId: state.sessionId,
+          agentMode: state.agentMode,
           history: state.messages.map((m) => ({ role: m.role, content: m.content })),
         }),
       });

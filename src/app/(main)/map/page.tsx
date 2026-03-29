@@ -8,6 +8,7 @@ import { TacticalAnalysis } from "@/components/map/tactical-analysis";
 import { MapBottomDrawer } from "@/components/map/map-bottom-drawer";
 import { WindShiftPanel } from "@/components/map/wind-shift-panel";
 import { StartLineTool } from "@/components/map/start-line-tool";
+import { InstrumentPanel } from "@/components/map/instrument-panel";
 
 // mapbox-gl accesses `window` at import time → must skip SSR
 const MapView = dynamic(
@@ -45,6 +46,7 @@ export default function MapPage() {
 
       {/* Race tool bottom sheets — mutually exclusive, z-30, above drawer */}
       <WindShiftPanel />
+      <InstrumentPanel />
       <StartLineTool />
     </div>
   );

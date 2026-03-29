@@ -70,7 +70,6 @@ export const NAV_ITEMS = [
   { key: "route", label: "Route", href: "/route-planner" },
   { key: "weather", label: "Weather", href: "/weather" },
   { key: "chat", label: "Coach", href: "/chat" },
-  { key: "messages", label: "Crew", href: "/messages" },
   { key: "races", label: "Races", href: "/races" },
   { key: "menu", label: "Menu", href: "/menu" },
 ] as const;

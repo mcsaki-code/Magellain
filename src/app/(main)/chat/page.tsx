@@ -4,9 +4,10 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/layout/header";
 import { useChatStore } from "@/lib/store/chat-store";
-import { Send, Trash2, Loader2, Sailboat, Mic, MicOff, Volume2, VolumeX, Settings2 } from "lucide-react";
+import { Send, Trash2, Loader2, Sailboat, Mic, MicOff, Volume2, VolumeX, Settings2, ClipboardList, Map as MapIcon } from "lucide-react";
 import { trackEvent } from "@/lib/telemetry/tracker";
 import { VoiceSettingsPanel, getVoiceSettings } from "@/components/chat/voice-settings";
+import { AGENT_CONFIGS, type AgentMode } from "@/lib/ai/agent-prompts";
 
 // Web Speech API type declarations
 interface ISpeechRecognitionResult {
@@ -193,7 +194,7 @@ export default function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
-  const { messages, isStreaming, error, sendMessage, clearMessages } = useChatStore();
+  const { messages, isStreaming, error, sendMessage, clearMessages, agentMode, setAgentMode } = useChatStore();
   const { speaking, voiceEnabled, ttsSupported, speak, stop, toggle: toggleTTS } = useVoiceOutput();
 
   // Auto-speak new assistant messages when voice output is enabled
@@ -360,11 +361,32 @@ export default function ChatPage() {
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-navy-100 dark:bg-navy-800">
               <Sailboat className="h-8 w-8 text-navy-600 dark:text-navy-300" />
             </div>
-            <h2 className="mb-1 text-lg font-semibold">MagellAIn Coach</h2>
-            <p className="mb-6 text-center text-sm text-muted-foreground">
-              Your AI sailing coach for racing tactics,<br />
-              weather strategy, and Lake Erie knowledge
+            <h2 className="mb-1 text-lg font-semibold">{AGENT_CONFIGS[agentMode].label}</h2>
+            <p className="mb-4 text-center text-sm text-muted-foreground">
+              {AGENT_CONFIGS[agentMode].description}
             </p>
+
+            {/* Agent mode selector */}
+            <div className="mb-4 flex w-full max-w-sm gap-1.5 rounded-xl bg-muted/50 p-1">
+              {(Object.keys(AGENT_CONFIGS) as AgentMode[]).map((mode) => {
+                const Icon = mode === "coach" ? Sailboat : mode === "race-debrief" ? ClipboardList : MapIcon;
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => setAgentMode(mode)}
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors ${
+                      agentMode === mode
+                        ? "bg-ocean text-white shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {AGENT_CONFIGS[mode].label.split(" ").pop()}
+                  </button>
+                );
+              })}
+            </div>
+
             {voiceSupported && (
               <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Mic className="h-3.5 w-3.5" />

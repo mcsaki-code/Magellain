@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
-import { User, Ship, Settings, LogOut, Shield, FileText, Trophy, HelpCircle, Info, BarChart3, Sailboat, MessageSquareText, LayoutDashboard } from "lucide-react";
+import { User, Ship, Settings, LogOut, Shield, FileText, Trophy, HelpCircle, Info, BarChart3, Sailboat, MessageSquareText, LayoutDashboard, Bluetooth, Flag, Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,10 @@ const menuItems = [
   { label: "Performance",  href: "/performance",      icon: BarChart3,  description: "Analytics & standings" },
   { label: "Float Plan",   href: "/menu/float-plan",  icon: FileText,   description: "Safety float plans" },
   { label: "Emergency",    href: "/menu/emergency",   icon: Shield,     description: "USCG & safety contacts" },
+  { label: "Yacht Clubs",   href: "/menu/club",        icon: Flag,       description: "Club registry & memberships" },
+  { label: "Instruments",  href: "/menu/instruments", icon: Bluetooth,  description: "Connect onboard sensors" },
   { label: "Settings",     href: "/menu/settings",    icon: Settings,   description: "App preferences" },
+  { label: "Privacy \& Data", href: "/menu/privacy",    icon: Lock,       description: "Data export, privacy controls" },
   { label: "Help",         href: "/menu/help",        icon: HelpCircle, description: "How to use MagellAIn" },
   { label: "Send Feedback", href: "/menu/feedback",   icon: MessageSquareText, description: "Suggest, report, or ask for help" },
   { label: "About",        href: "/menu/about",       icon: Info,       description: "App info, data sources & legal" },

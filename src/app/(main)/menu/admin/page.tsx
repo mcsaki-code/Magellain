@@ -310,7 +310,6 @@ function friendlyName(path: string): string {
     "/weather": "Weather",
     "/races": "Races",
     "/performance": "Performance",
-    "/messages": "Crew Messages",
     "/menu": "Menu",
     "/menu/boats": "My Boats",
     "/menu/profile": "Profile",

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+// Agent mode types — keep in sync with client-side AgentMode
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -162,7 +163,7 @@ function buildProfileContext(profile: Record<string, unknown>): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, history } = await req.json();
+    const { message, history, agentMode } = await req.json();
 
     if (!message || typeof message !== "string") {
       return new Response(JSON.stringify({ error: "Message is required" }), {
@@ -179,8 +180,36 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Agent-specific system prompts for race debrief and passage planning
+    const AGENT_PROMPTS: Record<string, string> = {
+      "race-debrief": `You are MagellAIn running a structured Race Debrief session. Walk the sailor through a post-race analysis one step at a time.
+
+DEBRIEF WORKFLOW:
+1. RACE CONTEXT — Ask about the race: date, fleet, conditions (wind speed/direction, waves, current), course type, fleet size, finish position.
+2. PRE-START — Analyze their pre-start: timing, position, line bias, whether they got the start they wanted.
+3. FIRST BEAT — Discuss upwind: which side favored, tack count, wind shifts caught or missed, speed relative to fleet.
+4. MARK ROUNDINGS — Review key roundings: approach, execution, tactical positions gained or lost.
+5. DOWNWIND — Analyze reaching/running: sail selection, VMG angles, gybe timing.
+6. KEY MOMENTS — Identify 2-3 pivotal moments where positions changed.
+7. TAKEAWAYS — Summarize 3 specific, actionable lessons for next race.
+
+After each step, wait for sailor input before proceeding. Keep it constructive. Never use emojis.`,
+
+      "passage-plan": `You are MagellAIn running a Passage Planning session for Great Lakes sailing.
+
+PLANNING WORKFLOW:
+1. ROUTE — Ask about departure/arrival, waypoints, timing constraints.
+2. VESSEL — Confirm boat type, crew experience, fuel range, equipment.
+3. WEATHER WINDOW — Analyze forecast wind, waves, visibility. Recommend go/no-go criteria.
+4. WAYPOINTS & HAZARDS — Identify waypoints, shipping lanes, shoals, safe harbors.
+5. SAFETY — Review safety equipment, VHF channels, USCG sectors, emergency alternatives.
+6. FLOAT PLAN — Generate summary with ETAs and emergency contacts.
+
+Walk through each step conversationally. Err on caution for marginal conditions. Never use emojis.`,
+    };
+
     // Build personalized system prompt with boat + profile data
-    let systemPrompt = BASE_SYSTEM_PROMPT;
+    let systemPrompt = (agentMode && AGENT_PROMPTS[agentMode]) || BASE_SYSTEM_PROMPT;
 
     try {
       const supabase = createServerClient(
