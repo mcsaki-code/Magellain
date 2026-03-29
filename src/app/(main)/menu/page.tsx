@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
-import { User, Ship, Settings, LogOut, Shield, FileText, Trophy, HelpCircle, Info, BarChart3, Sailboat } from "lucide-react";
+import { User, Ship, Settings, LogOut, Shield, FileText, Users, Trophy, HelpCircle, Info, BarChart3, Sailboat, MessageSquareText, LayoutDashboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+
+const ADMIN_EMAILS = ["mattcsaki@gmail.com"];
 
 const menuItems = [
   { label: "Profile",      href: "/menu/profile",    icon: User,       description: "Your sailing profile" },
@@ -11,24 +13,19 @@ const menuItems = [
   { label: "My Boats",     href: "/menu/boats",       icon: Ship,       description: "Manage your fleet" },
   { label: "Races",        href: "/races",            icon: Trophy,     description: "Schedules & results" },
   { label: "Performance",  href: "/performance",      icon: BarChart3,  description: "Analytics & standings" },
+  { label: "Crew Messages",href: "/messages",         icon: Users,      description: "Chat with your crew" },
   { label: "Float Plan",   href: "/menu/float-plan",  icon: FileText,   description: "Safety float plans" },
   { label: "Emergency",    href: "/menu/emergency",   icon: Shield,     description: "USCG & safety contacts" },
   { label: "Settings",     href: "/menu/settings",    icon: Settings,   description: "App preferences" },
   { label: "Help",         href: "/menu/help",        icon: HelpCircle, description: "How to use MagellAIn" },
-  { label: "About",        href: "/menu/about",       icon: Info,       description: "App info, data sources & legal" },
-];
-
-// Items visible to anonymous (not-signed-in) users
-const publicItems = [
-  { label: "Races",        href: "/races",            icon: Trophy,     description: "Schedules & results" },
-  { label: "Emergency",    href: "/menu/emergency",   icon: Shield,     description: "USCG & safety contacts" },
-  { label: "Help",         href: "/menu/help",        icon: HelpCircle, description: "How to use MagellAIn" },
+  { label: "Send Feedback", href: "/menu/feedback",   icon: MessageSquareText, description: "Suggest, report, or ask for help" },
   { label: "About",        href: "/menu/about",       icon: Info,       description: "App info, data sources & legal" },
 ];
 
 export default async function MenuPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email || "");
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
@@ -40,6 +37,25 @@ export default async function MenuPage() {
               <p className="font-medium text-foreground">{user.email}</p>
               <p className="text-xs text-muted-foreground">Signed in</p>
             </div>
+
+            {/* Admin link (only for admin users) */}
+            {isAdmin && (
+              <Link
+                href="/menu/admin"
+                className="flex min-h-touch items-center gap-3 rounded-xl border border-ocean/30 bg-ocean/5 px-4 py-3 transition-colors hover:bg-ocean/10"
+              >
+                <LayoutDashboard className="h-5 w-5 text-ocean" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">
+                    Admin Dashboard
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Telemetry, feedback & app health
+                  </p>
+                </div>
+              </Link>
+            )}
+
             <nav className="space-y-1">
               {menuItems.map((item) => {
                 const Icon = item.icon;
@@ -78,7 +94,7 @@ export default async function MenuPage() {
           <div className="space-y-3">
             <div className="rounded-xl border border-border bg-card p-6 text-center">
               <p className="text-sm text-muted-foreground">
-                Sign in to access your profile, boats, and race history.
+                Sign in to access your profile, boats, and chat history.
               </p>
             </div>
             <Link
@@ -93,28 +109,17 @@ export default async function MenuPage() {
             >
               Create Account
             </Link>
-            <nav className="space-y-1 pt-2">
-              {publicItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex min-h-touch items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:bg-accent"
-                  >
-                    <Icon className="h-5 w-5 text-ocean" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-foreground">
-                        {item.label}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.description}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </nav>
+            {/* Feedback link for non-authenticated users too */}
+            <Link
+              href="/menu/feedback"
+              className="flex min-h-touch items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:bg-accent"
+            >
+              <MessageSquareText className="h-5 w-5 text-ocean" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">Send Feedback</p>
+                <p className="text-xs text-muted-foreground">Suggest, report, or ask for help</p>
+              </div>
+            </Link>
           </div>
         )}
       </div>
