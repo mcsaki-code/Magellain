@@ -4,7 +4,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/layout/header";
 import { useChatStore } from "@/lib/store/chat-store";
-import { Send, Trash2, Loader2, Sailboat, Mic, MicOff } from "lucide-react";
+import { Send, Trash2, Loader2, Sailboat, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { trackEvent } from "@/lib/telemetry/tracker";
 
 // Web Speech API type declarations
 interface ISpeechRecognitionResult {
@@ -43,7 +44,93 @@ declare global {
   }
 }
 
-function MessageBubble({ role, content }: { role: "user" | "assistant"; content: string }) {
+// ─── Voice Output (Text-to-Speech) ──────────────────────
+function useVoiceOutput() {
+  const [speaking, setSpeaking] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [ttsSupported, setTtsSupported] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  useEffect(() => {
+    setTtsSupported(typeof window !== "undefined" && "speechSynthesis" in window);
+  }, []);
+
+  const speak = useCallback((text: string) => {
+    if (!ttsSupported || !voiceEnabled) return;
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+
+    // Strip markdown formatting for cleaner speech
+    const clean = text
+      .replace(/#{1,6}\s/g, "")          // headers
+      .replace(/\*\*(.+?)\*\*/g, "$1")   // bold
+      .replace(/\*(.+?)\*/g, "$1")       // italic
+      .replace(/`(.+?)`/g, "$1")         // code
+      .replace(/\[(.+?)\]\(.+?\)/g, "$1") // links
+      .replace(/[-*]\s/g, "")            // bullets
+      .replace(/\n{2,}/g, ". ")          // paragraph breaks
+      .replace(/\n/g, " ")              // line breaks
+      .trim();
+
+    if (!clean) return;
+
+    const utter = new SpeechSynthesisUtterance(clean);
+    utter.rate = 1.05;
+    utter.pitch = 1.0;
+    utter.lang = "en-US";
+    utter.onstart = () => setSpeaking(true);
+    utter.onend = () => setSpeaking(false);
+    utter.onerror = () => setSpeaking(false);
+    utteranceRef.current = utter;
+    window.speechSynthesis.speak(utter);
+    trackEvent("voice_output_speak", { length: clean.length });
+  }, [ttsSupported, voiceEnabled]);
+
+  const stop = useCallback(() => {
+    if (ttsSupported) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+    }
+  }, [ttsSupported]);
+
+  const toggle = useCallback(() => {
+    if (speaking) {
+      stop();
+    }
+    setVoiceEnabled((prev) => {
+      const next = !prev;
+      trackEvent("voice_output_toggle", { enabled: next });
+      if (!next) {
+        window.speechSynthesis.cancel();
+        setSpeaking(false);
+      }
+      return next;
+    });
+  }, [speaking, stop]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis?.cancel();
+    };
+  }, []);
+
+  return { speaking, voiceEnabled, ttsSupported, speak, stop, toggle };
+}
+
+function MessageBubble({
+  role,
+  content,
+  onSpeak,
+  speaking,
+  voiceEnabled,
+}: {
+  role: "user" | "assistant";
+  content: string;
+  onSpeak?: (text: string) => void;
+  speaking?: boolean;
+  voiceEnabled?: boolean;
+}) {
   if (role === "user") {
     return (
       <div className="flex justify-end">
@@ -59,11 +146,23 @@ function MessageBubble({ role, content }: { role: "user" | "assistant"; content:
       <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy-100 dark:bg-navy-800">
         <Sailboat className="h-3.5 w-3.5 text-navy-600 dark:text-navy-300" />
       </div>
-      <div className="prose prose-sm dark:prose-invert max-w-[85%] rounded-2xl rounded-bl-md bg-muted px-4 py-2.5 text-sm [&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:text-sm [&_h2]:font-bold [&_h3]:mt-2 [&_h3]:mb-1 [&_h3]:text-sm [&_h3]:font-semibold [&_p]:my-1.5 [&_ul]:my-1 [&_ul]:pl-4 [&_li]:my-0.5 [&_strong]:text-foreground">
-        {content ? (
-          <ReactMarkdown>{content}</ReactMarkdown>
-        ) : (
-          <span className="inline-block h-4 w-4 animate-pulse rounded-full bg-muted-foreground/30" />
+      <div className="group relative max-w-[85%]">
+        <div className="prose prose-sm dark:prose-invert rounded-2xl rounded-bl-md bg-muted px-4 py-2.5 text-sm [&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:text-sm [&_h2]:font-bold [&_h3]:mt-2 [&_h3]:mb-1 [&_h3]:text-sm [&_h3]:font-semibold [&_p]:my-1.5 [&_ul]:my-1 [&_ul]:pl-4 [&_li]:my-0.5 [&_strong]:text-foreground">
+          {content ? (
+            <ReactMarkdown>{content}</ReactMarkdown>
+          ) : (
+            <span className="inline-block h-4 w-4 animate-pulse rounded-full bg-muted-foreground/30" />
+          )}
+        </div>
+        {/* Voice output button on assistant messages */}
+        {voiceEnabled && content && onSpeak && (
+          <button
+            onClick={() => onSpeak(content)}
+            className="absolute -right-1 -bottom-1 flex h-6 w-6 items-center justify-center rounded-full bg-card border border-border text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-ocean"
+            title={speaking ? "Speaking..." : "Read aloud"}
+          >
+            <Volume2 className={`h-3 w-3 ${speaking ? "text-ocean animate-pulse" : ""}`} />
+          </button>
         )}
       </div>
     </div>
@@ -86,6 +185,18 @@ export default function ChatPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
   const { messages, isStreaming, error, sendMessage, clearMessages } = useChatStore();
+  const { speaking, voiceEnabled, ttsSupported, speak, stop, toggle: toggleTTS } = useVoiceOutput();
+
+  // Auto-speak new assistant messages when voice output is enabled
+  const lastMsgRef = useRef<string>("");
+  useEffect(() => {
+    if (!voiceEnabled || isStreaming) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && lastMsg.role === "assistant" && lastMsg.content && lastMsg.content !== lastMsgRef.current) {
+      lastMsgRef.current = lastMsg.content;
+      speak(lastMsg.content);
+    }
+  }, [messages, isStreaming, voiceEnabled, speak]);
 
   // Check for Web Speech API support
   useEffect(() => {
@@ -109,8 +220,11 @@ export default function ChatPage() {
   const handleSend = () => {
     const trimmed = input.trim();
     if (!trimmed || isStreaming) return;
+    // Stop any ongoing speech when user sends a new message
+    stop();
     setInput("");
     sendMessage(trimmed);
+    trackEvent("coach_message_sent", { length: trimmed.length });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -148,6 +262,7 @@ export default function ChatPage() {
     recognition.onstart = () => {
       setIsListening(true);
       finalTranscript = "";
+      trackEvent("voice_input_start");
     };
 
     recognition.onresult = (event: ISpeechRecognitionEvent) => {
@@ -160,13 +275,11 @@ export default function ChatPage() {
           interim += transcript;
         }
       }
-      // Show interim text in the input while speaking
       setInput(finalTranscript || interim);
     };
 
     recognition.onend = () => {
       setIsListening(false);
-      // Focus input so user can edit before sending
       inputRef.current?.focus();
     };
 
@@ -186,15 +299,38 @@ export default function ChatPage() {
   return (
     <div className="mx-auto flex h-[calc(100dvh-var(--nav-total-height))] w-full max-w-2xl flex-col">
       <Header title="Sailing Coach">
-        {messages.length > 0 && (
-          <button
-            onClick={clearMessages}
-            className="rounded-lg p-2 text-muted-foreground hover:bg-muted"
-            title="Clear chat"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          {/* Voice output toggle */}
+          {ttsSupported && (
+            <button
+              onClick={toggleTTS}
+              className={`rounded-lg p-2 transition-colors ${
+                voiceEnabled
+                  ? "text-ocean bg-ocean/10"
+                  : "text-muted-foreground hover:bg-muted"
+              }`}
+              title={voiceEnabled ? "Voice output on — tap to mute" : "Enable voice output"}
+            >
+              {voiceEnabled ? (
+                <Volume2 className={`h-4 w-4 ${speaking ? "animate-pulse" : ""}`} />
+              ) : (
+                <VolumeX className="h-4 w-4" />
+              )}
+            </button>
+          )}
+          {messages.length > 0 && (
+            <button
+              onClick={() => {
+                stop();
+                clearMessages();
+              }}
+              className="rounded-lg p-2 text-muted-foreground hover:bg-muted"
+              title="Clear chat"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </Header>
 
       {/* Messages area */}
@@ -210,9 +346,15 @@ export default function ChatPage() {
               weather strategy, and Lake Erie knowledge
             </p>
             {voiceSupported && (
-              <p className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Mic className="h-3.5 w-3.5" />
                 Tap the mic to speak your question
+              </p>
+            )}
+            {ttsSupported && (
+              <p className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Volume2 className="h-3.5 w-3.5" />
+                Enable voice output to hear responses read aloud
               </p>
             )}
             <div className="grid w-full max-w-sm gap-2">
@@ -223,6 +365,7 @@ export default function ChatPage() {
                     if (!isStreaming) {
                       setInput("");
                       sendMessage(s);
+                      trackEvent("coach_suggestion_tap", { suggestion: s.slice(0, 40) });
                     }
                   }}
                   disabled={isStreaming}
@@ -236,7 +379,14 @@ export default function ChatPage() {
         ) : (
           <div className="space-y-4">
             {messages.map((msg) => (
-              <MessageBubble key={msg.id} role={msg.role} content={msg.content} />
+              <MessageBubble
+                key={msg.id}
+                role={msg.role}
+                content={msg.content}
+                onSpeak={speak}
+                speaking={speaking}
+                voiceEnabled={voiceEnabled}
+              />
             ))}
           </div>
         )}
@@ -262,7 +412,21 @@ export default function ChatPage() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ocean opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-ocean" />
           </span>
-          <span className="text-xs font-medium text-ocean">Listening… speak now</span>
+          <span className="text-xs font-medium text-ocean">Listening... speak now</span>
+        </div>
+      )}
+
+      {/* Speaking indicator */}
+      {speaking && (
+        <div className="mx-4 mb-1 flex items-center gap-2 rounded-lg bg-ocean/5 px-3 py-2">
+          <Volume2 className="h-3.5 w-3.5 text-ocean animate-pulse" />
+          <span className="text-xs font-medium text-ocean">Speaking...</span>
+          <button
+            onClick={stop}
+            className="ml-auto text-[10px] font-medium text-ocean/70 hover:text-ocean"
+          >
+            Stop
+          </button>
         </div>
       )}
 
@@ -295,7 +459,7 @@ export default function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isListening ? "Listening…" : "Ask your sailing coach…"}
+            placeholder={isListening ? "Listening..." : "Ask your sailing coach..."}
             disabled={isStreaming}
             className="flex-1 rounded-xl border bg-muted px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:border-ocean focus:outline-none focus:ring-1 focus:ring-ocean disabled:opacity-50"
           />

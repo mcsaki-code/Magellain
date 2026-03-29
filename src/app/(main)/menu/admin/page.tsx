@@ -6,10 +6,22 @@ import Link from "next/link";
 import {
   ArrowLeft, BarChart3, Users, Eye, Globe, Ship, Navigation,
   Cpu, MessageSquare, TrendingUp, AlertCircle, Loader2,
-  ChevronDown, ChevronUp, RefreshCw, Clock
+  ChevronDown, ChevronUp, RefreshCw, Clock, Check, X,
+  MessageCircle, Pencil
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────
+interface FeedbackItem {
+  id: number;
+  category: string;
+  subject: string;
+  message?: string;
+  status: string;
+  admin_notes?: string;
+  created_at: string;
+  email: string | null;
+}
+
 interface TelemetryData {
   period: { days: number; since: string };
   kpis: {
@@ -25,14 +37,7 @@ interface TelemetryData {
   trend: { date: string; views: number }[];
   topEvents: { event: string; count: number }[];
   feedback: {
-    items: {
-      id: number;
-      category: string;
-      subject: string;
-      status: string;
-      created_at: string;
-      email: string | null;
-    }[];
+    items: FeedbackItem[];
     byCategory: Record<string, number>;
     byStatus: Record<string, number>;
   };
@@ -83,11 +88,13 @@ function Section({
   title,
   icon: Icon,
   defaultOpen = true,
+  badge,
   children,
 }: {
   title: string;
   icon: React.ElementType;
   defaultOpen?: boolean;
+  badge?: number;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -100,6 +107,11 @@ function Section({
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-ocean" />
           <span className="text-sm font-semibold text-foreground">{title}</span>
+          {badge !== undefined && badge > 0 && (
+            <span className="rounded-full bg-ocean/10 px-1.5 py-0.5 text-[10px] font-bold text-ocean">
+              {badge}
+            </span>
+          )}
         </div>
         {open ? (
           <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -142,6 +154,152 @@ function CategoryBadge({ category }: { category: string }) {
   );
 }
 
+// ─── Feedback Card (Expanded) ────────────────────────────
+function FeedbackCard({
+  item,
+  onUpdateStatus,
+  onUpdateNotes,
+}: {
+  item: FeedbackItem;
+  onUpdateStatus: (id: number, status: string) => Promise<void>;
+  onUpdateNotes: (id: number, notes: string) => Promise<void>;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [notes, setNotes] = useState(item.admin_notes || "");
+  const [saving, setSaving] = useState(false);
+
+  const statuses = ["new", "read", "in_progress", "resolved", "closed"];
+
+  const handleSaveNotes = async () => {
+    setSaving(true);
+    await onUpdateNotes(item.id, notes);
+    setSaving(false);
+    setEditing(false);
+  };
+
+  return (
+    <div className="rounded-lg border border-border bg-background overflow-hidden">
+      {/* Header row */}
+      <button
+        onClick={() => {
+          setExpanded(!expanded);
+          if (!expanded && item.status === "new") {
+            onUpdateStatus(item.id, "read");
+          }
+        }}
+        className="flex w-full items-center gap-2 p-3 text-left transition-colors hover:bg-muted/30"
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <CategoryBadge category={item.category} />
+            <StatusBadge status={item.status} />
+            <span className="text-[10px] text-muted-foreground ml-auto shrink-0">
+              {new Date(item.created_at).toLocaleDateString()}
+            </span>
+          </div>
+          <p className="text-sm font-medium text-foreground truncate">{item.subject}</p>
+          {item.email && (
+            <p className="text-[10px] text-muted-foreground mt-0.5">{item.email}</p>
+          )}
+        </div>
+        {expanded ? (
+          <ChevronUp className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        )}
+      </button>
+
+      {/* Expanded detail */}
+      {expanded && (
+        <div className="border-t border-border p-3 space-y-3">
+          {/* Message content */}
+          {item.message && (
+            <div className="rounded-lg bg-muted/50 p-3">
+              <p className="text-xs text-muted-foreground mb-1 font-medium">Message</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{item.message}</p>
+            </div>
+          )}
+
+          {/* Status actions */}
+          <div>
+            <p className="text-xs text-muted-foreground mb-1.5 font-medium">Update Status</p>
+            <div className="flex flex-wrap gap-1">
+              {statuses.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => onUpdateStatus(item.id, s)}
+                  disabled={item.status === s}
+                  className={`rounded-lg px-2.5 py-1 text-[10px] font-medium transition-colors ${
+                    item.status === s
+                      ? "bg-ocean text-white"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {s.replace("_", " ")}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Admin notes */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-xs text-muted-foreground font-medium">Admin Notes</p>
+              {!editing && (
+                <button
+                  onClick={() => setEditing(true)}
+                  className="flex items-center gap-1 text-[10px] text-ocean hover:text-ocean-600"
+                >
+                  <Pencil className="h-3 w-3" />
+                  {item.admin_notes ? "Edit" : "Add note"}
+                </button>
+              )}
+            </div>
+            {editing ? (
+              <div className="space-y-2">
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add internal notes about this feedback..."
+                  rows={3}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ocean focus:outline-none focus:ring-1 focus:ring-ocean"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveNotes}
+                    disabled={saving}
+                    className="flex items-center gap-1 rounded-lg bg-ocean px-3 py-1.5 text-xs font-medium text-white hover:bg-ocean-600 disabled:opacity-50"
+                  >
+                    {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditing(false);
+                      setNotes(item.admin_notes || "");
+                    }}
+                    className="flex items-center gap-1 rounded-lg bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-3 w-3" />
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : item.admin_notes ? (
+              <p className="text-xs text-foreground bg-muted/50 rounded-lg p-2 whitespace-pre-wrap">
+                {item.admin_notes}
+              </p>
+            ) : (
+              <p className="text-[10px] text-muted-foreground italic">No notes yet</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Page Name Helper ────────────────────────────────────
 function friendlyName(path: string): string {
   const names: Record<string, string> = {
@@ -162,6 +320,7 @@ function friendlyName(path: string): string {
     "/menu/emergency": "Emergency",
     "/menu/float-plan": "Float Plan",
     "/menu/admin": "Admin Dashboard",
+    "/menu/feedback": "Send Feedback",
   };
   return names[path] || path;
 }
@@ -194,6 +353,58 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // ─── Feedback Actions ──────────────────────────────────
+  const updateFeedbackStatus = useCallback(async (id: number, status: string) => {
+    try {
+      const res = await fetch("/api/admin/feedback", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      });
+      if (!res.ok) throw new Error("Failed to update");
+      // Update local state
+      setData((prev) => {
+        if (!prev) return prev;
+        const items = prev.feedback.items.map((f) =>
+          f.id === id ? { ...f, status } : f
+        );
+        // Recompute byStatus
+        const byStatus: Record<string, number> = {};
+        items.forEach((f) => {
+          byStatus[f.status] = (byStatus[f.status] || 0) + 1;
+        });
+        return {
+          ...prev,
+          feedback: { ...prev.feedback, items, byStatus },
+        };
+      });
+    } catch {
+      // Silent fail — user sees stale state
+    }
+  }, []);
+
+  const updateFeedbackNotes = useCallback(async (id: number, admin_notes: string) => {
+    try {
+      const res = await fetch("/api/admin/feedback", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, admin_notes }),
+      });
+      if (!res.ok) throw new Error("Failed to update");
+      setData((prev) => {
+        if (!prev) return prev;
+        const items = prev.feedback.items.map((f) =>
+          f.id === id ? { ...f, admin_notes } : f
+        );
+        return { ...prev, feedback: { ...prev.feedback, items } };
+      });
+    } catch {
+      // Silent fail
+    }
+  }, []);
+
+  const newCount = data?.feedback.byStatus.new || 0;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
@@ -330,8 +541,8 @@ export default function AdminDashboardPage() {
               )}
             </Section>
 
-            {/* ─── User Feedback ────────────────────────── */}
-            <Section title="User Feedback" icon={MessageSquare}>
+            {/* ─── User Feedback (Enhanced) ─────────────── */}
+            <Section title="User Feedback" icon={MessageSquare} badge={newCount}>
               {/* Category / Status summary */}
               {Object.keys(data.feedback.byCategory).length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -355,23 +566,13 @@ export default function AdminDashboardPage() {
                 <p className="text-xs text-muted-foreground">No feedback submitted yet</p>
               ) : (
                 <div className="space-y-2">
-                  {data.feedback.items.slice(0, 20).map((f) => (
-                    <div
+                  {data.feedback.items.slice(0, 25).map((f) => (
+                    <FeedbackCard
                       key={f.id}
-                      className="rounded-lg border border-border bg-background p-3"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <CategoryBadge category={f.category} />
-                        <StatusBadge status={f.status} />
-                        <span className="text-[10px] text-muted-foreground ml-auto">
-                          {new Date(f.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className="text-sm font-medium text-foreground">{f.subject}</p>
-                      {f.email && (
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{f.email}</p>
-                      )}
-                    </div>
+                      item={f}
+                      onUpdateStatus={updateFeedbackStatus}
+                      onUpdateNotes={updateFeedbackNotes}
+                    />
                   ))}
                 </div>
               )}

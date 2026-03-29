@@ -81,10 +81,10 @@ export async function GET(request: Request) {
       .slice(0, 15)
       .map(([event, count]) => ({ event, count }));
 
-    // 7. Feedback summary
+    // 7. Feedback summary — now includes message and admin_notes for management
     const { data: feedbackData } = await supabase
       .from("user_feedback")
-      .select("id, category, subject, status, created_at, email")
+      .select("id, category, subject, message, status, admin_notes, created_at, email")
       .order("created_at", { ascending: false })
       .limit(50);
 
