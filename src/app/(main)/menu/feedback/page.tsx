@@ -129,7 +129,7 @@ export default function FeedbackPage() {
         {/* Intro */}
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">
-            Have a suggestion, found a bug, or need help? Let us know and we'll get back to you.
+            Have a suggestion, found a bug, or need help? Let us know and we&apos;ll get back to you.
           </p>
         </div>
 
