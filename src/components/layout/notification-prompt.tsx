@@ -9,21 +9,15 @@ import {
 } from "@/lib/notifications/notification-manager";
 import { trackEvent } from "@/lib/telemetry/tracker";
 
-/**
- * Detects whether the app is running as an installed PWA (home screen).
- */
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
+
 function isRunningAsPWA(): boolean {
   if (typeof window === "undefined") return false;
-  // iOS: navigator.standalone is true when launched from home screen
   if ("standalone" in window.navigator && (window.navigator as unknown as { standalone: boolean }).standalone) return true;
-  // Android/desktop: display-mode: standalone media query
   if (window.matchMedia("(display-mode: standalone)").matches) return true;
   return false;
 }
 
-/**
- * Detects iOS Safari specifically.
- */
 function isIOSSafari(): boolean {
   if (typeof window === "undefined") return false;
   const ua = window.navigator.userAgent;
@@ -32,16 +26,59 @@ function isIOSSafari(): boolean {
   return isIOS && isSafari;
 }
 
-/**
- * Smart prompt that adapts based on context:
- * - If running in browser (not installed): shows "Add to Home Screen" instructions
- * - If running as PWA + notifications not yet granted: shows notification opt-in
- * - If already installed + notifications granted/denied: shows nothing
- */
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; i++) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+async function subscribeToPush(): Promise<boolean> {
+  try {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+
+    const registration = await navigator.serviceWorker.ready;
+
+    // Check for existing subscription
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription && VAPID_PUBLIC_KEY) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    }
+
+    if (!subscription) return false;
+
+    // Send subscription to our API
+    const response = await fetch("/api/push/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        endpoint: subscription.endpoint,
+        keys: {
+          p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey("p256dh") as ArrayBuffer))),
+          auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey("auth") as ArrayBuffer))),
+        },
+      }),
+    });
+
+    return response.ok;
+  } catch (err) {
+    console.warn("Push subscription failed:", err);
+    return false;
+  }
+}
+
 export function NotificationPrompt() {
   const [show, setShow] = useState(false);
   const [mode, setMode] = useState<"install" | "notify">("install");
   const [showInstructions, setShowInstructions] = useState(false);
+  const [enabling, setEnabling] = useState(false);
 
   useEffect(() => {
     const dismissed = sessionStorage.getItem("magellain-prompt-dismissed");
@@ -49,7 +86,6 @@ export function NotificationPrompt() {
 
     const timer = setTimeout(() => {
       if (isRunningAsPWA()) {
-        // Already installed — check if we should prompt for notifications
         if (notificationsSupported()) {
           const perm = getNotificationPermission();
           if (perm === "default") {
@@ -58,7 +94,6 @@ export function NotificationPrompt() {
           }
         }
       } else {
-        // Not installed as PWA — suggest adding to home screen
         setMode("install");
         setShow(true);
       }
@@ -68,10 +103,19 @@ export function NotificationPrompt() {
   }, []);
 
   const handleNotifyEnable = async () => {
+    setEnabling(true);
     const result = await requestNotificationPermission();
+    trackEvent("notification_permission", { result });
+
+    if (result === "granted") {
+      // Subscribe to push notifications
+      const pushOk = await subscribeToPush();
+      trackEvent("push_subscription", { success: pushOk });
+    }
+
     setShow(false);
     sessionStorage.setItem("magellain-prompt-dismissed", "true");
-    trackEvent("notification_permission", { result });
+    setEnabling(false);
   };
 
   const handleDismiss = () => {
@@ -82,7 +126,6 @@ export function NotificationPrompt() {
 
   if (!show) return null;
 
-  // ── Notification opt-in (PWA is installed) ─────────────────
   if (mode === "notify") {
     return (
       <div className="mx-4 mb-2 flex items-center gap-3 rounded-xl border border-ocean/20 bg-ocean/5 p-3 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -97,9 +140,10 @@ export function NotificationPrompt() {
         </div>
         <button
           onClick={handleNotifyEnable}
-          className="shrink-0 rounded-lg bg-ocean px-3 py-1.5 text-xs font-medium text-white hover:bg-ocean-600"
+          disabled={enabling}
+          className="shrink-0 rounded-lg bg-ocean px-3 py-1.5 text-xs font-medium text-white hover:bg-ocean-600 disabled:opacity-50"
         >
-          Enable
+          {enabling ? "..." : "Enable"}
         </button>
         <button
           onClick={handleDismiss}
@@ -111,7 +155,6 @@ export function NotificationPrompt() {
     );
   }
 
-  // ── Add to Home Screen prompt (not installed) ──────────────
   return (
     <div className="mx-4 mb-2 rounded-xl border border-ocean/20 bg-ocean/5 animate-in fade-in slide-in-from-top-2 duration-300">
       <div className="flex items-center gap-3 p-3">
@@ -143,7 +186,6 @@ export function NotificationPrompt() {
         </button>
       </div>
 
-      {/* Step-by-step instructions */}
       {showInstructions && (
         <div className="border-t border-ocean/10 px-4 py-3 space-y-2.5 animate-in fade-in duration-200">
           {isIOSSafari() ? (
@@ -190,7 +232,7 @@ export function NotificationPrompt() {
             </>
           )}
           <p className="text-[10px] text-muted-foreground pt-1">
-            Once installed, MagellAIn will open full-screen from your home screen with offline support and weather alerts.
+            Once installed, MagellAIn opens full-screen with offline support and weather alert notifications.
           </p>
         </div>
       )}

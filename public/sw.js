@@ -1,9 +1,7 @@
 // NEXT_PUBLIC_COMMIT_SHA is injected at build time via next.config.mjs env
-// Falls back to "dev" for local development
 const COMMIT_SHA = self.__COMMIT_SHA__ || "dev";
 const CACHE_NAME = `magellain-${COMMIT_SHA}`;
 
-// Static paths to cache on install
 const STATIC_PATHS = [
   "/",
   "/home",
@@ -21,12 +19,10 @@ const STATIC_PATHS = [
   "/manifest.json",
 ];
 
-// Install event: cache static paths
+// Install event
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_PATHS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_PATHS))
   );
   self.skipWaiting();
 });
@@ -34,52 +30,95 @@ self.addEventListener("install", (event) => {
 // Activate event: clean up old caches
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames.map((name) => {
+          if (name !== CACHE_NAME) return caches.delete(name);
         })
-      );
-    })
+      )
+    )
   );
   self.clients.claim();
 });
 
-// Fetch event: implement caching strategies
+// ─── Push Notification Handler ──────────────────────────────
+self.addEventListener("push", (event) => {
+  let data = { title: "MagellAIn", body: "New notification", url: "/home" };
+
+  try {
+    if (event.data) {
+      const parsed = event.data.json();
+      data = { ...data, ...parsed };
+    }
+  } catch {
+    // If not JSON, use text
+    if (event.data) {
+      data.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: data.body,
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    tag: data.tag || "magellain-notification",
+    requireInteraction: data.requireInteraction || false,
+    data: { url: data.url || "/home" },
+    actions: [
+      { action: "view", title: "View" },
+      { action: "dismiss", title: "Dismiss" },
+    ],
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+// Handle notification click
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const url = event.notification.data?.url || "/home";
+
+  if (event.action === "dismiss") return;
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      // Focus existing window if available
+      for (const client of windowClients) {
+        if (client.url.includes(self.location.origin) && "focus" in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      // Open new window
+      return clients.openWindow(url);
+    })
+  );
+});
+
+// ─── Fetch Strategies ───────────────────────────────────────
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip cross-origin requests and non-GET requests
-  if (!url.origin.includes(self.location.origin) && request.method !== "GET") {
-    return;
-  }
+  if (!url.origin.includes(self.location.origin) && request.method !== "GET") return;
 
-  // Navigation requests: network-first, fallback to cached page or /offline
+  // Navigation: network-first
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .catch(() => {
-          return caches.match(request).then((response) => {
-            if (response) {
-              return response;
-            }
-            // Fall back to /offline page
-            return caches.match("/offline").then((offlineResponse) => {
-              return (
-                offlineResponse ||
-                new Response("Offline", { status: 503 })
-              );
-            });
-          });
-        })
+      fetch(request).catch(() =>
+        caches.match(request).then((r) =>
+          r || caches.match("/offline").then((o) => o || new Response("Offline", { status: 503 }))
+        )
+      )
     );
     return;
   }
 
-  // API requests: network-first, cache successful responses, serve from cache on failure
+  // API / external data: network-first, cache on success
   if (
     url.pathname.includes("/api/") ||
     url.hostname.includes("supabase.co") ||
@@ -89,68 +128,56 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Only cache successful responses (2xx status)
           if (response.ok) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseToCache);
-            });
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           }
           return response;
         })
-        .catch(() => {
-          return caches.match(request).then((response) => {
-            return (
-              response ||
-              new Response(
-                JSON.stringify({ error: "Network error, no cache available" }),
-                { status: 503, headers: { "Content-Type": "application/json" } }
-              )
-            );
-          });
-        })
+        .catch(() =>
+          caches.match(request).then(
+            (r) =>
+              r || new Response(JSON.stringify({ error: "Offline" }), {
+                status: 503,
+                headers: { "Content-Type": "application/json" },
+              })
+          )
+        )
     );
     return;
   }
 
-  // Static assets (images, fonts, _next/static): cache-first strategy
+  // Static assets: cache-first
   if (
     url.pathname.includes("/_next/static/") ||
     /\.(png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|otf)$/i.test(url.pathname)
   ) {
     event.respondWith(
-      caches.match(request).then((response) => {
-        if (response) {
-          return response;
-        }
-        return fetch(request).then((response) => {
-          if (response.ok) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseToCache);
-            });
-          }
-          return response;
-        });
-      })
+      caches.match(request).then(
+        (r) =>
+          r ||
+          fetch(request).then((response) => {
+            if (response.ok) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            }
+            return response;
+          })
+      )
     );
     return;
   }
 
-  // Everything else: network-first, cache on success
+  // Everything else: network-first
   event.respondWith(
     fetch(request)
       .then((response) => {
         if (response.ok) {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
         return response;
       })
-      .catch(() => {
-        return caches.match(request);
-      })
+      .catch(() => caches.match(request))
   );
 });

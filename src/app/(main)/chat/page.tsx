@@ -4,8 +4,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/layout/header";
 import { useChatStore } from "@/lib/store/chat-store";
-import { Send, Trash2, Loader2, Sailboat, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { Send, Trash2, Loader2, Sailboat, Mic, MicOff, Volume2, VolumeX, Settings2 } from "lucide-react";
 import { trackEvent } from "@/lib/telemetry/tracker";
+import { VoiceSettingsPanel, getVoiceSettings } from "@/components/chat/voice-settings";
 
 // Web Speech API type declarations
 interface ISpeechRecognitionResult {
@@ -75,9 +76,16 @@ function useVoiceOutput() {
     if (!clean) return;
 
     const utter = new SpeechSynthesisUtterance(clean);
-    utter.rate = 1.05;
-    utter.pitch = 1.0;
+    // Apply user voice preferences
+    const prefs = getVoiceSettings();
+    utter.rate = prefs.rate || 1.05;
+    utter.pitch = prefs.pitch || 1.0;
     utter.lang = "en-US";
+    if (prefs.voiceURI) {
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find((v) => v.voiceURI === prefs.voiceURI);
+      if (preferred) utter.voice = preferred;
+    }
     utter.onstart = () => setSpeaking(true);
     utter.onend = () => setSpeaking(false);
     utter.onerror = () => setSpeaking(false);
@@ -181,6 +189,7 @@ export default function ChatPage() {
   const [isListening, setIsListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
@@ -302,21 +311,32 @@ export default function ChatPage() {
         <div className="flex items-center gap-1">
           {/* Voice output toggle */}
           {ttsSupported && (
-            <button
-              onClick={toggleTTS}
-              className={`rounded-lg p-2 transition-colors ${
-                voiceEnabled
-                  ? "text-ocean bg-ocean/10"
-                  : "text-muted-foreground hover:bg-muted"
-              }`}
-              title={voiceEnabled ? "Voice output on — tap to mute" : "Enable voice output"}
-            >
-              {voiceEnabled ? (
-                <Volume2 className={`h-4 w-4 ${speaking ? "animate-pulse" : ""}`} />
-              ) : (
-                <VolumeX className="h-4 w-4" />
+            <>
+              <button
+                onClick={toggleTTS}
+                className={`rounded-lg p-2 transition-colors ${
+                  voiceEnabled
+                    ? "text-ocean bg-ocean/10"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+                title={voiceEnabled ? "Voice output on — tap to mute" : "Enable voice output"}
+              >
+                {voiceEnabled ? (
+                  <Volume2 className={`h-4 w-4 ${speaking ? "animate-pulse" : ""}`} />
+                ) : (
+                  <VolumeX className="h-4 w-4" />
+                )}
+              </button>
+              {voiceEnabled && (
+                <button
+                  onClick={() => setShowVoiceSettings((p) => !p)}
+                  className="rounded-lg p-2 text-muted-foreground hover:bg-muted"
+                  title="Voice settings"
+                >
+                  <Settings2 className="h-4 w-4" />
+                </button>
               )}
-            </button>
+            </>
           )}
           {messages.length > 0 && (
             <button
@@ -479,3 +499,4 @@ export default function ChatPage() {
     </div>
   );
 }
+
