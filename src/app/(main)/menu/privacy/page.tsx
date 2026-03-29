@@ -39,7 +39,7 @@ export default function PrivacyPage() {
           supabase.from("profiles").select("*").eq("id", user.id).single(),
           supabase.from("boats").select("*").eq("owner_id", user.id),
           supabase.from("gps_tracks").select("*").eq("user_id", user.id),
-          supabase.from("routes").select("*").eq("owner_id", user.id),
+          supabase.from("passage_routes").select("*").eq("owner_id", user.id),
           supabase.from("chat_messages").select("*").eq("user_id", user.id),
           supabase.from("push_subscriptions").select("id, endpoint, user_agent, created_at").eq("user_id", user.id),
           supabase.from("club_memberships").select("*, club:clubs(name)").eq("user_id", user.id),
@@ -92,7 +92,7 @@ export default function PrivacyPage() {
         supabase.from("chat_messages").delete().eq("user_id", user.id),
         supabase.from("push_subscriptions").delete().eq("user_id", user.id),
         supabase.from("club_memberships").delete().eq("user_id", user.id),
-        supabase.from("routes").delete().eq("owner_id", user.id),
+        supabase.from("passage_routes").delete().eq("owner_id", user.id),
         supabase.from("boats").delete().eq("owner_id", user.id),
         supabase.from("feedback").delete().eq("user_id", user.id),
       ]);

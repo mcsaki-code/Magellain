@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const supabase = await createClient();
 
     const { data: route, error } = await supabase
-      .from("custom_routes")
+      .from("passage_routes")
       .select("id, name, category, is_public, waypoints, total_distance_nm, created_at, user_id")
       .eq("id", id)
       .eq("is_public", true)

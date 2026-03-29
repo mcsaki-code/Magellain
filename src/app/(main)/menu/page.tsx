@@ -2,10 +2,9 @@ import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { User, Ship, Settings, LogOut, Shield, FileText, Trophy, HelpCircle, Info, BarChart3, Sailboat, MessageSquareText, LayoutDashboard, Bluetooth, Flag, Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
-
-const ADMIN_EMAILS = ["mattcsaki@gmail.com"];
 
 const menuItems = [
   { label: "Profile",      href: "/menu/profile",    icon: User,       description: "Your sailing profile" },
@@ -27,7 +26,7 @@ const menuItems = [
 export default async function MenuPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const isAdmin = user && ADMIN_EMAILS.includes(user.email || "");
+  const userIsAdmin = user && isAdmin(user.email);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
@@ -41,7 +40,7 @@ export default async function MenuPage() {
             </div>
 
             {/* Admin link (only for admin users) */}
-            {isAdmin && (
+            {userIsAdmin && (
               <Link
                 href="/menu/admin"
                 className="flex min-h-touch items-center gap-3 rounded-xl border border-ocean/30 bg-ocean/5 px-4 py-3 transition-colors hover:bg-ocean/10"

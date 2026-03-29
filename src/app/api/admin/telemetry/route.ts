@@ -1,16 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { isAdmin } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
-
-// Admin emails allowed to see telemetry
-const ADMIN_EMAILS = ["mattcsaki@gmail.com"];
 
 export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user || !ADMIN_EMAILS.includes(user.email || "")) {
+  if (!user || !isAdmin(user.email)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 

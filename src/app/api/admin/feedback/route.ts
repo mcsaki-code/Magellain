@@ -1,16 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { isAdmin } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
-
-const ADMIN_EMAILS = ["mattcsaki@gmail.com"];
 
 // PATCH /api/admin/feedback — update feedback status and admin notes
 export async function PATCH(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user || !ADMIN_EMAILS.includes(user.email || "")) {
+  if (!user || !isAdmin(user.email)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -54,16 +53,17 @@ export async function DELETE(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user || !ADMIN_EMAILS.includes(user.email || "")) {
+  if (!user || !isAdmin(user.email)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   try {
     const { searchParams } = new URL(request.url);
-    const id = parseInt(searchParams.get("id") || "", 10);
+    const idParam = searchParams.get("id");
+    const id = idParam ? parseInt(idParam, 10) : NaN;
 
-    if (!id) {
-      return NextResponse.json({ error: "Missing feedback id" }, { status: 400 });
+    if (!idParam || isNaN(id) || id <= 0) {
+      return NextResponse.json({ error: "Missing or invalid feedback id" }, { status: 400 });
     }
 
     const { error } = await supabase
