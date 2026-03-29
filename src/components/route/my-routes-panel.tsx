@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackEvent } from "@/lib/telemetry/tracker";
 import {
   Route,
   MapPin,
@@ -210,9 +211,9 @@ export default function MyRoutesPanel() {
                   isSelected={selectedPassageId === route.id}
                   isOwned={true}
                   onSelect={() => setSelectedPassage(route.id)}
-                  onEdit={() => startEditing(route)}
-                  onDelete={() => deleteRoute(route.id)}
-                  onDuplicate={() => duplicateRoute(route)}
+                  onEdit={() => { trackEvent("route_edit", { routeId: route.id }); startEditing(route); }}
+                  onDelete={() => { trackEvent("route_delete", { routeId: route.id }); deleteRoute(route.id); }}
+                  onDuplicate={() => { trackEvent("route_duplicate", { routeId: route.id, source: "owned" }); duplicateRoute(route); }}
                 />
               ))}
             </div>

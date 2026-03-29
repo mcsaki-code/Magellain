@@ -15,8 +15,13 @@ import {
   ChevronUp,
   Globe,
   AlertCircle,
+  Upload,
 } from "lucide-react";
 import { useRouteStore, computeTotalDistance, computeBearing, type Waypoint } from "@/lib/store/route-store";
+import { trackEvent } from "@/lib/telemetry/tracker";
+import dynamic from "next/dynamic";
+
+const CSVImport = dynamic(() => import("./csv-import"), { ssr: false });
 
 // ─── DMS Parser ───────────────────────────────────────────
 
@@ -261,6 +266,8 @@ export default function RouteCreator() {
     cancelCreation,
   } = useRouteStore();
 
+  const [showCSV, setShowCSV] = useState(false);
+
   const totalDistance = computeTotalDistance(draftWaypoints);
   const canSave = draftName.trim().length > 0 && draftWaypoints.length >= 2;
 
@@ -323,28 +330,28 @@ export default function RouteCreator() {
 
         {/* Input Mode Toggle */}
         <div className="flex gap-1 rounded-lg border p-1">
-          <button
-            onClick={() => setInputMode("map")}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              inputMode === "map"
-                ? "bg-ocean text-white"
-                : "text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <Map className="h-3.5 w-3.5" />
-            Tap on Map
-          </button>
-          <button
-            onClick={() => setInputMode("manual")}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              inputMode === "manual"
-                ? "bg-ocean text-white"
-                : "text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <Keyboard className="h-3.5 w-3.5" />
-            Coordinates
-          </button>
+          {([
+            { key: "map" as const, label: "Map", icon: Map },
+            { key: "manual" as const, label: "Coords", icon: Keyboard },
+            { key: "csv" as const, label: "CSV", icon: Upload },
+          ]).map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => {
+                setInputMode(key === "csv" ? "manual" : key);
+                setShowCSV(key === "csv");
+                trackEvent("route_input_mode", { mode: key });
+              }}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                (key === "csv" ? showCSV : !showCSV && inputMode === key)
+                  ? "bg-ocean text-white"
+                  : "text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </button>
+          ))}
         </div>
 
         {/* Map tap hint */}
@@ -358,9 +365,12 @@ export default function RouteCreator() {
         )}
 
         {/* Manual entry form */}
-        {inputMode === "manual" && (
+        {inputMode === "manual" && !showCSV && (
           <ManualCoordInput onAdd={addWaypoint} />
         )}
+
+        {/* CSV Import */}
+        {showCSV && <CSVImport />}
 
         {/* Waypoint List */}
         {draftWaypoints.length > 0 && (
@@ -405,7 +415,10 @@ export default function RouteCreator() {
       {/* Footer: Save / Cancel */}
       <div className="border-t p-4 space-y-2">
         <button
-          onClick={saveRoute}
+          onClick={() => {
+            trackEvent("route_save", { mode: creationMode, waypointCount: draftWaypoints.length, distance: totalDistance });
+            saveRoute();
+          }}
           disabled={!canSave || isSaving}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-ocean px-4 py-3 text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
         >
