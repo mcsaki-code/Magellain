@@ -17,22 +17,29 @@ export async function GET(request: Request) {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
   try {
+    // Use filtered views to exclude admin/developer activity.
+    // These views are backed by system_config.telemetry_excluded_user_ids
+    // so the exclusion list is configurable without code changes.
+    const PAGE_VIEWS = "page_views_filtered";
+    const FEATURE_EVENTS = "feature_events_filtered";
+    const USER_FEEDBACK = "user_feedback_filtered";
+
     // 1. Total page views
     const { count: totalPageViews } = await supabase
-      .from("page_views")
+      .from(PAGE_VIEWS)
       .select("*", { count: "exact", head: true })
       .gte("created_at", since);
 
     // 2. Unique sessions
     const { data: sessionData } = await supabase
-      .from("page_views")
+      .from(PAGE_VIEWS)
       .select("session_id")
       .gte("created_at", since);
     const uniqueSessions = new Set(sessionData?.map((r: { session_id: string }) => r.session_id)).size;
 
     // 3. Unique users (authenticated)
     const { data: userData } = await supabase
-      .from("page_views")
+      .from(PAGE_VIEWS)
       .select("user_id")
       .gte("created_at", since)
       .not("user_id", "is", null);
@@ -40,7 +47,7 @@ export async function GET(request: Request) {
 
     // 4. Page views by path (top pages)
     const { data: pageViewsByPath } = await supabase
-      .from("page_views")
+      .from(PAGE_VIEWS)
       .select("page_path, created_at")
       .gte("created_at", since)
       .order("created_at", { ascending: false });
@@ -66,7 +73,7 @@ export async function GET(request: Request) {
 
     // 6. Feature events summary
     const { data: featureEvents } = await supabase
-      .from("feature_events")
+      .from(FEATURE_EVENTS)
       .select("event_name, created_at")
       .gte("created_at", since);
 
@@ -79,9 +86,9 @@ export async function GET(request: Request) {
       .slice(0, 15)
       .map(([event, count]) => ({ event, count }));
 
-    // 7. Feedback summary — now includes message and admin_notes for management
+    // 7. Feedback summary
     const { data: feedbackData } = await supabase
-      .from("user_feedback")
+      .from(USER_FEEDBACK)
       .select("id, category, subject, message, status, admin_notes, created_at, email")
       .order("created_at", { ascending: false })
       .limit(50);
